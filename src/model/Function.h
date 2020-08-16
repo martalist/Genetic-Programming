@@ -43,6 +43,8 @@ namespace Model
 
         bool AddChild(std::unique_ptr<INode> child) override;
 
+        int NumberOfChildren() const override;
+
     private:
         ChildNodes m_children;
         const int MaxChildren;

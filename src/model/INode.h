@@ -42,6 +42,8 @@ namespace Model
 
         virtual bool AddChild(std::unique_ptr<INode> child) = 0;
 
+        virtual int NumberOfChildren() const = 0;
+
         /*
          * Assignment operator
          */

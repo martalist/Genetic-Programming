@@ -33,4 +33,9 @@ namespace Model
     {
         return true;
     }
+
+    int Function::NumberOfChildren() const 
+    {
+        return static_cast<int>(m_children.size());
+    }
 }

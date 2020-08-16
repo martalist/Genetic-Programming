@@ -26,4 +26,9 @@ namespace Model
     {
         throw std::exception();
     }
+
+    int Variable::NumberOfChildren() const 
+    {
+        return 0;
+    }
 }

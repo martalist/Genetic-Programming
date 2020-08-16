@@ -41,6 +41,8 @@ namespace Model
 
         bool AddChild(std::unique_ptr<INode> child) override;
 
+        int NumberOfChildren() const override;
+
     private:
         const double& m_variable;
     };
