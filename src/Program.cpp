@@ -1,5 +1,6 @@
 #include "Program.h"
 #include "model/INode.h"
+#include "model/FunctionFactory.h"
 
 namespace Model
 {
@@ -16,6 +17,7 @@ namespace Model
         // evaluate the fitness
         // evolve over m_numGenerations
 
+        FunctionFactory::Create(FunctionType::Addition);
         for (auto i = 0u; i < m_numGenerations; ++i)
         {
             std::vector<int> newPopulation;
