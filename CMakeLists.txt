@@ -10,6 +10,7 @@ SET(CMAKE_CXX_FLAGS "--std=c++17 -Wall")
 
 include_directories(${PROJECT_SOURCE_DIR}/src) # tells cmake that all headers should be searched for, starting at this folder.
 include_directories(${PROJECT_SOURCE_DIR}/src/utils) # tells cmake that all headers should be searched for, starting at this folder.
+include_directories(${PROJECT_SOURCE_DIR}/src/model) # tells cmake that all headers should be searched for, starting at this folder.
 add_subdirectory(${PROJECT_SOURCE_DIR}/src) 
 
 # Must be defined in top-most CMakeLists.txt
