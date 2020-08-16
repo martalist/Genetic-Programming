@@ -71,8 +71,12 @@ namespace Model
 
     std::unique_ptr<INode> FunctionFactory::CreateDivision()
     {
-        auto func = [](const ChildNodes& children) 
+        auto func = [](const ChildNodes& children) -> double
         {
+            if (children.size() != 2u)
+            {
+                throw std::exception();
+            }
             return children[0]->Evaluate() / children[1]->Evaluate();
         };
         return std::make_unique<Function>(func, 2);
@@ -82,6 +86,10 @@ namespace Model
     {
         auto func = [](const ChildNodes& children) 
         {
+            if (children.size() != 1u)
+            {
+                throw std::exception();
+            }
             return std::sqrt(children[0]->Evaluate());
         };
         return std::make_unique<Function>(func, 1);

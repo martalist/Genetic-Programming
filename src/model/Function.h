@@ -22,7 +22,7 @@ namespace Model
          * @param maxChildren The max legal number of children for the function
          */
         Function(std::function<double(const ChildNodes&)> func, 
-                int maxChildren = std::numeric_limits<int>::infinity());
+                int maxChildren = std::numeric_limits<int>::max());
 
         /**
          * Evaluates the value of this subtree.
@@ -41,7 +41,7 @@ namespace Model
          */
         bool SwapWith(std::unique_ptr<INode> child) override;
 
-        bool AddChild(std::unique_ptr<INode> child);
+        bool AddChild(std::unique_ptr<INode> child) override;
 
     private:
         ChildNodes m_children;

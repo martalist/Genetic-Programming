@@ -40,6 +40,7 @@ namespace Model
         
         virtual bool SwapWith(std::unique_ptr<INode> child) = 0;
 
+        virtual bool AddChild(std::unique_ptr<INode> child) = 0;
 
         /*
          * Assignment operator

@@ -3,7 +3,7 @@
 namespace Model
 {
     Function::Function(std::function<double(const ChildNodes&)> func,
-                int maxChildren /*= std::numeric_limits<int>::infinity()*/)
+                int maxChildren /*= std::numeric_limits<int>::max()*/)
         : MaxChildren(maxChildren)
         , m_func(func)
     {
@@ -21,8 +21,12 @@ namespace Model
 
     bool Function::AddChild(std::unique_ptr<INode> child)
     {
-        m_children.push_back(std::move(child));
-        return true;
+        if (static_cast<int>(m_children.size()) < MaxChildren)
+        {
+            m_children.push_back(std::move(child));
+            return true;
+        }
+        return false;
     }
 
     bool Function::SwapWith(std::unique_ptr<INode> child)

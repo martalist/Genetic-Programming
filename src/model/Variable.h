@@ -39,6 +39,8 @@ namespace Model
          */
         bool SwapWith(std::unique_ptr<INode> child) override;
 
+        bool AddChild(std::unique_ptr<INode> child) override;
+
     private:
         const double& m_variable;
     };

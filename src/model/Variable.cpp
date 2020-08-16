@@ -21,4 +21,9 @@ namespace Model
     {
         return true;
     }
+
+    bool Variable::AddChild(std::unique_ptr<INode> child)
+    {
+        throw std::exception();
+    }
 }
