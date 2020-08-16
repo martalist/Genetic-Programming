@@ -1,5 +1,5 @@
-#ifndef Function_H
-#define Function_H
+#ifndef Variable_H
+#define Variable_H
 
 #include <functional>
 #include <limits>
@@ -13,16 +13,14 @@ namespace Model
     /**
      * An interface Node of the genetic programming tree/model.
      */
-    class Function : public INode
+    class Variable : public INode
     {
     public:
         /**
          * Constructor
-         * @param func The mathematical function to call upon the child nodes
-         * @param maxChildren The max legal number of children for the function
+         * @param variable A reference to the variable.
          */
-        Function(std::function<double(const ChildNodes&)> func, 
-                int maxChildren = std::numeric_limits<int>::infinity());
+        Variable(const double& variable);
 
         /**
          * Evaluates the value of this subtree.
@@ -41,12 +39,8 @@ namespace Model
          */
         bool SwapWith(std::unique_ptr<INode> child) override;
 
-        bool AddChild(std::unique_ptr<INode> child);
-
     private:
-        ChildNodes m_children;
-        const int MaxChildren;
-        const std::function<double(const ChildNodes&)> m_func;
+        const double& m_variable;
     };
 }
 #endif

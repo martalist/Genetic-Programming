@@ -37,6 +37,9 @@ namespace Model
          * @return the string representation of this subtree.
          */
         virtual std::string ToString() const = 0;
+        
+        virtual bool SwapWith(std::unique_ptr<INode> child) = 0;
+
 
         /*
          * Assignment operator

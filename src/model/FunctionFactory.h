@@ -17,6 +17,21 @@ namespace Model
          * Create an addition function
          */
         static std::unique_ptr<INode> CreateAddition();
+
+        /**
+         * Create a subtraction function
+         */
+        static std::unique_ptr<INode> CreateSubtraction();
+
+        /**
+         * Create a multiplication function
+         */
+        static std::unique_ptr<INode> CreateMultiplication();
+
+        /**
+         * Create a division function
+         */
+        static std::unique_ptr<INode> CreateDivision();
     };
 }
 #endif
