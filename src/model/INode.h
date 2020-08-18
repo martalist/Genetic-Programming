@@ -34,12 +34,28 @@ namespace Model
          */
         virtual std::string ToString() const = 0;
         
+        // TODO: is this needed?
         virtual bool SwapWith(std::unique_ptr<INode> child) = 0;
 
+        /**
+         * Add a child node to this node
+         */
         virtual bool AddChild(std::unique_ptr<INode> child) = 0;
 
+        /**
+         * @return The number of immediate children of this node
+         */
         virtual int NumberOfChildren() const = 0;
 
+        /**
+         * Gets the nubmer of nodes in the chromosome tree (self included)
+         * @return the size of the tree
+         */
+        virtual int Size() const = 0;
+
+        /**
+         * @return true if this node is a variable, else false (i.e. a function)
+         */
         virtual bool IsVariable() const = 0;
 
         /*

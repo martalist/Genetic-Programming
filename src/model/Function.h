@@ -45,9 +45,20 @@ namespace Model
          */
         bool SwapWith(std::unique_ptr<INode> child) override;
 
+        /**
+         * @see INode::AddChild()
+         */
         bool AddChild(std::unique_ptr<INode> child) override;
 
+        /**
+         * @see INode::NumberOfChildren()
+         */
         int NumberOfChildren() const override;
+
+        /**
+         * @see INode::Size()
+         */
+        int Size() const override;
 
         bool IsVariable() const override;
 

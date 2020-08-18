@@ -21,10 +21,10 @@ namespace Model { namespace Operators
 {
     void Mutate(INode& chromosome)
     {
-        // the decision on whether to mutate is made in Program (not here)
-        
         // TODO
-        // Randomly select a node in the chromosome tree
+        // Randomly select a node in the chromosome tree 
+            // TODO: needs us to be able to iterator over the tree
+            // TODO: and get the length (No. of nodes)
         // if a function
             // randomly select a new function
             // (the new function must be compatible with the number of children)
@@ -36,10 +36,14 @@ namespace Model { namespace Operators
     void Crossover(INode& left, INode& right)
     {
         // TODO
+        // Pick a random node in left
+        // Pick a random node in right
+        // swap them (pointers)
     }
 
     std::unique_ptr<INode> CreateRandomChromosome(int targetSize, const std::vector<FunctionType>& allowedFunctions)
     {
+        // TODO: this needs to be checked, and should be tested!!
         // start with a randomly selected function
         int index = RandomIndex(allowedFunctions.size());
         auto root = FunctionFactory::Create(allowedFunctions[index]);

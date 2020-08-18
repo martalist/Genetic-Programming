@@ -1,5 +1,7 @@
 #include "Function.h"
 
+#include <numeric>
+
 namespace Model
 {
     Function::Function(std::function<double(const ChildNodes&)> func,
@@ -44,6 +46,12 @@ namespace Model
     int Function::NumberOfChildren() const 
     {
         return static_cast<int>(m_children.size());
+    }
+
+    int Function::Size() const 
+    {
+        return std::accumulate(m_children.begin(), m_children.end(), 1,
+                [](int a, const auto& child) { return a + child->Size(); });
     }
 
     bool Function::IsVariable() const

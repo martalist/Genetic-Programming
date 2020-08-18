@@ -37,6 +37,11 @@ namespace Model
         return 0;
     }
 
+    int Variable::Size() const 
+    {
+        return 1;
+    }
+
     bool Variable::IsVariable() const
     {
         return true;
