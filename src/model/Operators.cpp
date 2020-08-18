@@ -5,8 +5,9 @@
 
 namespace Model
 {
-    static void Mutate(INode& chromosome)
+    void Operators::Mutate(INode& chromosome)
     {
+        // TODO
         // the decision on whether to mutation is made in Program (not here)
         
         // Randomly select a node in the chromosome tree
@@ -16,6 +17,11 @@ namespace Model
             // replace by altering parent/child pointers
         // else if a variable
             // randomly select a new variable
+    }
+
+    void Operators::Crossover(INode& left, INode& right)
+    {
+        // TODO
     }
 
     std::unique_ptr<INode> Operators::CreateRandomChromosome(int targetSize, const std::vector<FunctionType>& allowedFunctions)

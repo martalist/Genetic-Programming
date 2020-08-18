@@ -10,6 +10,7 @@ namespace Model
 {
     Program::Program()
         : m_fitness(0.0, m_populationSize)
+        , m_randomProbability(.0, 1.)
         , m_allowedFunctions(AllowedSets)
     {
         // parse command line input
@@ -117,12 +118,23 @@ namespace Model
         // Deep copy mum & dad
         auto son      = FunctionFactory::Copy(dad);
         auto daughter = FunctionFactory::Copy(mum);
+        
         // should we crossover? 
-            // Operators::Crossover(mum, dad);
-        // should we mutate dad?
-            // Operators::Mutate(dad);
-        // should we mutate mum?
-            // Operators::Mutate(mum);
+        if (m_randomProbability.Get() <= m_crossoverProb)
+        {
+            Operators::Crossover(*son, *daughter);
+        }
+
+        // should we mutate?
+        if (m_randomProbability.Get() <= m_mutationProb)
+        {
+            Operators::Mutate(*son);
+        }
+        if (m_randomProbability.Get() <= m_mutationProb)
+        {
+            Operators::Mutate(*daughter);
+        }
+
         return std::make_tuple(std::move(son), std::move(daughter));
     }
     
@@ -130,6 +142,7 @@ namespace Model
     {
         for (auto i = 0u; i < m_populationSize; i++)
         {
+            // TODO: Think about how to track fitness, to easily implement the ticketing
             m_fitness[i] = CalculateChromosomeFitness(i);
         }
     }
