@@ -3,13 +3,27 @@
 #include <memory>
 #include "../utils/UniformRandomGenerator.h"
 
-namespace Model
+namespace
 {
-    void Operators::Mutate(INode& chromosome)
+    /**
+     * Gets a random index into a collection of the specified size
+     * @param size The size of the collection
+     */
+    int RandomIndex(size_t size)
     {
-        // TODO
-        // the decision on whether to mutation is made in Program (not here)
+        static Util::UniformRandomGenerator<int, std::uniform_int_distribution<int>> randomInteger(0, 1000);
+        int maxIndex = static_cast<int>(--size);
+        return randomInteger.GetInRange(0, maxIndex);
+    }
+}
+
+namespace Model { namespace Operators 
+{
+    void Mutate(INode& chromosome)
+    {
+        // the decision on whether to mutate is made in Program (not here)
         
+        // TODO
         // Randomly select a node in the chromosome tree
         // if a function
             // randomly select a new function
@@ -19,12 +33,12 @@ namespace Model
             // randomly select a new variable
     }
 
-    void Operators::Crossover(INode& left, INode& right)
+    void Crossover(INode& left, INode& right)
     {
         // TODO
     }
 
-    std::unique_ptr<INode> Operators::CreateRandomChromosome(int targetSize, const std::vector<FunctionType>& allowedFunctions)
+    std::unique_ptr<INode> CreateRandomChromosome(int targetSize, const std::vector<FunctionType>& allowedFunctions)
     {
         // start with a randomly selected function
         int index = RandomIndex(allowedFunctions.size());
@@ -54,12 +68,4 @@ namespace Model
         }
         return std::move(root);
     }
-    
-    int Operators::RandomIndex(size_t size)
-    {
-        static Util::UniformRandomGenerator<int, std::uniform_int_distribution<int>> randomInteger(0, 1000);
-        int maxIndex = static_cast<int>(--size);
-        return randomInteger.GetInRange(0, maxIndex);
-    }
-
-}
+}}

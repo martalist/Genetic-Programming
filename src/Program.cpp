@@ -150,12 +150,15 @@ namespace Model
     double Program::CalculateChromosomeFitness(unsigned int index)
     {
         double sumOfSquares = 0.0;
-        auto& chromosome = m_population[index]; // the program of interest
-        for (auto& fCase : FitnessCases)
+        double caseFitness = 0.0;
+        auto& chromosome = m_population[index]; // the program of interest 
+        for (auto& fCase : FitnessCases) // FitnessCases are the training set
         {
+            // TODO:
             // calculate the fitness based on the variable values
             // and expected result for each case
-            double caseFitness = 0.0;
+            // i.e. caseFitness = (chromosome_answer - expected)^2
+            caseFitness = 0.0;
 
             // add to the tally
             sumOfSquares += caseFitness;
