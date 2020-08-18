@@ -10,6 +10,8 @@
 
 namespace Model
 {
+    typedef std::vector<std::unique_ptr<INode>> ChildNodes;
+
     /**
      * An interface Node of the genetic programming tree/model.
      */
@@ -23,6 +25,8 @@ namespace Model
          */
         Function(std::function<double(const ChildNodes&)> func, 
                 int maxChildren = std::numeric_limits<int>::max());
+
+        Function(const Function& other);
 
         /**
          * Evaluates the value of this subtree.
@@ -44,6 +48,8 @@ namespace Model
         bool AddChild(std::unique_ptr<INode> child) override;
 
         int NumberOfChildren() const override;
+
+        bool IsVariable() const override;
 
     private:
         ChildNodes m_children;

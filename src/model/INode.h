@@ -6,10 +6,6 @@
 
 namespace Model
 {
-    
-    class INode;
-    typedef std::vector<std::unique_ptr<INode>> ChildNodes;
-
     /**
      * An interface Node of the genetic programming tree/model.
      */
@@ -17,7 +13,7 @@ namespace Model
     {
     public:
         /**
-         * Copy Constructor
+         * Copy Constructor TODO
          */
         // virtual INode(const INode& other) = 0;
 
@@ -43,6 +39,8 @@ namespace Model
         virtual bool AddChild(std::unique_ptr<INode> child) = 0;
 
         virtual int NumberOfChildren() const = 0;
+
+        virtual bool IsVariable() const = 0;
 
         /*
          * Assignment operator

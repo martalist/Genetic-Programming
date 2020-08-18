@@ -2,20 +2,19 @@
 
 #include <iostream>
 #include "ProgramSettings.h"
-#include "model/INode.h"
 #include "model/FunctionFactory.h"
 #include "model/Variable.h"
+#include "model/Operators.h"
 
 namespace Model
 {
-
-    Util::UniformRandomGenerator<int, std::uniform_int_distribution<int>> Program::s_randInt(0, 1);
     Program::Program()
-        : m_allowedFunctions(AllowedSets)
+        : m_fitness(0.0, m_populationSize)
+        , m_allowedFunctions(AllowedSets)
     {
         // parse command line input
 
-        // m_population.reserve(m_populationSize); // make room
+        m_population.reserve(m_populationSize); // make room
     }
 
     void Program::TemporaryTesting()
@@ -72,69 +71,88 @@ namespace Model
     void Program::Start()
     {
         TemporaryTesting();
+        
         // generate m_populationSize chromosomes
-        for (int i = 0u; i < m_populationSize; ++i)
+        for (auto i = 0u; i < m_populationSize; ++i)
         {
-            // m_population.push_back(std::move(CreateRandomChromosome()));
+            auto itsABoy = Operators::CreateRandomChromosome(m_minInitialTreeSize, m_allowedFunctions);
+            m_population.push_back(std::move(itsABoy));
         }
 
-        // evaluate the fitness
         // evolve over m_numGenerations
         for (auto i = 0u; i < m_numGenerations; ++i)
         {
-            std::vector<int> newPopulation;
-            // newPopulation.reserve(m_populationSize); // make room 
-
+            // evaluate the fitness
+            CalculatePopulationFitness();
+        
             // breed
-            while (newPopulation.size() < m_populationSize)
-            {
-                // select a breeding pair and (deep) copy them
-                // auto& [mum, dad] = SelectParents();
+            ProduceNextGeneration();
+        }
+        CalculatePopulationFitness();
 
-                // perform crossover & mutation
-                // auto& [son, daughter] = Reproduce(mum, dad);
-                
-                // add to new population
-                newPopulation.push_back(0);
-                newPopulation.push_back(0);
-            }
+        // TODO: report results
+    }
+
+    void Program::ProduceNextGeneration()
+    {
+        std::vector<std::unique_ptr<INode>> newPopulation;
+        while (newPopulation.size() < m_populationSize)
+        {
+            // select a breeding pair
+            auto parents = SelectParents();
+            auto& mum = std::get<0>(parents);
+            auto& dad = std::get<1>(parents);
+
+            // perform a deep copy, crossover & mutation
+            auto children = Reproduce(*mum, *dad);
+            
+            // add to new population
+            newPopulation.push_back(std::move(std::get<0>(children)));
+            newPopulation.push_back(std::move(std::get<1>(children)));
         }
     }
 
-    std::unique_ptr<INode> Program::CreateRandomChromosome() const
+    Program::NodePair Program::Reproduce(const INode& mum, const INode& dad)
     {
-        // start with a randomly selected function
-        int index = RandomIndex(m_allowedFunctions.size());
-        auto root = FunctionFactory::Create(m_allowedFunctions[index]);
-
-        // keep a local list of function nodes, for easy reference
-        std::vector<INode*> functions;
-        functions.push_back(root.get());
-        int count = 1; // easier to do account keeping this way, than in the tree
-        while (count < m_minInitialTreeSize)
-        {
-            // Randomly choose a new function/variable
-            auto newNode = FunctionFactory::Create(FunctionType::Addition);
-
-            // add the new node to the randomly selected one
-            auto func = functions[ RandomIndex(functions.size()) ];
-            func->AddChild(std::move(newNode));
-        }
-        
-        // Make sure none of the leaf nodes are functions
-        for (auto& func : functions)
-        {
-            if (func->NumberOfChildren() == 0)
-            {
-                // add a variable
-            }
-        }
-        return root;
+        // Deep copy mum & dad
+        auto son      = FunctionFactory::Copy(dad);
+        auto daughter = FunctionFactory::Copy(mum);
+        // should we crossover? 
+            // Operators::Crossover(mum, dad);
+        // should we mutate dad?
+            // Operators::Mutate(dad);
+        // should we mutate mum?
+            // Operators::Mutate(mum);
+        return std::make_tuple(std::move(son), std::move(daughter));
     }
     
-    int Program::RandomIndex(size_t size) const
+    void Program::CalculatePopulationFitness()
     {
-        int maxIndex = static_cast<int>(--size);
-        return s_randInt.GetInRange(0, maxIndex);
+        for (auto i = 0u; i < m_populationSize; i++)
+        {
+            m_fitness[i] = CalculateChromosomeFitness(i);
+        }
+    }
+
+    double Program::CalculateChromosomeFitness(unsigned int index)
+    {
+        double sumOfSquares = 0.0;
+        auto& chromosome = m_population[index]; // the program of interest
+        for (auto& fCase : FitnessCases)
+        {
+            // calculate the fitness based on the variable values
+            // and expected result for each case
+            double caseFitness = 0.0;
+
+            // add to the tally
+            sumOfSquares += caseFitness;
+        }
+        return sumOfSquares; // this is what we want to minimize
+    }
+
+    std::tuple<INode*, INode*> Program::SelectParents()
+    {
+        // TODO: implement a ticketing system, based on fitness
+        return std::make_tuple( m_population[0].get(), m_population[1].get() );
     }
 }

@@ -2,11 +2,10 @@
 #define FunctionFactory_H
 
 #include <memory>
+#include "INode.h"
 
 namespace Model
 {
-    class INode;
-
     enum class FunctionType
     {
         None = 0,
@@ -25,8 +24,15 @@ namespace Model
     public:
         /**
          * Create a function
+         * @param type The type of function to create
          */
         static std::unique_ptr<INode> Create(const FunctionType& type);
+
+        /**
+         * Performs a deep copy of the node tree
+         * @param other The node tree to copy
+         */
+        static std::unique_ptr<INode> Copy(const INode& other);
 
     private:
         /**

@@ -2,13 +2,12 @@
 #define Program_H
 
 #include <memory>
-#include <utility>
+#include <tuple>
 #include <vector>
-#include "utils/UniformRandomGenerator.h"
+#include "model/INode.h"
 
 namespace Model
 {
-    class INode;
     enum class FunctionType;
 
     /**
@@ -22,10 +21,13 @@ namespace Model
          */
         Program(/* CLI args */);
 
+        /**
+         * Runs the genetic program for the specified number of generations
+         */
         void Start();
 
     private:
-        using NodePair = std::pair<INode&, INode&>;
+        using NodePair = std::tuple<std::unique_ptr<INode>, std::unique_ptr<INode>>;
 
         /**
          * Determines the fitness of each chromosome/program in the 
@@ -36,8 +38,13 @@ namespace Model
         /**
          * Select a pair of parents
          */
-        NodePair SelectParents();
+        std::tuple<INode*, INode*> SelectParents();
         
+        /**
+         * Replace the entire population with it's direct descendants.
+         */
+        void ProduceNextGeneration();
+
         /**
          * Deep copy from parents, perform crossover and mutation
          */
@@ -45,19 +52,17 @@ namespace Model
 
         void TemporaryTesting();
 
-        std::unique_ptr<INode> CreateRandomChromosome() const;
+        void CalculatePopulationFitness();
+        double CalculateChromosomeFitness(unsigned int index);
 
-        int RandomIndex(size_t size) const;
-
-        // std::vector<std::unique_ptr<INode>> m_population;
-        int m_minInitialTreeSize = 4;
         unsigned int m_populationSize = 10;
+        std::vector<std::unique_ptr<INode>> m_population;
+        std::vector<double> m_fitness;
+        int m_minInitialTreeSize = 4;
         unsigned int m_numGenerations = 10;
         double m_crossoverProb = 0.7;
         double m_mutationProb = 0.001;
         std::vector<FunctionType> m_allowedFunctions;
-
-        static Util::UniformRandomGenerator<int, std::uniform_int_distribution<int>> s_randInt;
     };
 }
 

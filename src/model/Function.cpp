@@ -9,6 +9,13 @@ namespace Model
     {
     }
 
+    Function::Function(const Function& other)
+        : MaxChildren(other.MaxChildren)
+        , m_func(other.m_func)
+    {
+        // TODO: perform a deep copy of m_children
+    }
+
     double Function::Evaluate() const
     {
         return m_func(m_children);
@@ -37,5 +44,10 @@ namespace Model
     int Function::NumberOfChildren() const 
     {
         return static_cast<int>(m_children.size());
+    }
+
+    bool Function::IsVariable() const
+    {
+        return false;
     }
 }

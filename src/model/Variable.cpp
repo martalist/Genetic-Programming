@@ -7,6 +7,11 @@ namespace Model
     {
     }
 
+    Variable::Variable(const Variable& other)
+        : m_variable(other.m_variable)
+    {
+    }
+
     double Variable::Evaluate() const
     {
         return m_variable;
@@ -30,5 +35,10 @@ namespace Model
     int Variable::NumberOfChildren() const 
     {
         return 0;
+    }
+
+    bool Variable::IsVariable() const
+    {
+        return true;
     }
 }

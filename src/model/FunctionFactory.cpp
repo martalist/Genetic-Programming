@@ -3,6 +3,7 @@
 #include <cmath>
 #include <numeric>
 #include "Function.h"
+#include "Variable.h"
 
 namespace Model
 {
@@ -25,30 +26,43 @@ namespace Model
         }
     }
 
+    std::unique_ptr<INode> FunctionFactory::Copy(const INode& other)
+    {
+        // TODO: This implementation has a bad smell to it
+        if (other.IsVariable())
+        {
+            return std::make_unique<Variable>(dynamic_cast<const Variable&>(other));
+        }
+        return std::make_unique<Function>(dynamic_cast<const Function&>(other));
+    }
+
     std::unique_ptr<INode> FunctionFactory::CreateAddition()
     {
-        auto func = [](const ChildNodes& children) 
+        auto func = [](const ChildNodes& children) -> double
         {
-            return std::accumulate(children.begin(), children.end(), 0.0,
-                [](double b, const std::unique_ptr<Model::INode>& child) 
-                { 
-                    return b + child->Evaluate(); 
-                });
+            double result = 0.0;
+            if (!children.empty())
+            {
+                for (auto& child : children)
+                {
+                    result += child->Evaluate();
+                }
+            }
+            return result;
         };
         return std::make_unique<Function>(func);
     }
 
     std::unique_ptr<INode> FunctionFactory::CreateSubtraction()
     {
-        auto func = [](const ChildNodes& children)
+        auto func = [](const ChildNodes& children) -> double
         {
-            return std::accumulate(children.begin() + 1, 
-                    children.end(), 
-                    (*children.begin())->Evaluate(),
-                [](double b, const std::unique_ptr<Model::INode>& child) 
-                { 
-                    return b - child->Evaluate(); 
-                });
+            double result = children.empty() ? 0.0 : children[0]->Evaluate();
+            for (auto i = 1u; i < children.size(); ++i)
+            {
+                result -= children[i]->Evaluate();
+            }
+            return result;
         };
         return std::make_unique<Function>(func);
     }
@@ -58,13 +72,12 @@ namespace Model
     {
         auto func = [](const ChildNodes& children) 
         {
-            return std::accumulate(children.begin() + 1, 
-                    children.end(), 
-                    (*children.begin())->Evaluate(),
-                [](double b, const std::unique_ptr<Model::INode>& child) 
-                { 
-                    return b * child->Evaluate(); 
-                });
+            double result = 1.0;
+            for (auto& child : children)
+            {
+                result *= child->Evaluate();
+            }
+            return result;
         };
         return std::make_unique<Function>(func);
     }

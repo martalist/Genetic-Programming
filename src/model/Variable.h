@@ -22,6 +22,8 @@ namespace Model
          */
         Variable(const double& variable);
 
+        Variable(const Variable& other);
+
         /**
          * Evaluates the value of this subtree.
          * @return the primitate value for a variable, or the return 
@@ -42,6 +44,8 @@ namespace Model
         bool AddChild(std::unique_ptr<INode> child) override;
 
         int NumberOfChildren() const override;
+
+        bool IsVariable() const override;
 
     private:
         const double& m_variable;
