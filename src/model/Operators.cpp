@@ -6,14 +6,18 @@
 namespace
 {
     /**
+     * A random integer generator for reuse in the methods below
+     */
+    Util::UniformRandomGenerator<int, std::uniform_int_distribution<int>> RandInt(0, 1);
+
+    /**
      * Gets a random index into a collection of the specified size
      * @param size The size of the collection
      */
     int RandomIndex(size_t size)
     {
-        static Util::UniformRandomGenerator<int, std::uniform_int_distribution<int>> randomInteger(0, 1000);
         int maxIndex = static_cast<int>(--size);
-        return randomInteger.GetInRange(0, maxIndex);
+        return RandInt.GetInRange(0, maxIndex);
     }
 }
 
@@ -21,10 +25,11 @@ namespace Model { namespace Operators
 {
     void Mutate(INode& chromosome)
     {
-        // TODO
         // Randomly select a node in the chromosome tree 
-            // TODO: needs us to be able to iterator over the tree
-            // TODO: and get the length (No. of nodes)
+        int size = chromosome.Size();
+        int index = size == 1 ? 0 : RandInt.GetInRange(1, size - 1);
+        // get it out of the tree
+            // TODO: needs us to be able to iterate over the tree
         // if a function
             // randomly select a new function
             // (the new function must be compatible with the number of children)
@@ -35,9 +40,20 @@ namespace Model { namespace Operators
 
     void Crossover(INode& left, INode& right)
     {
+        int lSize = left.Size();
+        int rSize = right.Size();
+        if (lSize == 1 && rSize == 1)
+        {
+            return; // nothing to do here
+        }
+
         // TODO
         // Pick a random node in left
+        int l = lSize == 1 ? 0 : RandInt.GetInRange(1, lSize);
+            // get a pointer/reference to it
         // Pick a random node in right
+        int r = rSize == 1 ? 0 : RandInt.GetInRange(1, rSize);
+            // get a pointer/reference to it
         // swap them (pointers)
     }
 
