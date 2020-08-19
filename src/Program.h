@@ -6,6 +6,7 @@
 #include <vector>
 #include "model/INode.h"
 #include "utils/UniformRandomGenerator.h"
+#include "utils/Raffle.h"
 
 namespace Model
 {
@@ -77,6 +78,7 @@ namespace Model
         double m_mutationProb = 0.001; ///< The probability that a child gene mutates
         Util::UniformRandomGenerator<float> m_randomProbability; ///< Generates random floats in the range [0,1]
         std::vector<FunctionType> m_allowedFunctions; ///< The set of functions permitted in chromosomes
+        Util::Raffle<double> m_raffle;
     };
 }
 

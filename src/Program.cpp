@@ -140,10 +140,11 @@ namespace Model
     
     void Program::CalculatePopulationFitness()
     {
+        m_raffle.Reset(); // get rid of the previous generation's tickets
         for (auto i = 0u; i < m_populationSize; i++)
         {
-            // TODO: Think about how to track fitness, to easily implement the ticketing
             m_fitness[i] = CalculateChromosomeFitness(i);
+            m_raffle.BuyTickets(m_fitness[i], i);
         }
     }
 
@@ -168,7 +169,8 @@ namespace Model
 
     std::tuple<INode*, INode*> Program::SelectParents()
     {
-        // TODO: implement a ticketing system, based on fitness
-        return std::make_tuple( m_population[0].get(), m_population[1].get() );
+        int mum = m_raffle.Draw();
+        int dad = m_raffle.Draw();
+        return std::make_tuple( m_population[mum].get(), m_population[dad].get() );
     }
 }
