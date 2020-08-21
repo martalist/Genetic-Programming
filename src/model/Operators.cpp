@@ -28,6 +28,7 @@ namespace Model { namespace Operators
         // Randomly select a node in the chromosome tree 
         int size = chromosome.Size();
         int index = size == 1 ? 0 : RandInt.GetInRange(1, size - 1);
+        index++; // just shutting up the compiler for now!
         // get it out of the tree
             // TODO: needs us to be able to iterate over the tree
         // if a function
@@ -38,10 +39,10 @@ namespace Model { namespace Operators
             // randomly select a new variable
     }
 
-    void Crossover(INode& left, INode& right)
+    void Crossover(std::unique_ptr<INode>& left, std::unique_ptr<INode>& right)
     {
-        int lSize = left.Size();
-        int rSize = right.Size();
+        int lSize = left->Size();
+        int rSize = right->Size();
         if (lSize == 1 && rSize == 1)
         {
             return; // nothing to do here
@@ -55,6 +56,7 @@ namespace Model { namespace Operators
         int r = rSize == 1 ? 0 : RandInt.GetInRange(1, rSize);
             // get a pointer/reference to it
         // swap them (pointers)
+        left->SwapWith(l, r, right);
     }
 
     std::unique_ptr<INode> CreateRandomChromosome(int targetSize, const std::vector<FunctionType>& allowedFunctions)

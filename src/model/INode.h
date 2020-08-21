@@ -35,7 +35,7 @@ namespace Model
         virtual std::string ToString() const = 0;
         
         // TODO: is this needed?
-        virtual bool SwapWith(std::unique_ptr<INode> child) = 0;
+        virtual bool SwapWith(int thisIndex, int otherIndex, std::unique_ptr<INode>& other) = 0;
 
         /**
          * Add a child node to this node

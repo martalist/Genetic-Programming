@@ -1,6 +1,9 @@
 #include "Function.h"
 
+#include <cassert>
 #include <numeric>
+#include <sstream>
+#include <stdexcept>
 
 namespace Model
 {
@@ -38,8 +41,12 @@ namespace Model
         return false;
     }
 
-    bool Function::SwapWith(std::unique_ptr<INode> child)
+    bool Function::SwapWith(int thisIndex, int otherIndex, std::unique_ptr<INode>& other)
     {
+        // TODO: check for indices == 0 (i.e. the root node of either tree)
+        auto& thisINodePtr = GetINodePointerByIndex(thisIndex);
+        auto& otherINodePtr = reinterpret_cast<Function*>(other.get())->GetINodePointerByIndex(otherIndex);
+        thisINodePtr.swap(otherINodePtr);
         return true;
     }
 
@@ -57,5 +64,31 @@ namespace Model
     bool Function::IsVariable() const
     {
         return false;
+    }
+
+    std::unique_ptr<INode>& Function::GetINodePointerByIndex(int index)
+    {
+        assert(index > 0); // we want the pointer to the index, not the object itself
+        for (auto i = 0u; i < m_children.size(); i++)
+        {
+            int size = m_children[i]->Size();
+            if (index >= size)
+            {
+                // target is not in this subtree; move on
+                index -= size;
+                continue;
+            }
+
+            // target is in this subtree
+            if (index == 0)
+            {
+                // it's the direct descendant
+                return m_children[i];
+            }
+               
+            // else it's deeper in the subtree
+            return reinterpret_cast<Function*>(m_children[i].get())->GetINodePointerByIndex(index);
+        }
+        throw std::out_of_range("Index out of range in Function::GetINodePointerByIndex");
     }
 }

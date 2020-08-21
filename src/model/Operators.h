@@ -15,7 +15,7 @@ namespace Model { namespace Operators
     /**
      * Performs crossover on a pair of chromosomes
      */
-    void Crossover(INode& left, INode& right);
+    void Crossover(std::unique_ptr<INode>& left, std::unique_ptr<INode>& right);
 
     /**
      * Creates a new, random chromosome

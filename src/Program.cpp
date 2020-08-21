@@ -122,7 +122,7 @@ namespace Model
         // should we crossover? 
         if (m_randomProbability.Get() <= m_crossoverProb)
         {
-            Operators::Crossover(*son, *daughter);
+            Operators::Crossover(son, daughter);
         }
 
         // should we mutate?
@@ -155,6 +155,8 @@ namespace Model
         auto& chromosome = m_population[index]; // the program of interest 
         for (auto& fCase : FitnessCases) // FitnessCases are the training set
         {
+            std::get<0>(fCase); // just shupping up the compiler
+            chromosome->Size(); // just shupping up the compiler
             // TODO:
             // calculate the fitness based on the variable values
             // and expected result for each case

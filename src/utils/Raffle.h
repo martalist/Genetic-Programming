@@ -45,7 +45,7 @@ namespace Util
 
             // Move through the list until you go past the winner's ticket No.
             // Currenlty O(n) in the worst case. Could do binary search to improve performance
-            // since it's guaranteed to be sorted
+            // since it's guaranteed to be sorted; TODO
             auto current = m_tickets.begin();
             while (winner > current->first)
             {

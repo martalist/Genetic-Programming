@@ -1,5 +1,7 @@
 #include "Variable.h"
 
+#include <stdexcept>
+
 namespace Model
 {
     Variable::Variable(const double& variable)
@@ -22,14 +24,14 @@ namespace Model
         return std::to_string(m_variable);
     }
 
-    bool Variable::SwapWith(std::unique_ptr<INode> child)
+    bool Variable::SwapWith(int thisIndex, int otherIndex, std::unique_ptr<INode>& other)
     {
-        return true;
+        throw std::logic_error("Variables should not be swapped directly");
     }
 
     bool Variable::AddChild(std::unique_ptr<INode> child)
     {
-        throw std::exception();
+        throw std::logic_error("Variables cannot have children");
     }
 
     int Variable::NumberOfChildren() const 
