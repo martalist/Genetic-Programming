@@ -24,7 +24,7 @@ namespace Model
         return std::to_string(m_variable);
     }
 
-    bool Variable::SwapWith(int thisIndex, int otherIndex, std::unique_ptr<INode>& other)
+    bool Variable::SwapWith(std::unique_ptr<INode> other)
     {
         throw std::logic_error("Variables should not be swapped directly");
     }
@@ -35,6 +35,11 @@ namespace Model
     }
 
     int Variable::NumberOfChildren() const 
+    {
+        return 0;
+    }
+
+    int Variable::MaxChildren() const
     {
         return 0;
     }

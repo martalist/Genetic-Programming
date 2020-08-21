@@ -10,7 +10,7 @@ namespace Model { namespace Operators
     /**
      * Performs mutation on a chromosome
      */
-    void Mutate(INode& chromosome);
+    void Mutate(std::unique_ptr<INode>& chromosome, const std::vector<FunctionType>& allowedFunctions, const std::vector<double*> variables);
 
     /**
      * Performs crossover on a pair of chromosomes
@@ -24,7 +24,7 @@ namespace Model { namespace Operators
      * @param allowedFunctions The set of functions allowed in the chromosome tree.
      * @return the root of the new chromosome
      */
-    std::unique_ptr<INode> CreateRandomChromosome(int targetSize, const std::vector<FunctionType>& allowedFunctions);
+    std::unique_ptr<INode> CreateRandomChromosome(int targetSize, const std::vector<FunctionType>& allowedFunctions, const std::vector<double*> variables);
 }}
 
 #endif

@@ -9,13 +9,13 @@ namespace Model
 {
     Function::Function(std::function<double(const ChildNodes&)> func,
                 int maxChildren /*= std::numeric_limits<int>::max()*/)
-        : MaxChildren(maxChildren)
+        : MaxAllowedChildren(maxChildren)
         , m_func(func)
     {
     }
 
     Function::Function(const Function& other)
-        : MaxChildren(other.MaxChildren)
+        : MaxAllowedChildren(other.MaxAllowedChildren)
         , m_func(other.m_func)
     {
         // TODO: perform a deep copy of m_children
@@ -33,7 +33,7 @@ namespace Model
 
     bool Function::AddChild(std::unique_ptr<INode> child)
     {
-        if (static_cast<int>(m_children.size()) < MaxChildren)
+        if (static_cast<int>(m_children.size()) < MaxAllowedChildren)
         {
             m_children.push_back(std::move(child));
             return true;
@@ -41,18 +41,24 @@ namespace Model
         return false;
     }
 
-    bool Function::SwapWith(int thisIndex, int otherIndex, std::unique_ptr<INode>& other)
+    bool Function::SwapWith(std::unique_ptr<INode> other)
     {
-        // TODO: check for indices == 0 (i.e. the root node of either tree)
-        auto& thisINodePtr = Get(thisIndex);
-        auto& otherINodePtr = reinterpret_cast<Function*>(other.get())->Get(otherIndex);
-        thisINodePtr.swap(otherINodePtr);
-        return true;
+        for (auto& child : m_children)
+        {
+            // TODO: need to copy the children over, then
+            // have this new node be the other function
+            // .... or can just alter the MaxAllowedChildren & m_func?
+        }
     }
 
     int Function::NumberOfChildren() const 
     {
         return static_cast<int>(m_children.size());
+    }
+
+    int Function::MaxChildren() const
+    {
+        return MaxAllowedChildren;
     }
 
     int Function::Size() const 

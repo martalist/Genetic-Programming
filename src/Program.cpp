@@ -76,7 +76,7 @@ namespace Model
         // generate m_populationSize chromosomes
         for (auto i = 0u; i < m_populationSize; ++i)
         {
-            auto itsABoy = Operators::CreateRandomChromosome(m_minInitialTreeSize, m_allowedFunctions);
+            auto itsABoy = Operators::CreateRandomChromosome(m_minInitialTreeSize, m_allowedFunctions, m_variables);
             m_population.push_back(std::move(itsABoy));
         }
 
@@ -128,11 +128,11 @@ namespace Model
         // should we mutate?
         if (m_randomProbability.Get() <= m_mutationProb)
         {
-            Operators::Mutate(*son);
+            Operators::Mutate(son, m_allowedFunctions, m_variables);
         }
         if (m_randomProbability.Get() <= m_mutationProb)
         {
-            Operators::Mutate(*daughter);
+            Operators::Mutate(daughter, m_allowedFunctions, m_variables);
         }
 
         return std::make_tuple(std::move(son), std::move(daughter));

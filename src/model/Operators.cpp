@@ -1,6 +1,7 @@
 #include "Operators.h"
 
 #include <memory>
+#include "Variable.h"
 #include "../utils/UniformRandomGenerator.h"
 
 namespace
@@ -23,12 +24,39 @@ namespace
 
 namespace Model { namespace Operators 
 {
-    void Mutate(INode& chromosome)
+    void Mutate(std::unique_ptr<INode>& chromosome, const std::vector<FunctionType>& allowedFunctions, const std::vector<double*> variables)
     {
+        auto randomMutation = [&](std::unique_ptr<INode>& gene)
+        {
+            if (gene->IsVariable())
+            {
+                int i = RandomIndex(variables.size());
+                gene = std::make_unique<Variable>(*variables[i]);
+            }
+            else
+            {
+                std::unique_ptr<INode> newFunction = nullptr;
+                do
+                {
+                    int i = RandomIndex(allowedFunctions.size());
+                    newFunction = FunctionFactory::Create(allowedFunctions[i]);
+                } while(gene->NumberOfChildren() > newFunction->MaxChildren());
+
+                gene->SwapWith(std::move(newFunction));
+            }
+        };
         // Randomly select a node in the chromosome tree 
-        int size = chromosome.Size();
-        int index = size == 1 ? 0 : RandInt.GetInRange(1, size - 1);
-        index++; // just shutting up the compiler for now!
+        int size = chromosome->Size();
+        int index = RandInt.GetInRange(0, size-1);
+        if (index == 0)
+        {
+            randomMutation(chromosome);
+        }
+        else
+        {
+            auto& gene = chromosome->Get(index);
+            randomMutation(gene);
+        }
         // get it out of the tree
             // TODO: needs us to be able to iterate over the tree
         // if a function
@@ -67,7 +95,7 @@ namespace Model { namespace Operators
         }
     }
 
-    std::unique_ptr<INode> CreateRandomChromosome(int targetSize, const std::vector<FunctionType>& allowedFunctions)
+    std::unique_ptr<INode> CreateRandomChromosome(int targetSize, const std::vector<FunctionType>& allowedFunctions, const std::vector<double*> variables)
     {
         // TODO: this needs to be checked, and should be tested!!
         // start with a randomly selected function

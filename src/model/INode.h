@@ -35,7 +35,7 @@ namespace Model
         virtual std::string ToString() const = 0;
         
         // TODO: is this needed?
-        virtual bool SwapWith(int thisIndex, int otherIndex, std::unique_ptr<INode>& other) = 0;
+        virtual bool SwapWith(std::unique_ptr<INode> other) = 0;
 
         /**
          * Add a child node to this node
@@ -46,6 +46,11 @@ namespace Model
          * @return The number of immediate children of this node
          */
         virtual int NumberOfChildren() const = 0;
+
+        /**
+         * @return The maximum allowed immediate children of this node
+         */
+        virtual int MaxChildren() const = 0;
 
         /**
          * Gets the nubmer of nodes in the chromosome tree (self included)

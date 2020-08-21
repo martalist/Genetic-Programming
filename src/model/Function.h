@@ -43,7 +43,7 @@ namespace Model
         /**
          * @see INode::SwapWith
          */
-        bool SwapWith(int thisIndex, int otherIndex, std::unique_ptr<INode>& other) override;
+        bool SwapWith(std::unique_ptr<INode> other) override;
 
         /**
          * @see INode::AddChild()
@@ -54,6 +54,11 @@ namespace Model
          * @see INode::NumberOfChildren()
          */
         int NumberOfChildren() const override;
+
+        /**
+         * @see INode::MaxChildren()
+         */
+        int MaxChildren() const override;
 
         /**
          * @see INode::Size()
@@ -70,8 +75,10 @@ namespace Model
          */
         std::unique_ptr<INode>& Get(int index) override;
 
+    private:
+
         ChildNodes m_children;
-        const int MaxChildren;
+        const int MaxAllowedChildren;
         const std::function<double(const ChildNodes&)> m_func;
     };
 }
