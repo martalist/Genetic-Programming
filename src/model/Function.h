@@ -65,8 +65,10 @@ namespace Model
          */
         bool IsVariable() const override;
 
-    private:
-        std::unique_ptr<INode>& GetINodePointerByIndex(int index) ;
+        /**
+         * @see INode::Get
+         */
+        std::unique_ptr<INode>& Get(int index) override;
 
         ChildNodes m_children;
         const int MaxChildren;

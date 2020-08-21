@@ -41,22 +41,30 @@ namespace Model { namespace Operators
 
     void Crossover(std::unique_ptr<INode>& left, std::unique_ptr<INode>& right)
     {
-        int lSize = left->Size();
-        int rSize = right->Size();
-        if (lSize == 1 && rSize == 1)
+        int leftSize = left->Size();
+        int rightSize = right->Size();
+        if (leftSize == 1 && rightSize == 1)
         {
             return; // nothing to do here
         }
 
-        // TODO
         // Pick a random node in left
-        int l = lSize == 1 ? 0 : RandInt.GetInRange(1, lSize);
-            // get a pointer/reference to it
-        // Pick a random node in right
-        int r = rSize == 1 ? 0 : RandInt.GetInRange(1, rSize);
-            // get a pointer/reference to it
-        // swap them (pointers)
-        left->SwapWith(l, r, right);
+        if (leftSize == 1)
+        {
+            left.swap(right->Get(RandInt.GetInRange(1, rightSize-1)));
+            return;
+        }
+        else if (rightSize == 1)
+        {
+            right.swap(left->Get(RandInt.GetInRange(1, leftSize-1)));
+        }
+        else
+        {
+            int leftIndex = RandInt.GetInRange(1, leftSize-1);
+            int rightIndex = RandInt.GetInRange(1, rightSize-1);
+            auto& leftSubtree = left->Get(leftIndex);
+            leftSubtree.swap(right->Get(rightIndex));
+        }
     }
 
     std::unique_ptr<INode> CreateRandomChromosome(int targetSize, const std::vector<FunctionType>& allowedFunctions)

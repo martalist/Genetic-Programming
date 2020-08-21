@@ -61,6 +61,11 @@ namespace Model
          */
         bool IsVariable() const override;
 
+        /**
+         * @see INode::Get
+         */
+        std::unique_ptr<INode>& Get(int index) override;
+
     private:
         const double& m_variable;
     };

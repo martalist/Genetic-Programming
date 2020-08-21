@@ -48,4 +48,9 @@ namespace Model
     {
         return true;
     }
+
+    std::unique_ptr<INode>& Variable::Get(int index)
+    {
+        throw std::out_of_range("The unique ptr for a Variable should be obtained from a Function.");
+    }
 }

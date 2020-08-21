@@ -44,8 +44,8 @@ namespace Model
     bool Function::SwapWith(int thisIndex, int otherIndex, std::unique_ptr<INode>& other)
     {
         // TODO: check for indices == 0 (i.e. the root node of either tree)
-        auto& thisINodePtr = GetINodePointerByIndex(thisIndex);
-        auto& otherINodePtr = reinterpret_cast<Function*>(other.get())->GetINodePointerByIndex(otherIndex);
+        auto& thisINodePtr = Get(thisIndex);
+        auto& otherINodePtr = reinterpret_cast<Function*>(other.get())->Get(otherIndex);
         thisINodePtr.swap(otherINodePtr);
         return true;
     }
@@ -66,7 +66,7 @@ namespace Model
         return false;
     }
 
-    std::unique_ptr<INode>& Function::GetINodePointerByIndex(int index)
+    std::unique_ptr<INode>& Function::Get(int index)
     {
         assert(index > 0); // we want the pointer to the index, not the object itself
         for (auto i = 0u; i < m_children.size(); i++)
@@ -87,8 +87,8 @@ namespace Model
             }
                
             // else it's deeper in the subtree
-            return reinterpret_cast<Function*>(m_children[i].get())->GetINodePointerByIndex(index);
+            return reinterpret_cast<Function*>(m_children[i].get())->Get(index);
         }
-        throw std::out_of_range("Index out of range in Function::GetINodePointerByIndex");
+        throw std::out_of_range("Index out of range in Function::Get");
     }
 }
