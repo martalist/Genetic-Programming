@@ -49,6 +49,7 @@ namespace Model
             // have this new node be the other function
             // .... or can just alter the MaxAllowedChildren & m_func?
         }
+        return true;
     }
 
     int Function::NumberOfChildren() const 
