@@ -13,7 +13,7 @@ add_executable(${TEST_BINARY} TestMain.cpp)
 # Link the executable to needed libraries.
 target_link_libraries(${TEST_BINARY}
     prog               # Library we are testing
-    utils
+    model
     gtest gtest_main   # GTest libraries
 )
 
