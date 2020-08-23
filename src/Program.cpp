@@ -116,7 +116,7 @@ namespace Model
     Program::NodePair Program::Reproduce(const INode& mum, const INode& dad)
     {
         // Deep copy mum & dad
-        auto son      = FunctionFactory::Copy(dad);
+        auto son      = FunctionFactory::Copy(dad); // TODO
         auto daughter = FunctionFactory::Copy(mum);
         
         // should we crossover? 
