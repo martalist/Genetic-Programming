@@ -41,13 +41,11 @@ namespace Model
         return false;
     }
 
-    bool Function::SwapWith(std::unique_ptr<INode> other)
+    bool Function::MoveChildrenTo(std::unique_ptr<INode>& other)
     {
         for (auto& child : m_children)
         {
-            // TODO: need to copy the children over, then
-            // have this new node be the other function
-            // .... or can just alter the MaxAllowedChildren & m_func?
+            other->AddChild(std::move(child));
         }
         return true;
     }

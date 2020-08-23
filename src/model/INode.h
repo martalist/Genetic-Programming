@@ -34,8 +34,12 @@ namespace Model
          */
         virtual std::string ToString() const = 0;
         
-        // TODO: is this needed?
-        virtual bool SwapWith(std::unique_ptr<INode> other) = 0;
+        /**
+         * Transfers all children of this node to the other node
+         * @param other The node to move the children to
+         * @return true if the transfer completes successfully
+         */
+        virtual bool MoveChildrenTo(std::unique_ptr<INode>& other) = 0;
 
         /**
          * Add a child node to this node

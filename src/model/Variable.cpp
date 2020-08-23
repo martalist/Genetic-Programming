@@ -24,7 +24,7 @@ namespace Model
         return std::to_string(m_variable);
     }
 
-    bool Variable::SwapWith(std::unique_ptr<INode> other)
+    bool Variable::MoveChildrenTo(std::unique_ptr<INode>& other)
     {
         throw std::logic_error("Variables should not be swapped directly");
     }

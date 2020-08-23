@@ -37,9 +37,9 @@ namespace Model
         std::string ToString() const override;
 
         /**
-         * @see INode::SwapWith
+         * @see INode::MoveChildrenTo
          */
-        bool SwapWith(std::unique_ptr<INode> other) override;
+        bool MoveChildrenTo(std::unique_ptr<INode>& other) override;
 
         /**
          * @see INode::AddChild()

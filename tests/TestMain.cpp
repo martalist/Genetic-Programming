@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include "RaffleTest.cpp"
 #include "FunctionTest.cpp"
+#include "OperatorsTest.cpp"
 
 int main(int argc, char **argv)
 {

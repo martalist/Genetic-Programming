@@ -42,7 +42,8 @@ namespace Model { namespace Operators
                     newFunction = FunctionFactory::Create(allowedFunctions[i]);
                 } while(gene->NumberOfChildren() > newFunction->MaxChildren());
 
-                gene->SwapWith(std::move(newFunction));
+                gene->MoveChildrenTo(newFunction); // transfer sub tree
+                gene.swap(newFunction);
             }
         };
         // Randomly select a node in the chromosome tree 
