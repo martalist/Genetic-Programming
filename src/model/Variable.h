@@ -20,7 +20,7 @@ namespace Model
          * Constructor
          * @param variable A reference to the variable.
          */
-        Variable(const double& variable);
+        Variable(const double* variable);
 
         Variable(const Variable& other);
 
@@ -72,7 +72,7 @@ namespace Model
         std::unique_ptr<INode>& Get(int index) override;
 
     private:
-        const double& m_variable;
+        const double* m_variable;
     };
 }
 #endif

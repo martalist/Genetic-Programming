@@ -24,14 +24,14 @@ namespace
 
 namespace Model { namespace Operators 
 {
-    void Mutate(std::unique_ptr<INode>& chromosome, const std::vector<FunctionType>& allowedFunctions, const std::vector<double*> variables)
+    void Mutate(std::unique_ptr<INode>& chromosome, const std::vector<FunctionType>& allowedFunctions, const std::vector<double*>& variables)
     {
-        auto randomMutation = [&](std::unique_ptr<INode>& gene)
+        auto randomMutation = [&](std::unique_ptr<INode>& gene) -> void
         {
             if (gene->IsVariable())
             {
                 int i = RandomIndex(variables.size());
-                gene = std::make_unique<Variable>(*variables[i]);
+                gene = std::make_unique<Variable>(variables[i]);
             }
             else
             {
@@ -96,7 +96,7 @@ namespace Model { namespace Operators
         }
     }
 
-    std::unique_ptr<INode> CreateRandomChromosome(int targetSize, const std::vector<FunctionType>& allowedFunctions, const std::vector<double*> variables)
+    std::unique_ptr<INode> CreateRandomChromosome(int targetSize, const std::vector<FunctionType>& allowedFunctions, const std::vector<double*>& variables)
     {
         // TODO: this needs to be checked, and should be tested!!
         // start with a randomly selected function

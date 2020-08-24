@@ -4,7 +4,7 @@
 
 namespace Model
 {
-    Variable::Variable(const double& variable)
+    Variable::Variable(const double* variable)
         : m_variable(variable)
     {
     }
@@ -16,12 +16,12 @@ namespace Model
 
     double Variable::Evaluate() const
     {
-        return m_variable;
+        return *m_variable;
     }
 
     std::string Variable::ToString() const
     {
-        return std::to_string(m_variable);
+        return std::to_string(*m_variable);
     }
 
     bool Variable::MoveChildrenTo(std::unique_ptr<INode>& other)

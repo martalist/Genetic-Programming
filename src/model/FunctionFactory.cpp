@@ -25,6 +25,10 @@ namespace Model
             throw std::exception();
         }
     }
+    std::unique_ptr<INode> FunctionFactory::Create(const double* variable)
+    {
+        return std::make_unique<Variable>(variable);
+    }
 
     std::unique_ptr<INode> FunctionFactory::Copy(const INode& other)
     {

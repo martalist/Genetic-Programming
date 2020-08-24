@@ -25,8 +25,16 @@ namespace Model
         /**
          * Create a function
          * @param type The type of function to create
+         * @return the new INode
          */
         static std::unique_ptr<INode> Create(const FunctionType& type);
+
+        /**
+         * Create a variable
+         * @param varaible A pointer to the variable
+         * @return the new INode
+         */
+        static std::unique_ptr<INode> Create(const double* variable);
 
         /**
          * Performs a deep copy of the node tree

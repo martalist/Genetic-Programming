@@ -13,7 +13,7 @@ namespace Model { namespace Operators
      * @param allowedFunctions The allowed set of functions that may be selected from
      * @param variables The allowed set of terminals that may be selected from
      */
-    void Mutate(std::unique_ptr<INode>& chromosome, const std::vector<FunctionType>& allowedFunctions, const std::vector<double*> variables);
+    void Mutate(std::unique_ptr<INode>& chromosome, const std::vector<FunctionType>& allowedFunctions, const std::vector<double*>& variables);
 
     /**
      * Performs crossover on a pair of chromosomes
@@ -30,7 +30,7 @@ namespace Model { namespace Operators
      * @param variables The allowed set of terminals that may be selected from
      * @return the root of the new chromosome
      */
-    std::unique_ptr<INode> CreateRandomChromosome(int targetSize, const std::vector<FunctionType>& allowedFunctions, const std::vector<double*> variables);
+    std::unique_ptr<INode> CreateRandomChromosome(int targetSize, const std::vector<FunctionType>& allowedFunctions, const std::vector<double*>& variables);
 }}
 
 #endif
