@@ -36,6 +36,9 @@ namespace Model { namespace Operators
             else
             {
                 std::unique_ptr<INode> newFunction = nullptr;
+
+                // TODO: this will spin forever if no function in the set can
+                // handle the number of children
                 do
                 {
                     int i = RandomIndex(allowedFunctions.size());
@@ -67,7 +70,7 @@ namespace Model { namespace Operators
         int rightSize = right->Size();
         if (leftSize == 1 && rightSize == 1)
         {
-            return; // nothing to do here
+            left.swap(right);
         }
 
         // Pick a random node in left
@@ -91,7 +94,6 @@ namespace Model { namespace Operators
 
     std::unique_ptr<INode> CreateRandomChromosome(int targetSize, const std::vector<FunctionType>& allowedFunctions, const std::vector<double*>& variables)
     {
-        // TODO: this needs to be checked, and should be tested!!
         // start with a randomly selected function
         int index = RandomIndex(allowedFunctions.size());
         auto root = FunctionFactory::Create(allowedFunctions[index]);
@@ -103,19 +105,43 @@ namespace Model { namespace Operators
         for (int count = 1; count < targetSize; ++count)
         {
             // Randomly choose a new function/variable
-            auto newNode = FunctionFactory::Create(FunctionType::Addition);
-
-            // add the new node to the randomly selected one
-            auto func = functions[ RandomIndex(functions.size()) ];
-            func->AddChild(std::move(newNode));
+            auto binaryChoice = RandomIndex(static_cast<size_t>(2));
+            std::unique_ptr<INode> newNode;
+            if (binaryChoice == 0) // function
+            {
+                // randomly select a function type
+                index = RandomIndex(allowedFunctions.size());
+                newNode = FunctionFactory::Create(allowedFunctions[index]); 
+                functions.push_back(newNode.get());
+            }
+            else 
+            {
+                // randomly select a variable
+                index = RandomIndex(variables.size());
+                newNode = FunctionFactory::Create(variables[index]);
+            }
+            
+            // add the new node in a random position in the tree
+            auto insertUnderIndex = RandInt.GetInRange(0, root->Size()-1);
+            if (insertUnderIndex == 0)
+            {
+                root->AddChild(std::move(newNode));
+            }
+            else
+            {
+                root->Get(insertUnderIndex)->AddChild(std::move(newNode));
+            }
         }
         
         // Make sure none of the leaf nodes are functions
+        // TODO: check that all functions have the min req. children
         for (auto& func : functions)
         {
             if (func->NumberOfChildren() == 0)
             {
                 // add a variable
+                index = RandomIndex(variables.size());
+                func->AddChild(FunctionFactory::Create(variables[index]));
             }
         }
         return std::move(root);

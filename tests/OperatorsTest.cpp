@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <iostream>
 #include <memory>
 #include "../src/model/Operators.h"
 
@@ -23,7 +24,7 @@ namespace Tests
         Operators::Mutate(func, allowedFunctions, allowedTerminals);
         func->AddChild(std::make_unique<Variable>(&B));
         func->AddChild(std::make_unique<Variable>(&A));
-        ASSERT_DOUBLE_EQ(1.8, func->Evaluate());
+        ASSERT_DOUBLE_EQ(B-A, func->Evaluate());
     }
 
     TEST(OperatorsTest, MutationOneVariable)
@@ -35,7 +36,7 @@ namespace Tests
         // since there is only one node (Variable), and only one allowed terminal,
         // the mutation should change this to B.
         Operators::Mutate(var, allowedFunctions, allowedTerminals);
-        ASSERT_DOUBLE_EQ(3.3, var->Evaluate());
+        ASSERT_DOUBLE_EQ(B, var->Evaluate());
     }
 
     TEST(OperatorsTest, MutateEitherVariableOrFunction)
@@ -48,7 +49,7 @@ namespace Tests
         std::vector<double*> allowedTerminals{ &two };
         Operators::Mutate(func, allowedFunctions, allowedTerminals);
 
-        ASSERT_DOUBLE_EQ(2.0, func->Evaluate());
+        ASSERT_DOUBLE_EQ(two, func->Evaluate());
     }
 
     TEST(OperatorsTest, TestFunctionThatCantHoldAllChildren)
@@ -63,5 +64,25 @@ namespace Tests
     TEST(OperatorsTest, MutateCompositeTree)
     {
         // TODO: do a more complicated mutation test
+    }
+
+    TEST(OperatorsTest, CreateSingleRandomChromosome)
+    {
+        std::vector<FunctionType> allowedFunctions{ FunctionType::Addition };
+        std::vector<double*> allowedTerminals{ &A };
+        auto chromosome = Operators::CreateRandomChromosome(1, allowedFunctions, allowedTerminals);
+
+        std::cout << chromosome->ToString() << std::endl;
+        ASSERT_DOUBLE_EQ(A, chromosome->Evaluate());
+    }
+
+    TEST(OperatorsTest, CreateRandomChromosome)
+    {
+        std::vector<FunctionType> allowedFunctions{ FunctionType::Addition };
+        std::vector<double*> allowedTerminals{ &A, &B };
+        auto chromosome = Operators::CreateRandomChromosome(3, allowedFunctions, allowedTerminals);
+
+        std::cout << chromosome->ToString() << std::endl;
+        // ASSERT_DOUBLE_EQ(A, chromosome->Evaluate());
     }
 }

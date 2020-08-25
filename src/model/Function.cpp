@@ -82,9 +82,16 @@ namespace Model
 
     std::unique_ptr<INode>& Function::Get(int index)
     {
+        // TODO: this function needs to be thoroughly tested
         assert(index > 0); // we want the pointer to the index, not the object itself
+        int originalIndex = index;
         for (auto i = 0u; i < m_children.size(); i++)
         {
+            if (index == 1)
+            {
+                return m_children[i];
+            }
+            
             int size = m_children[i]->Size();
             if (index >= size)
             {
@@ -93,16 +100,9 @@ namespace Model
                 continue;
             }
 
-            // target is in this subtree
-            if (index == 0)
-            {
-                // it's the direct descendant
-                return m_children[i];
-            }
-               
             // else it's deeper in the subtree
-            return reinterpret_cast<Function*>(m_children[i].get())->Get(index);
+            return m_children[i]->Get(index);
         }
-        throw std::out_of_range("Index out of range in Function::Get");
+        throw std::out_of_range("Index out of range in Function::Get. Index: " + std::to_string(originalIndex) + ", Size(): " + std::to_string(Size()));
     }
 }
