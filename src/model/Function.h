@@ -23,7 +23,8 @@ namespace Model
          * @param func The mathematical function to call upon the child nodes
          * @param maxChildren The max legal number of children for the function
          */
-        Function(std::function<double(const ChildNodes&)> func, 
+        Function(std::function<double(const ChildNodes&)> func,
+                const std::string& symbol,
                 int maxChildren = std::numeric_limits<int>::max());
 
         Function(const Function& other);
@@ -80,6 +81,7 @@ namespace Model
         ChildNodes m_children;
         const int MaxAllowedChildren;
         const std::function<double(const ChildNodes&)> m_func;
+        const std::string m_symbol;
     };
 }
 #endif

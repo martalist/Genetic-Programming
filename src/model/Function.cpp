@@ -8,9 +8,11 @@
 namespace Model
 {
     Function::Function(std::function<double(const ChildNodes&)> func,
+                const std::string& symbol,
                 int maxChildren /*= std::numeric_limits<int>::max()*/)
         : MaxAllowedChildren(maxChildren)
         , m_func(func)
+        , m_symbol(symbol)
     {
     }
 
@@ -28,7 +30,14 @@ namespace Model
 
     std::string Function::ToString() const
     {
-        return "";
+        std::stringstream out;
+        out << "(" << m_symbol << " ";
+        for (auto& child : m_children)
+        {
+            out << child->ToString() << " ";
+        }
+        out << ")";
+        return out.str();
     }
 
     bool Function::AddChild(std::unique_ptr<INode> child)

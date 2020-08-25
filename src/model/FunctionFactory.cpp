@@ -54,7 +54,7 @@ namespace Model
             }
             return result;
         };
-        return std::make_unique<Function>(func);
+        return std::make_unique<Function>(func, "+");
     }
 
     std::unique_ptr<INode> FunctionFactory::CreateSubtraction()
@@ -68,7 +68,7 @@ namespace Model
             }
             return result;
         };
-        return std::make_unique<Function>(func);
+        return std::make_unique<Function>(func, "-");
     }
 
 
@@ -83,7 +83,7 @@ namespace Model
             }
             return result;
         };
-        return std::make_unique<Function>(func);
+        return std::make_unique<Function>(func, "*");
     }
 
     std::unique_ptr<INode> FunctionFactory::CreateDivision()
@@ -96,7 +96,7 @@ namespace Model
             }
             return children[0]->Evaluate() / children[1]->Evaluate();
         };
-        return std::make_unique<Function>(func, 2);
+        return std::make_unique<Function>(func, "/", 2);
     }
 
     std::unique_ptr<INode> FunctionFactory::CreateSquareRoot()
@@ -109,6 +109,6 @@ namespace Model
             }
             return std::sqrt(children[0]->Evaluate());
         };
-        return std::make_unique<Function>(func, 1);
+        return std::make_unique<Function>(func, "√", 1);
     }
 }

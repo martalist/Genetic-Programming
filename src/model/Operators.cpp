@@ -46,6 +46,7 @@ namespace Model { namespace Operators
                 gene.swap(newFunction);
             }
         };
+        
         // Randomly select a node in the chromosome tree 
         int size = chromosome->Size();
         int index = RandInt.GetInRange(0, size-1);
@@ -58,14 +59,6 @@ namespace Model { namespace Operators
             auto& gene = chromosome->Get(index);
             randomMutation(gene);
         }
-        // get it out of the tree
-            // TODO: needs us to be able to iterate over the tree
-        // if a function
-            // randomly select a new function
-            // (the new function must be compatible with the number of children)
-            // replace by altering parent/child pointers
-        // else if a variable
-            // randomly select a new variable
     }
 
     void Crossover(std::unique_ptr<INode>& left, std::unique_ptr<INode>& right)
