@@ -51,17 +51,9 @@ namespace Model { namespace Operators
         };
         
         // Randomly select a node in the chromosome tree 
-        int size = chromosome->Size();
-        int index = RandInt.GetInRange(0, size-1);
-        if (index == 0)
-        {
-            randomMutation(chromosome);
-        }
-        else
-        {
-            auto& gene = chromosome->Get(index);
-            randomMutation(gene);
-        }
+        int index = RandInt.GetInRange(0, chromosome->Size()-1);
+        auto& gene = chromosome->Get(index, chromosome);
+        randomMutation(gene);
     }
 
     void Crossover(std::unique_ptr<INode>& left, std::unique_ptr<INode>& right)
@@ -76,19 +68,19 @@ namespace Model { namespace Operators
         // Pick a random node in left
         if (leftSize == 1)
         {
-            left.swap(right->Get(RandInt.GetInRange(1, rightSize-1)));
+            left.swap(right->Get(RandInt.GetInRange(1, rightSize-1), right));
             return;
         }
         else if (rightSize == 1)
         {
-            right.swap(left->Get(RandInt.GetInRange(1, leftSize-1)));
+            right.swap(left->Get(RandInt.GetInRange(1, leftSize-1), left));
         }
         else
         {
             int leftIndex = RandInt.GetInRange(1, leftSize-1);
             int rightIndex = RandInt.GetInRange(1, rightSize-1);
-            auto& leftSubtree = left->Get(leftIndex);
-            leftSubtree.swap(right->Get(rightIndex));
+            auto& leftSubtree = left->Get(leftIndex, left);
+            leftSubtree.swap(right->Get(rightIndex, right));
         }
     }
 
@@ -121,15 +113,22 @@ namespace Model { namespace Operators
                 newNode = FunctionFactory::Create(variables[index]);
             }
             
-            // add the new node in a random position in the tree
-            auto insertUnderIndex = RandInt.GetInRange(0, root->Size()-1);
-            if (insertUnderIndex == 0)
+            // get a random position to insert (in the tree)
+            auto insertIndex = RandInt.GetInRange(0, root->Size()-1);
+            while (insertIndex != 0 && root->Get(insertIndex, root)->IsVariable())
+            {
+                // keep looking if we've selected a variable
+                insertIndex = RandInt.GetInRange(0, root->Size()-1);
+            }
+
+            // add the new node to the random position in the tree
+            if (insertIndex == 0)
             {
                 root->AddChild(std::move(newNode));
             }
             else
             {
-                root->Get(insertUnderIndex)->AddChild(std::move(newNode));
+                root->Get(insertIndex, root)->AddChild(std::move(newNode));
             }
         }
         

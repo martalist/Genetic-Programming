@@ -49,14 +49,18 @@ namespace Tests
     TEST_F(FunctionTest, Multiplication)
     {
         auto func = FunctionFactory::Create(FunctionType::Multiplication);
+        ASSERT_EQ(1, func->Size());
         func->AddChild(std::make_unique<Variable>(&a));
         ASSERT_DOUBLE_EQ(1.0, func->Evaluate());
+        ASSERT_EQ(2, func->Size());
 
         func->AddChild(std::make_unique<Variable>(&b));
         ASSERT_DOUBLE_EQ(2.0, func->Evaluate());
+        ASSERT_EQ(3, func->Size());
 
         func->AddChild(std::make_unique<Variable>(&c));
         ASSERT_DOUBLE_EQ(6.0, func->Evaluate());
+        ASSERT_EQ(4, func->Size());
     }
 
     TEST_F(FunctionTest, Division)
@@ -93,6 +97,7 @@ namespace Tests
         func = FunctionFactory::Create(FunctionType::SquareRoot);
         ASSERT_TRUE(func->AddChild(std::make_unique<Variable>(&four)));
         ASSERT_DOUBLE_EQ(2.0, func->Evaluate());
+        ASSERT_EQ(2, func->Size());
 
         // sqrt can only have one child
         ASSERT_FALSE(func->AddChild(std::make_unique<Variable>(&b)));
@@ -120,5 +125,51 @@ namespace Tests
         root->AddChild(std::move(div));
 
         ASSERT_DOUBLE_EQ(3.4641016151377544, root->Evaluate());
+    }
+
+    TEST_F(FunctionTest, GetNodePointers)
+    {
+        auto root = FunctionFactory::Create(FunctionType::SquareRoot);
+        auto div = FunctionFactory::Create(FunctionType::Division);
+        auto mult = FunctionFactory::Create(FunctionType::Multiplication);
+        auto add = FunctionFactory::Create(FunctionType::Addition);
+        auto sub = FunctionFactory::Create(FunctionType::Subtraction);
+        add->AddChild(FunctionFactory::Create(&a));
+        add->AddChild(FunctionFactory::Create(&b));
+        add->AddChild(FunctionFactory::Create(&c));
+        sub->AddChild(FunctionFactory::Create(&c));
+        sub->AddChild(FunctionFactory::Create(&b));
+        mult->AddChild(FunctionFactory::Create(&b));
+        mult->AddChild(std::move(add));
+        div->AddChild(std::move(mult));
+        div->AddChild(std::move(sub));
+        root->AddChild(std::move(div));
+
+        /*               sqrt
+         *                |
+         *               div
+         *              /   \
+         *          mult     minus
+         *         /   \     /   \
+         *        b   plus  c     b
+         *           / | \
+         *          a  b  c
+         *
+         *   a = 1.0;  b = 2.0;  c = 3.0;
+         */
+
+        ASSERT_EQ(11, root->Size());
+        ASSERT_DOUBLE_EQ(12.0, root->Get(1, root)->Evaluate()); // div
+        ASSERT_DOUBLE_EQ(12.0, root->Get(2, root)->Evaluate()); // mult
+        ASSERT_DOUBLE_EQ(2.0, root->Get(3, root)->Evaluate()); // b
+        ASSERT_DOUBLE_EQ(6.0, root->Get(4, root)->Evaluate()); // plus
+        ASSERT_DOUBLE_EQ(1.0, root->Get(5, root)->Evaluate()); // a
+        ASSERT_DOUBLE_EQ(2.0, root->Get(6, root)->Evaluate()); // b
+        // Function.cpp:87: virtual std::unique_ptr<Model::INode>& Model::Function::Get(int): Assertion `index > 0' failed.`
+        ASSERT_DOUBLE_EQ(3.0, root->Get(7, root)->Evaluate()); // c
+        ASSERT_DOUBLE_EQ(1.0, root->Get(8, root)->Evaluate()); // minus
+        ASSERT_DOUBLE_EQ(3.0, root->Get(9, root)->Evaluate()); // c
+        // C++ exception with description "Index out of range in Function::Get. Index: 10, Size(): 11" thrown in the test body.
+        ASSERT_DOUBLE_EQ(2.0, root->Get(10, root)->Evaluate()); // b
     }
 }

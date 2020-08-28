@@ -74,7 +74,7 @@ namespace Model
         /**
          * @see INode::Get
          */
-        std::unique_ptr<INode>& Get(int index) override;
+        std::unique_ptr<INode>& Get(int index, std::unique_ptr<INode>& ptr) override;
 
     private:
 

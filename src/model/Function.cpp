@@ -36,6 +36,7 @@ namespace Model
         {
             out << child->ToString() << " ";
         }
+        out.seekp(-1, out.cur);
         out << ")";
         return out.str();
     }
@@ -80,10 +81,11 @@ namespace Model
         return false;
     }
 
-    std::unique_ptr<INode>& Function::Get(int index)
+    std::unique_ptr<INode>& Function::Get(int index, std::unique_ptr<INode>& ptr)
     {
         // TODO: this function needs to be thoroughly tested
-        assert(index > 0); // we want the pointer to the index, not the object itself
+        if (index == 0) return ptr;
+
         int originalIndex = index;
         for (auto i = 0u; i < m_children.size(); i++)
         {
@@ -93,7 +95,7 @@ namespace Model
             }
             
             int size = m_children[i]->Size();
-            if (index >= size)
+            if (index-1 >= size)
             {
                 // target is not in this subtree; move on
                 index -= size;
@@ -101,7 +103,7 @@ namespace Model
             }
 
             // else it's deeper in the subtree
-            return m_children[i]->Get(index);
+            return m_children[i]->Get(index-1, m_children[i]);
         }
         throw std::out_of_range("Index out of range in Function::Get. Index: " + std::to_string(originalIndex) + ", Size(): " + std::to_string(Size()));
     }

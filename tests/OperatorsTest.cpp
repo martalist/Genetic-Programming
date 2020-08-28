@@ -72,7 +72,7 @@ namespace Tests
         std::vector<double*> allowedTerminals{ &A };
         auto chromosome = Operators::CreateRandomChromosome(1, allowedFunctions, allowedTerminals);
 
-        std::cout << chromosome->ToString() << std::endl;
+        // std::cout << chromosome->ToString() << std::endl;
         ASSERT_DOUBLE_EQ(A, chromosome->Evaluate());
     }
 
@@ -82,7 +82,7 @@ namespace Tests
         std::vector<double*> allowedTerminals{ &A, &B };
         auto chromosome = Operators::CreateRandomChromosome(3, allowedFunctions, allowedTerminals);
 
-        std::cout << chromosome->ToString() << std::endl;
+        // std::cout << chromosome->ToString() << std::endl;
         // ASSERT_DOUBLE_EQ(A, chromosome->Evaluate());
     }
 }

@@ -20,6 +20,12 @@ namespace Model
 
     void Program::Start()
     {
+        // temporary variable initialization
+        double a = 1.0, b = 2.0, c = 3.0;
+        m_variables.push_back(&a);
+        m_variables.push_back(&b);
+        m_variables.push_back(&c);
+
         // generate m_populationSize chromosomes
         for (auto i = 0u; i < m_populationSize; ++i)
         {
@@ -113,7 +119,11 @@ namespace Model
             // add to the tally
             sumOfSquares += caseFitness;
         }
-        return sumOfSquares; // this is what we want to minimize
+        // TODO: We want to minimize fitness, so should calculate the
+        // inverse, 1/sumOfSquares... however we need to be careful to
+        // avoid zero division errors, and overflow when adding doubles
+        // that are close to the max double value.
+        return sumOfSquares;
     }
 
     std::tuple<INode*, INode*> Program::SelectParents()

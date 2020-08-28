@@ -73,12 +73,12 @@ namespace Model
         // virtual INode& operator=(const INode& rhs) = 0;
 
         /**
-         * Returns a reference to the unique pointer at the specified index
+         * Returns a reference to the unique pointer at the specified index, pre-order
          * @param index The node index (in-order traversal). 
          * @return A reference to the node unique_ptr
          * @throws an exception if index exceeds is >= the tree size
          */
-        virtual std::unique_ptr<INode>& Get(int index) = 0;
+        virtual std::unique_ptr<INode>& Get(int index, std::unique_ptr<INode>& ptr) = 0;
     };
 }
 
