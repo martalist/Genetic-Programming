@@ -8,6 +8,12 @@
 namespace Model { namespace Operators
 {
     /**
+     * Utility function to obtain deterministic results from the operators
+     * @param seed The seed to set
+     */
+    void SetSeed(int seed);
+    
+    /**
      * Performs mutation on a chromosome
      * @param chromosome The S-expression to mutate
      * @param allowedFunctions The allowed set of functions that may be selected from

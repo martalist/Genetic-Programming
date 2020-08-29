@@ -35,6 +35,10 @@ namespace Model
         for (auto i = 0; i < m_numGenerations; ++i)
         {
             m_population->CalculateFitness(FitnessCases);
+            double avg = m_population->GetAverageFitness();
+            double best = m_population->GetBestFitness();
+            // TODO: log these parameters, for later analysis
+
             m_population->Evolve();
         }
         // m_population->CalculateFitness(FitnessCases);

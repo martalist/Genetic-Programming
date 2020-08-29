@@ -13,7 +13,8 @@
 namespace Model
 {
     /**
-     * An interface Node of the genetic programming tree/model.
+     * Allows configuration and running of a genetic programming stochastic 
+     * search program.
      */
     class Program
     {

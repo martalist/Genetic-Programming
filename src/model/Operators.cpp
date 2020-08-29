@@ -24,6 +24,11 @@ namespace
 
 namespace Model { namespace Operators 
 {
+    void SetSeed(int seed)
+    {
+        RandInt.SetSeed(seed);
+    }
+
     void Mutate(std::unique_ptr<INode>& chromosome, const std::vector<FunctionType>& allowedFunctions, const std::vector<double*>& variables)
     {
         auto randomMutation = [&](std::unique_ptr<INode>& gene) -> void

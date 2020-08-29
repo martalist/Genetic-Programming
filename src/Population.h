@@ -14,7 +14,8 @@ namespace Model
     struct PopulationParams;
 
     /**
-     * A singleton class, representing the current population of S-expressions
+     * Represents a population of S-expressions, and facilitates reproduction
+     * and evolution.
      */
     class Population
     {
@@ -34,29 +35,44 @@ namespace Model
          */
         void CalculateFitness(const std::vector<std::vector<double>>& fitnessCases);
 
+        /**
+         * @return the average fitness for the population
+         */
+        double GetAverageFitness() const;
+
+        /**
+         * @return the best fitness value for the population
+         */
+        double GetBestFitness() const;
+
     private:
         using NodePair = std::tuple<std::unique_ptr<INode>, std::unique_ptr<INode>>;
 
         /**
          * Select a pair of parents. The more 'fit' the chromosome, the more
          * likely it will be selected as a parent.
+         * @return TODO
          */
         std::tuple<INode*, INode*> SelectParents();
 
         /**
          * Deep copy from parents, perform crossover and mutation
+         * @param TODO
          */
         NodePair Reproduce(const INode& mum, const INode& dad);
 
         /**
          * Calculate the fitness for one chromosome
          * @param index The index of the chromosome
+         * @param fitnessCases TODO
+         * @return TODO
          */
         double CalculateChromosomeFitness(unsigned int index, const std::vector<std::vector<double>>& fitnessCases);
 
         std::vector<std::unique_ptr<INode>> m_population; ///< The chromosome population
-        const double m_crossoverProb = 0.7; 
-        const double m_mutationProb = 0.001; 
+        std::vector<double> m_fitness; ///< The finess of chromosomes, in order of m_population
+        const double m_crossoverProb = 0.7; ///< The probability of genetic crossover when breeding
+        const double m_mutationProb = 0.001; ///< The probability of gene mutation when breeding
         Util::UniformRandomGenerator<float> m_randomProbability; ///< Generates random floats in the range [0,1]
         std::vector<FunctionType> m_allowedFunctions; ///< The set of functions permitted in chromosomes
         std::vector<double*> m_allowedTerminals; ///< The set of variables

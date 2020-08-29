@@ -1,10 +1,15 @@
 #ifndef PopulationParams_h
 #define PopulationParams_h
 
+#include <experimental/optional>
+
 namespace Model
 {
     enum class FunctionType;
 
+    /**
+     * Parameters that define the population and how it evolves
+     */
     struct PopulationParams
     {
         int PopulationSize = 10; ///< Number of chromosomes in the population
@@ -13,6 +18,7 @@ namespace Model
         double MutationProb = 0.001; ///< The probability that a child gene mutates
         std::vector<FunctionType> AllowedFunctions; ///< The set of functions permitted in chromosomes
         std::vector<double*> AllowedTerminals; ///< The set of variables
+        std::experimental::optional<int> Seed;
     };
 }
 

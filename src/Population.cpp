@@ -1,6 +1,8 @@
 #include "Population.h"
 
+#include <algorithm>
 #include <iostream>
+#include <stdexcept>
 #include "PopulationParams.h"
 #include "model/FunctionFactory.h"
 #include "model/Terminal.h"
@@ -15,6 +17,11 @@ namespace Model
         , m_allowedFunctions(params.AllowedFunctions)
         , m_allowedTerminals(params.AllowedTerminals)
     {
+        if (params.Seed)
+        {
+            Operators::SetSeed(params.Seed.value());
+        }
+
         // generate m_params.PopulationSize chromosomes
         for (auto i = 0; i < params.PopulationSize; ++i)
         {
@@ -75,8 +82,8 @@ namespace Model
         m_raffle.Reset(); // get rid of the previous generation's tickets
         for (auto i = 0u; i < m_population.size(); i++)
         {
-            // m_fitness[i] = CalculateChromosomeFitness(i, fitnessCases);
-            m_raffle.BuyTickets(CalculateChromosomeFitness(i, fitnessCases), i);
+            m_fitness[i] = CalculateChromosomeFitness(i, fitnessCases);
+            m_raffle.BuyTickets(m_fitness[i], i);
         }
     }
 
@@ -114,5 +121,23 @@ namespace Model
         int mum = m_raffle.Draw();
         int dad = m_raffle.Draw();
         return std::make_tuple( m_population[mum].get(), m_population[dad].get() );
+    }
+
+    double Population::GetAverageFitness() const
+    {
+        auto total = std::accumulate(m_fitness.begin(), m_fitness.end(), 0.0,
+                [](double result, double fitness) { return result + fitness; });
+        return total / static_cast<double>(m_fitness.size());
+    }
+
+    double Population::GetBestFitness() const
+    {
+        // TODO: min or max element ?? 
+        auto best = std::min_element(m_fitness.begin(), m_fitness.end());
+        if (best == m_fitness.end())
+        {
+            throw std::runtime_error("Can't get best fitness from empty fitness vector.");
+        }
+        return *best;
     }
 }
