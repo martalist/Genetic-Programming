@@ -19,8 +19,12 @@ namespace Model
     Function::Function(const Function& other)
         : MaxAllowedChildren(other.MaxAllowedChildren)
         , m_func(other.m_func)
+        , m_symbol(other.m_symbol)
     {
-        // TODO: perform a deep copy of m_children
+        for (auto& child : other.m_children)
+        {
+            m_children.push_back(child->Clone());
+        }
     }
 
     double Function::Evaluate() const
@@ -106,5 +110,10 @@ namespace Model
             return m_children[i]->Get(index-1, m_children[i]);
         }
         throw std::out_of_range("Index out of range in Function::Get. Index: " + std::to_string(originalIndex) + ", Size(): " + std::to_string(Size()));
+    }
+
+    std::unique_ptr<INode> Function::Clone() const
+    {
+        return std::make_unique<Function>(*this);
     }
 }

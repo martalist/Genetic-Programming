@@ -1,6 +1,7 @@
 #include "Program.h"
 
 #include <iostream>
+#include <iomanip>
 #include "ProgramSettings.h"
 #include "model/FunctionFactory.h"
 #include "model/Terminal.h"
@@ -18,7 +19,7 @@ namespace Model
             // Fitness Cases
             // Crossover/Mutation probabilites
         // Create random/initial population from params
-        m_params.Seed = 0;
+        // m_params.Seed = 0;
 
         m_params.AllowedFunctions = AllowedSets;
         m_params.NumberOfTerminals = static_cast<int>(FitnessCases[0].size()-1);
@@ -34,6 +35,9 @@ namespace Model
             double avg = m_population->GetAverageFitness();
             double best = m_population->GetBestFitness();
             // TODO: log these parameters, for later analysis
+
+            std::cout << std::setprecision(2) << "Generation: " << i
+                << ", avg = " << avg << ", best = " << best << std::endl;
 
             m_population->Evolve();
         }

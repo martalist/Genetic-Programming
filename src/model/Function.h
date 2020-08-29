@@ -76,6 +76,11 @@ namespace Model
          */
         std::unique_ptr<INode>& Get(int index, std::unique_ptr<INode>& ptr) override;
 
+        /**
+         * @see INode::Clone
+         */
+        std::unique_ptr<INode> Clone() const override;
+
     private:
 
         ChildNodes m_children;

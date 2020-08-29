@@ -62,4 +62,9 @@ namespace Model
         }
         return ptr;
     }
+
+    std::unique_ptr<INode> Terminal::Clone() const
+    {
+        return std::make_unique<Terminal>(*this);
+    }
 }

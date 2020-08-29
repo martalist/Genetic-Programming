@@ -13,11 +13,6 @@ namespace Model
     {
     public:
         /**
-         * Copy Constructor TODO
-         */
-        // virtual INode(const INode& other) = 0;
-
-        /**
          * Virtual Destructor
          */
         virtual ~INode() = default;
@@ -66,6 +61,11 @@ namespace Model
          * @return true if this node is a variable, else false (i.e. a function)
          */
         virtual bool IsTerminal() const = 0; // TODO: consider removing - MaxChildren can answer this question
+
+        /**
+         * @return a copy of this (sub)tree
+         */
+        virtual std::unique_ptr<INode> Clone() const = 0;
 
         /*
          * Assignment operator

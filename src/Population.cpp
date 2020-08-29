@@ -74,8 +74,8 @@ namespace Model
     Population::NodePair Population::Reproduce(const INode& mum, const INode& dad)
     {
         // Deep copy mum & dad
-        auto son      = FunctionFactory::Copy(dad); // TODO
-        auto daughter = FunctionFactory::Copy(mum);
+        auto son = dad.Clone();
+        auto daughter = mum.Clone();
         
         // should we crossover? 
         if (m_randomProbability.Get() <= m_crossoverProb)

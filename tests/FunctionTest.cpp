@@ -165,11 +165,42 @@ namespace Tests
         ASSERT_DOUBLE_EQ(6.0, root->Get(4, root)->Evaluate()); // plus
         ASSERT_DOUBLE_EQ(1.0, root->Get(5, root)->Evaluate()); // a
         ASSERT_DOUBLE_EQ(2.0, root->Get(6, root)->Evaluate()); // b
-        // Function.cpp:87: virtual std::unique_ptr<Model::INode>& Model::Function::Get(int): Assertion `index > 0' failed.`
         ASSERT_DOUBLE_EQ(3.0, root->Get(7, root)->Evaluate()); // c
         ASSERT_DOUBLE_EQ(1.0, root->Get(8, root)->Evaluate()); // minus
         ASSERT_DOUBLE_EQ(3.0, root->Get(9, root)->Evaluate()); // c
-        // C++ exception with description "Index out of range in Function::Get. Index: 10, Size(): 11" thrown in the test body.
         ASSERT_DOUBLE_EQ(2.0, root->Get(10, root)->Evaluate()); // b
+    }
+
+    TEST_F(FunctionTest, CloneSingleFunctionAndChild)
+    {
+        auto root = FunctionFactory::Create(FunctionType::Addition);
+        root->AddChild(FunctionFactory::Create(&a));
+
+        auto clone = root->Clone();
+        ASSERT_DOUBLE_EQ(root->Evaluate(), clone->Evaluate());
+        ASSERT_EQ(root->ToString(), clone->ToString());
+    }
+
+    TEST_F(FunctionTest, CloneSExpression)
+    {
+        auto root = FunctionFactory::Create(FunctionType::SquareRoot);
+        auto div = FunctionFactory::Create(FunctionType::Division);
+        auto mult = FunctionFactory::Create(FunctionType::Multiplication);
+        auto add = FunctionFactory::Create(FunctionType::Addition);
+        auto sub = FunctionFactory::Create(FunctionType::Subtraction);
+        add->AddChild(FunctionFactory::Create(&a));
+        add->AddChild(FunctionFactory::Create(&b));
+        add->AddChild(FunctionFactory::Create(&c));
+        sub->AddChild(FunctionFactory::Create(&c));
+        sub->AddChild(FunctionFactory::Create(&b));
+        mult->AddChild(FunctionFactory::Create(&b));
+        mult->AddChild(std::move(add));
+        div->AddChild(std::move(mult));
+        div->AddChild(std::move(sub));
+        root->AddChild(std::move(div));
+
+        auto clone = root->Clone();
+        ASSERT_DOUBLE_EQ(root->Evaluate(), clone->Evaluate());
+        ASSERT_EQ(root->ToString(), clone->ToString());
     }
 }
