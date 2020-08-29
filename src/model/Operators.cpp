@@ -1,7 +1,7 @@
 #include "Operators.h"
 
 #include <memory>
-#include "Variable.h"
+#include "Terminal.h"
 #include "../utils/UniformRandomGenerator.h"
 
 namespace
@@ -28,10 +28,10 @@ namespace Model { namespace Operators
     {
         auto randomMutation = [&](std::unique_ptr<INode>& gene) -> void
         {
-            if (gene->IsVariable())
+            if (gene->IsTerminal())
             {
                 int i = RandomIndex(variables.size());
-                gene = std::make_unique<Variable>(variables[i]);
+                gene = std::make_unique<Terminal>(variables[i]);
             }
             else
             {
@@ -115,7 +115,7 @@ namespace Model { namespace Operators
             
             // get a random position to insert (in the tree)
             auto insertIndex = RandInt.GetInRange(0, root->Size()-1);
-            while (insertIndex != 0 && root->Get(insertIndex, root)->IsVariable())
+            while (insertIndex != 0 && root->Get(insertIndex, root)->IsTerminal())
             {
                 // keep looking if we've selected a variable
                 insertIndex = RandInt.GetInRange(0, root->Size()-1);

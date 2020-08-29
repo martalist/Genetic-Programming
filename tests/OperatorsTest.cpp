@@ -22,24 +22,24 @@ namespace Tests
         // since there is only one node, and only one allowed function,
         // the mutation should change this to a sutraction
         Operators::Mutate(func, allowedFunctions, allowedTerminals);
-        func->AddChild(std::make_unique<Variable>(&B));
-        func->AddChild(std::make_unique<Variable>(&A));
+        func->AddChild(std::make_unique<Terminal>(&B));
+        func->AddChild(std::make_unique<Terminal>(&A));
         ASSERT_DOUBLE_EQ(B-A, func->Evaluate());
     }
 
-    TEST(OperatorsTest, MutationOneVariable)
+    TEST(OperatorsTest, MutationOneTerminal)
     {
         auto var = FunctionFactory::Create(&A);
         std::vector<FunctionType> allowedFunctions{};
         std::vector<double*> allowedTerminals{ &B };
 
-        // since there is only one node (Variable), and only one allowed terminal,
+        // since there is only one node (Terminal), and only one allowed terminal,
         // the mutation should change this to B.
         Operators::Mutate(var, allowedFunctions, allowedTerminals);
         ASSERT_DOUBLE_EQ(B, var->Evaluate());
     }
 
-    TEST(OperatorsTest, MutateEitherVariableOrFunction)
+    TEST(OperatorsTest, MutateEitherTerminalOrFunction)
     {
         double two = 2.0;
         double four = 4.0;

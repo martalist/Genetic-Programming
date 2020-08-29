@@ -3,7 +3,7 @@
 #include <iostream>
 #include "ProgramSettings.h"
 #include "model/FunctionFactory.h"
-#include "model/Variable.h"
+#include "model/Terminal.h"
 #include "model/Operators.h"
 
 namespace Model
@@ -96,8 +96,8 @@ namespace Model
         m_raffle.Reset(); // get rid of the previous generation's tickets
         for (auto i = 0u; i < m_populationSize; i++)
         {
-            m_fitness[i] = CalculateChromosomeFitness(i);
-            m_raffle.BuyTickets(m_fitness[i], i);
+            // m_fitness[i] = CalculateChromosomeFitness(i);
+            m_raffle.BuyTickets(CalculateChromosomeFitness(i), i);
         }
     }
 
@@ -105,11 +105,14 @@ namespace Model
     {
         double sumOfSquares = 0.0;
         double caseFitness = 0.0;
-        auto& chromosome = m_population[index]; // the program of interest 
+        // auto& chromosome = m_population[index]; // the program of interest 
         for (auto& fCase : FitnessCases) // FitnessCases are the training set
         {
-            std::get<0>(fCase); // just shupping up the compiler
-            chromosome->Size(); // just shupping up the compiler
+            m_variables.clear();
+            // for (auto i = 0u; i < std::tuple_size(fCase); i++)
+            // {
+                // m_variables.push_back(&std::get<0>(fCase));
+            // }
             // TODO:
             // calculate the fitness based on the variable values
             // and expected result for each case
@@ -123,7 +126,8 @@ namespace Model
         // inverse, 1/sumOfSquares... however we need to be careful to
         // avoid zero division errors, and overflow when adding doubles
         // that are close to the max double value.
-        return sumOfSquares;
+        // return sumOfSquares;
+        return 1.0;
     }
 
     std::tuple<INode*, INode*> Program::SelectParents()

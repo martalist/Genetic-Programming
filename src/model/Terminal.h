@@ -1,5 +1,5 @@
-#ifndef Variable_H
-#define Variable_H
+#ifndef Terminal_H
+#define Terminal_H
 
 #include <functional>
 #include <limits>
@@ -13,16 +13,16 @@ namespace Model
     /**
      * An interface Node of the genetic programming tree/model.
      */
-    class Variable : public INode
+    class Terminal : public INode
     {
     public:
         /**
          * Constructor
          * @param variable A reference to the variable.
          */
-        Variable(const double* variable);
+        Terminal(const double* variable);
 
-        Variable(const Variable& other);
+        Terminal(const Terminal& other);
 
         /**
          * Evaluates the value of this subtree.
@@ -62,9 +62,9 @@ namespace Model
         int Size() const override;
 
         /**
-         * @see INode::IsVariable()
+         * @see INode::IsTerminal()
          */
-        bool IsVariable() const override;
+        bool IsTerminal() const override;
 
         /**
          * @see INode::Get

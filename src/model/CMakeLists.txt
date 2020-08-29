@@ -1,6 +1,6 @@
 add_library(model 
     INode.h
-    Variable.cpp
+    Terminal.cpp
     Function.cpp
     FunctionFactory.cpp
     Operators.cpp

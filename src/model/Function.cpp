@@ -76,7 +76,7 @@ namespace Model
                 [](int a, const auto& child) { return a + child->Size(); });
     }
 
-    bool Function::IsVariable() const
+    bool Function::IsTerminal() const
     {
         return false;
     }

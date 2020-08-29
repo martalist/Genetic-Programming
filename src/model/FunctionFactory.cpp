@@ -3,7 +3,7 @@
 #include <cmath>
 #include <numeric>
 #include "Function.h"
-#include "Variable.h"
+#include "Terminal.h"
 
 namespace Model
 {
@@ -28,15 +28,15 @@ namespace Model
 
     std::unique_ptr<INode> FunctionFactory::Create(const double* variable)
     {
-        return std::make_unique<Variable>(variable);
+        return std::make_unique<Terminal>(variable);
     }
 
     std::unique_ptr<INode> FunctionFactory::Copy(const INode& other)
     {
         // TODO: This implementation has a bad smell to it
-        if (other.IsVariable())
+        if (other.IsTerminal())
         {
-            return std::make_unique<Variable>(dynamic_cast<const Variable&>(other));
+            return std::make_unique<Terminal>(dynamic_cast<const Terminal&>(other));
         }
         return std::make_unique<Function>(dynamic_cast<const Function&>(other));
     }

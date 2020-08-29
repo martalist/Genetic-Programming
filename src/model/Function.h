@@ -67,9 +67,9 @@ namespace Model
         int Size() const override;
 
         /**
-         * @see INode::IsVariable()
+         * @see INode::IsTerminal()
          */
-        bool IsVariable() const override;
+        bool IsTerminal() const override;
 
         /**
          * @see INode::Get

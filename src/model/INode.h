@@ -65,7 +65,7 @@ namespace Model
         /**
          * @return true if this node is a variable, else false (i.e. a function)
          */
-        virtual bool IsVariable() const = 0; // TODO: consider removing - MaxChildren can answer this question
+        virtual bool IsTerminal() const = 0; // TODO: consider removing - MaxChildren can answer this question
 
         /*
          * Assignment operator
