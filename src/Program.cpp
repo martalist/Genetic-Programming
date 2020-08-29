@@ -18,14 +18,10 @@ namespace Model
             // Fitness Cases
             // Crossover/Mutation probabilites
         // Create random/initial population from params
-
-        // temporary variable initialization
-        double a = 1.0, b = 2.0, c = 3.0;
-        m_params.AllowedTerminals.push_back(&a);
-        m_params.AllowedTerminals.push_back(&b);
-        m_params.AllowedTerminals.push_back(&c);
+        m_params.Seed = 0;
 
         m_params.AllowedFunctions = AllowedSets;
+        m_params.NumberOfTerminals = static_cast<int>(FitnessCases[0].size()-1);
         m_population = std::make_unique<Population>(m_params);
     }
 
@@ -43,6 +39,10 @@ namespace Model
         }
         // m_population->CalculateFitness(FitnessCases);
 
+        // print best result
+        std::cout << m_population->BestAsString() << std::endl;
+        
         // TODO: report results
+        // Should be able to get all or top-N S-expressions.
     }
 }

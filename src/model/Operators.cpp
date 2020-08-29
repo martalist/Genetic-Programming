@@ -102,9 +102,9 @@ namespace Model { namespace Operators
         for (int count = 1; count < targetSize; ++count)
         {
             // Randomly choose a new function/variable
-            auto binaryChoice = RandomIndex(static_cast<size_t>(2));
+            auto isFunction = RandInt.GetInRange(0, 1) == 0;
             std::unique_ptr<INode> newNode;
-            if (binaryChoice == 0) // function
+            if (isFunction)
             {
                 // randomly select a function type
                 index = RandomIndex(allowedFunctions.size());
@@ -118,22 +118,17 @@ namespace Model { namespace Operators
                 newNode = FunctionFactory::Create(variables[index]);
             }
             
-            // get a random position to insert (in the tree)
-            auto insertIndex = RandInt.GetInRange(0, root->Size()-1);
-            while (insertIndex != 0 && root->Get(insertIndex, root)->IsTerminal())
+            // get a random position to insert (must be a Function)
+            int insertIndex = -1;
+            do
             {
-                // keep looking if we've selected a variable
                 insertIndex = RandInt.GetInRange(0, root->Size()-1);
-            }
-
+            } 
+            while (insertIndex != 0 && root->Get(insertIndex, root)->IsTerminal());
             // add the new node to the random position in the tree
-            if (insertIndex == 0)
+            if (!root->Get(insertIndex, root)->AddChild(std::move(newNode)) && isFunction)
             {
-                root->AddChild(std::move(newNode));
-            }
-            else
-            {
-                root->Get(insertIndex, root)->AddChild(std::move(newNode));
+                functions.pop_back(); // remove from cache if failed
             }
         }
         

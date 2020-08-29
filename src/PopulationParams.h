@@ -17,7 +17,7 @@ namespace Model
         double CrossoverProb = 0.7; ///< The probability that two child genes cross over
         double MutationProb = 0.001; ///< The probability that a child gene mutates
         std::vector<FunctionType> AllowedFunctions; ///< The set of functions permitted in chromosomes
-        std::vector<double*> AllowedTerminals; ///< The set of variables
+        int NumberOfTerminals; ///< The number of terminals
         std::experimental::optional<int> Seed;
     };
 }

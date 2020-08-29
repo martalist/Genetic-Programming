@@ -45,6 +45,8 @@ namespace Model
          */
         double GetBestFitness() const;
 
+        std::string BestAsString() const;
+
     private:
         using NodePair = std::tuple<std::unique_ptr<INode>, std::unique_ptr<INode>>;
 
@@ -76,6 +78,7 @@ namespace Model
         Util::UniformRandomGenerator<float> m_randomProbability; ///< Generates random floats in the range [0,1]
         std::vector<FunctionType> m_allowedFunctions; ///< The set of functions permitted in chromosomes
         std::vector<double*> m_allowedTerminals; ///< The set of variables
+        std::vector<double> m_terminals; ///< The terminal values to evaluate
         Util::Raffle<double> m_raffle;
     };
 }

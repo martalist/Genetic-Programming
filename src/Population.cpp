@@ -8,6 +8,20 @@
 #include "model/Terminal.h"
 #include "model/Operators.h"
 
+namespace
+{
+    std::vector<double>::const_iterator GetBestIterator(const std::vector<double>& vec)
+    {
+        // TODO: min or max element ?? 
+        auto best = std::min_element(vec.begin(), vec.end());
+        if (best == vec.end())
+        {
+            throw std::runtime_error("Can't get best fitness from empty fitness vector.");
+        }
+        return best;
+    }
+}
+
 namespace Model
 {
     Population::Population(const PopulationParams& params)
@@ -15,13 +29,18 @@ namespace Model
         , m_mutationProb(params.MutationProb)
         , m_randomProbability(.0, 1.)
         , m_allowedFunctions(params.AllowedFunctions)
-        , m_allowedTerminals(params.AllowedTerminals)
+        , m_terminals(params.NumberOfTerminals)
     {
         if (params.Seed)
         {
             Operators::SetSeed(params.Seed.value());
         }
 
+        for (auto& terminal : m_terminals)
+        {
+            m_allowedTerminals.push_back(&terminal);
+        }
+        
         // generate m_params.PopulationSize chromosomes
         for (auto i = 0; i < params.PopulationSize; ++i)
         {
@@ -79,41 +98,38 @@ namespace Model
     
     void Population::CalculateFitness(const std::vector<std::vector<double>>& fitnessCases)
     {
+        m_fitness.clear();
         m_raffle.Reset(); // get rid of the previous generation's tickets
         for (auto i = 0u; i < m_population.size(); i++)
         {
-            m_fitness[i] = CalculateChromosomeFitness(i, fitnessCases);
-            m_raffle.BuyTickets(m_fitness[i], i);
+            m_fitness.push_back(CalculateChromosomeFitness(i, fitnessCases));
+
+            // TODO: We want to minimize fitness, so should calculate the
+            // inverse, 1/m_fitness... however we need to be careful to
+            // avoid zero division errors, and overflow when adding doubles
+            // that are close to the max double value.
+            m_raffle.BuyTickets(1.0/m_fitness[i], i);
         }
     }
 
     double Population::CalculateChromosomeFitness(unsigned int index, const std::vector<std::vector<double>>& fitnessCases)
     {
-        double sumOfSquares = 0.0;
-        double caseFitness = 0.0;
-        // auto& chromosome = m_population[index]; // the program of interest 
+        double sumOfErrors = 0.0;
         for (auto& fCase : fitnessCases) // FitnessCases are the training set
         {
-            m_allowedTerminals.clear();
-            // for (auto i = 0u; i < std::tuple_size(fCase); i++)
-            // {
-                // m_allowedTerminals.push_back(&std::get<0>(fCase));
-            // }
-            // TODO:
+            for (auto i = 0u; i < fCase.size()-1; i++)
+            {
+                m_terminals[i] = fCase[i];
+            }
+
             // calculate the fitness based on the variable values
             // and expected result for each case
-            // i.e. caseFitness = (chromosome_answer - expected)^2
-            caseFitness = 0.0;
+            auto caseFitness = m_population[index]->Evaluate() - fCase.back();
 
             // add to the tally
-            sumOfSquares += caseFitness;
+            sumOfErrors += caseFitness;
         }
-        // TODO: We want to minimize fitness, so should calculate the
-        // inverse, 1/sumOfSquares... however we need to be careful to
-        // avoid zero division errors, and overflow when adding doubles
-        // that are close to the max double value.
-        // return sumOfSquares;
-        return 1.0;
+        return sumOfErrors;
     }
 
     std::tuple<INode*, INode*> Population::SelectParents()
@@ -132,12 +148,14 @@ namespace Model
 
     double Population::GetBestFitness() const
     {
-        // TODO: min or max element ?? 
-        auto best = std::min_element(m_fitness.begin(), m_fitness.end());
-        if (best == m_fitness.end())
-        {
-            throw std::runtime_error("Can't get best fitness from empty fitness vector.");
-        }
+        auto best = GetBestIterator(m_fitness);
         return *best;
+    }
+
+    std::string Population::BestAsString() const
+    {
+        auto best = GetBestIterator(m_fitness);
+        int index = best - m_fitness.begin();
+        return m_population[index]->ToString();
     }
 }

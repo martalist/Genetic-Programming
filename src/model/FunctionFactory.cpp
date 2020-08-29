@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <numeric>
+#include <stdexcept>
 #include "Function.h"
 #include "Terminal.h"
 
@@ -22,7 +23,7 @@ namespace Model
         case FunctionType::SquareRoot:
             return CreateSquareRoot();
         default:
-            throw std::exception();
+            throw std::invalid_argument("The function type provided is not valid");
         }
     }
 
@@ -91,11 +92,16 @@ namespace Model
     {
         auto func = [](const ChildNodes& children) -> double
         {
-            if (children.size() != 2u)
+            if (children.size() == 1u)
             {
-                throw std::exception();
+                // TODO: consider having random creationg check for a MinChildren instead
+                return children[0]->Evaluate(); // assumes that the demoninator is 1
             }
-            return children[0]->Evaluate() / children[1]->Evaluate();
+            if (children.size() == 2u)
+            {
+                return children[0]->Evaluate() / children[1]->Evaluate();
+            }
+            throw std::logic_error("A division function must have no more than 2 children.");
         };
         return std::make_unique<Function>(func, "/", 2);
     }
@@ -106,7 +112,7 @@ namespace Model
         {
             if (children.size() != 1u)
             {
-                throw std::exception();
+                throw std::logic_error("A square root function must have exactly 1 child.");
             }
             return std::sqrt(children[0]->Evaluate());
         };
