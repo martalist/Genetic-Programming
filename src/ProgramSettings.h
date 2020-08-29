@@ -23,18 +23,18 @@ namespace Model
 
     const std::vector<double> Variables {0.0, 2};
 
-    std::vector<std::tuple<double, double, double>> FitnessCases
+    std::vector<std::vector<double>> FitnessCases
     {
-        std::make_tuple( 3.0, 5.0, 5.830952 ),
-        std::make_tuple( 8.0, 14.0, 16.124515 ),
-        std::make_tuple( 18.0, 2.0, 18.11077 ),
-        std::make_tuple( 32.0, 11.0, 33.837849 ),
-        std::make_tuple( 4.0, 3.0, 5.0 ),
-        std::make_tuple( 12.0, 10.0, 15.620499 ),
-        std::make_tuple( 21.0, 6.0, 21.84033 ),
-        std::make_tuple( 7.0, 4.0, 8.062258 ),
-        std::make_tuple( 16.0, 24.0, 28.84441 ),
-        std::make_tuple( 2.0, 9.0, 9219545 )
+        { 3.0, 5.0, 5.830952 },
+        { 8.0, 14.0, 16.124515 },
+        { 18.0, 2.0, 18.11077 },
+        { 32.0, 11.0, 33.837849 },
+        { 4.0, 3.0, 5.0 },
+        { 12.0, 10.0, 15.620499 },
+        { 21.0, 6.0, 21.84033 },
+        { 7.0, 4.0, 8.062258 },
+        { 16.0, 24.0, 28.84441 },
+        { 2.0, 9.0, 9219545 }
     };
 }
 
