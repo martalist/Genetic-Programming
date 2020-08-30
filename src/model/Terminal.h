@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <limits>
+#include <map>
 #include <memory>
 #include <vector>
 
@@ -77,7 +78,11 @@ namespace Model
         std::unique_ptr<INode> Clone() const override;
 
     private:
-        const double* m_variable;
+        const double* m_variable; ///< A pointer to the terminal value
+        std::string m_symbol; ///< A symbolic representation of the terminal
+
+        static char letter; ///< The symbol for the next terminal
+        static std::map<const double*, char> s_symbols; ///< Maps symbols to the terminal pointer
     };
 }
 #endif

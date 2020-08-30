@@ -4,13 +4,26 @@
 
 namespace Model
 {
+    char Terminal::letter = 'a';
+    std::map<const double*, char> Terminal::s_symbols;
+
     Terminal::Terminal(const double* variable)
         : m_variable(variable)
     {
+        if (s_symbols.find(variable) != s_symbols.end())
+        {
+            m_symbol = std::string({ s_symbols[variable], '\0' });
+        }
+        else
+        {
+            m_symbol = std::string({letter, '\0'});
+            s_symbols[variable] = letter++;
+        }
     }
 
     Terminal::Terminal(const Terminal& other)
         : m_variable(other.m_variable)
+        , m_symbol(other.m_symbol)
     {
     }
 
@@ -21,7 +34,7 @@ namespace Model
 
     std::string Terminal::ToString() const
     {
-        return std::to_string(*m_variable);
+        return m_symbol.empty() ? std::to_string(*m_variable) : m_symbol;
     }
 
     bool Terminal::MoveChildrenTo(std::unique_ptr<INode>& other)
