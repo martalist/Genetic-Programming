@@ -33,7 +33,7 @@ namespace Model
 
         PopulationParams m_params{}; ///< parameters for the population
         std::unique_ptr<Population> m_population; ///< The chromosome population
-        int m_numGenerations = 10; ///< Number of generations to evolve through to find a solution
+        int m_numGenerations = 20; ///< Number of generations to evolve through to find a solution
     };
 }
 

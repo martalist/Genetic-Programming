@@ -1,6 +1,7 @@
 #include "Population.h"
 
 #include <algorithm>
+#include <cmath>
 #include <iostream>
 #include <stdexcept>
 #include "PopulationParams.h"
@@ -69,6 +70,7 @@ namespace Model
             newPopulation.push_back(std::move(std::get<0>(children)));
             newPopulation.push_back(std::move(std::get<1>(children)));
         }
+        m_population.swap(newPopulation);
     }
 
     Population::NodePair Population::Reproduce(const INode& mum, const INode& dad)
@@ -100,6 +102,12 @@ namespace Model
     {
         m_fitness.clear();
         m_raffle.Reset(); // get rid of the previous generation's tickets
+        
+        auto ticketAllocation = [](double fitness) 
+        {
+            return std::exp(4.0 - std::pow(fitness, 2.0/5.0));
+        };
+
         for (auto i = 0u; i < m_population.size(); i++)
         {
             m_fitness.push_back(CalculateChromosomeFitness(i, fitnessCases));
@@ -108,7 +116,12 @@ namespace Model
             // inverse, 1/m_fitness... however we need to be careful to
             // avoid zero division errors, and overflow when adding doubles
             // that are close to the max double value.
-            m_raffle.BuyTickets(1.0/m_fitness[i], i);
+            if (!std::isnan(m_fitness[i]))
+            {
+                // Only buy tickets if the S-expression returned a valid number
+                // for all cases
+                m_raffle.BuyTickets(ticketAllocation(m_fitness[i]), i);
+            }
         }
     }
 
@@ -124,7 +137,7 @@ namespace Model
 
             // calculate the fitness based on the variable values
             // and expected result for each case
-            auto caseFitness = m_population[index]->Evaluate() - fCase.back();
+            auto caseFitness = std::abs(m_population[index]->Evaluate() - fCase.back());
 
             // add to the tally
             sumOfErrors += caseFitness;
@@ -141,9 +154,19 @@ namespace Model
 
     double Population::GetAverageFitness() const
     {
-        auto total = std::accumulate(m_fitness.begin(), m_fitness.end(), 0.0,
-                [](double result, double fitness) { return result + fitness; });
-        return total / static_cast<double>(m_fitness.size());
+        int count = 0;
+        double total = 0.0;
+        for (auto i = 0u; i < m_fitness.size(); i++)
+        {
+            // Some functions have conditions that if not met result in NaN
+            // For example, sqrt(a) requires that a >= 0. 
+            if (!std::isnan(m_fitness[i]))
+            {
+                total += m_fitness[i];
+                ++count;
+            }
+        }
+        return total / static_cast<double>(count);
     }
 
     double Population::GetBestFitness() const

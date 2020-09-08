@@ -36,8 +36,8 @@ namespace Model
             double best = m_population->GetBestFitness();
             // TODO: log these parameters, for later analysis
 
-            std::cout << std::setprecision(2) << "Generation: " << i
-                << ", avg = " << avg << ", best = " << best << std::endl;
+            std::cout << std::fixed << std::setprecision(2) << "Generation: " << i
+                << ", avg = " << avg << ", best = " << best << " [[ " << m_population->BestAsString() << " ]]"<< std::endl;
 
             m_population->Evolve();
         }

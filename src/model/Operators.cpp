@@ -2,6 +2,7 @@
 
 #include <memory>
 #include "Terminal.h"
+#include "Function.h"
 #include "../utils/UniformRandomGenerator.h"
 
 namespace
@@ -136,7 +137,7 @@ namespace Model { namespace Operators
         // TODO: check that all functions have the min req. children
         for (auto& func : functions)
         {
-            if (func->NumberOfChildren() == 0)
+            while (func->NumberOfChildren() == 0 || reinterpret_cast<Function*>(func)->LacksBreadth())
             {
                 // add a variable
                 index = RandomIndex(variables.size());

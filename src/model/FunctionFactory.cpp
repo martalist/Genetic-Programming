@@ -32,16 +32,6 @@ namespace Model
         return std::make_unique<Terminal>(variable);
     }
 
-    std::unique_ptr<INode> FunctionFactory::Copy(const INode& other)
-    {
-        // TODO: This implementation has a bad smell to it
-        if (other.IsTerminal())
-        {
-            return std::make_unique<Terminal>(dynamic_cast<const Terminal&>(other));
-        }
-        return std::make_unique<Function>(dynamic_cast<const Function&>(other));
-    }
-
     std::unique_ptr<INode> FunctionFactory::CreateAddition()
     {
         auto func = [](const ChildNodes& children) -> double
@@ -56,7 +46,7 @@ namespace Model
             }
             return result;
         };
-        return std::make_unique<Function>(func, "+");
+        return std::make_unique<Function>(func, "+", 2);
     }
 
     std::unique_ptr<INode> FunctionFactory::CreateSubtraction()
@@ -70,7 +60,7 @@ namespace Model
             }
             return result;
         };
-        return std::make_unique<Function>(func, "-");
+        return std::make_unique<Function>(func, "-", 2);
     }
 
 
@@ -85,7 +75,7 @@ namespace Model
             }
             return result;
         };
-        return std::make_unique<Function>(func, "*");
+        return std::make_unique<Function>(func, "*", 2);
     }
 
     std::unique_ptr<INode> FunctionFactory::CreateDivision()
@@ -103,7 +93,7 @@ namespace Model
             }
             throw std::logic_error("A division function must have no more than 2 children.");
         };
-        return std::make_unique<Function>(func, "/", 2);
+        return std::make_unique<Function>(func, "/", 2, 2);
     }
 
     std::unique_ptr<INode> FunctionFactory::CreateSquareRoot()
@@ -116,6 +106,6 @@ namespace Model
             }
             return std::sqrt(children[0]->Evaluate());
         };
-        return std::make_unique<Function>(func, "√", 1);
+        return std::make_unique<Function>(func, "√", 1, 1);
     }
 }

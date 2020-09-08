@@ -36,12 +36,6 @@ namespace Model
          */
         static std::unique_ptr<INode> Create(const double* variable);
 
-        /**
-         * Performs a deep copy of the node tree
-         * @param other The node tree to copy
-         */
-        static std::unique_ptr<INode> Copy(const INode& other);
-
     private:
         /**
          * Create an addition function

@@ -25,6 +25,7 @@ namespace Model
          */
         Function(std::function<double(const ChildNodes&)> func,
                 const std::string& symbol,
+                int minChildren = 1,
                 int maxChildren = std::numeric_limits<int>::max());
 
         Function(const Function& other);
@@ -81,9 +82,12 @@ namespace Model
          */
         std::unique_ptr<INode> Clone() const override;
 
+        bool LacksBreadth() const;
+
     private:
 
         ChildNodes m_children;
+        const int MinAllowedChildren;
         const int MaxAllowedChildren;
         const std::function<double(const ChildNodes&)> m_func;
         const std::string m_symbol;

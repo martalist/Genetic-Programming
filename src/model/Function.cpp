@@ -9,15 +9,18 @@ namespace Model
 {
     Function::Function(std::function<double(const ChildNodes&)> func,
                 const std::string& symbol,
+                int minChildren /*= 1*/,
                 int maxChildren /*= std::numeric_limits<int>::max()*/)
-        : MaxAllowedChildren(maxChildren)
+        : MinAllowedChildren(minChildren)
+        , MaxAllowedChildren(maxChildren)
         , m_func(func)
         , m_symbol(symbol)
     {
     }
 
     Function::Function(const Function& other)
-        : MaxAllowedChildren(other.MaxAllowedChildren)
+        : MinAllowedChildren(other.MinAllowedChildren)
+        , MaxAllowedChildren(other.MaxAllowedChildren)
         , m_func(other.m_func)
         , m_symbol(other.m_symbol)
     {
@@ -115,5 +118,10 @@ namespace Model
     std::unique_ptr<INode> Function::Clone() const
     {
         return std::make_unique<Function>(*this);
+    }
+
+    bool Function::LacksBreadth() const
+    {
+        return NumberOfChildren() <  MinAllowedChildren;
     }
 }

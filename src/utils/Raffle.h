@@ -70,6 +70,11 @@ namespace Util
             m_tickets.clear();
         }
 
+        int NumberOfTicketsIssued() const
+        {
+            return static_cast<int>(m_tickets.size());
+        }
+
     private:
         UniformRandomGenerator<T, Distribution> m_randomTicket; ///< Used to randomly draw a ticket
         std::vector<std::pair<T, int>> m_tickets; ///< A list of the highest ticket held by per identifier
