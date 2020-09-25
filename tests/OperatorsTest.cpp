@@ -73,7 +73,7 @@ namespace Tests
         auto chromosome = Operators::CreateRandomChromosome(1, allowedFunctions, allowedTerminals);
 
         // std::cout << chromosome->ToString() << std::endl;
-        ASSERT_DOUBLE_EQ(A, chromosome->Evaluate());
+        ASSERT_DOUBLE_EQ(A+A, chromosome->Evaluate());
     }
 
     TEST(OperatorsTest, CreateRandomChromosome)

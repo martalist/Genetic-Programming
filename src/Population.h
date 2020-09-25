@@ -53,21 +53,23 @@ namespace Model
         /**
          * Select a pair of parents. The more 'fit' the chromosome, the more
          * likely it will be selected as a parent.
-         * @return TODO
+         * @return a pointer to two parents
          */
         std::tuple<INode*, INode*> SelectParents();
 
         /**
          * Deep copy from parents, perform crossover and mutation
-         * @param TODO
+         * @param mum The mother chromosome 
+         * @param dad The father chromosome
+         * @return two offspring created from mum and dad
          */
         NodePair Reproduce(const INode& mum, const INode& dad);
 
         /**
          * Calculate the fitness for one chromosome
          * @param index The index of the chromosome
-         * @param fitnessCases TODO
-         * @return TODO
+         * @param fitnessCases The test cases uses to assess the fitness of the chromosome
+         * @return the chromosome fitness as a positive, real number
          */
         double CalculateChromosomeFitness(unsigned int index, const std::vector<std::vector<double>>& fitnessCases);
 

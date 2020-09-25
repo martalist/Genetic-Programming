@@ -25,6 +25,8 @@ namespace Tests
         // in both cases the 
         EXPECT_EQ(-1, realRaffle.Draw());
         EXPECT_EQ(-1, intRaffle.Draw());
+        EXPECT_EQ(0, realRaffle.NumberOfTicketsIssued());
+        EXPECT_EQ(0, intRaffle.NumberOfTicketsIssued());
     }
 
     TEST_F(RaffleTest, BuyZeroTickets)
@@ -35,6 +37,8 @@ namespace Tests
 
         EXPECT_EQ(-1, realRaffle.Draw());
         EXPECT_EQ(-1, intRaffle.Draw());
+        EXPECT_EQ(0, realRaffle.NumberOfTicketsIssued());
+        EXPECT_EQ(0, intRaffle.NumberOfTicketsIssued());
     }
 
     TEST_F(RaffleTest, OneParticipant)
@@ -45,6 +49,8 @@ namespace Tests
 
         EXPECT_EQ(id, realRaffle.Draw());
         EXPECT_EQ(id, intRaffle.Draw());
+        EXPECT_EQ(1, realRaffle.NumberOfTicketsIssued());
+        EXPECT_EQ(1, intRaffle.NumberOfTicketsIssued());
     }
 
     TEST_F(RaffleTest, TwoParticipants)
