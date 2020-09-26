@@ -1,7 +1,13 @@
 #ifndef PopulationParams_h
 #define PopulationParams_h
 
-#include <experimental/optional>
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+    #include <experimental/optional>
+    #define OPTIONAL std::experimental::optional
+#elif __APPLE__
+    #include <optional>
+    #define OPTIONAL std::optional
+#endif
 
 namespace Model
 {
@@ -18,7 +24,7 @@ namespace Model
         double MutationProb = 0.001; ///< The probability that a child gene mutates
         std::vector<FunctionType> AllowedFunctions; ///< The set of functions permitted in chromosomes
         int NumberOfTerminals; ///< The number of terminals
-        std::experimental::optional<int> Seed;
+        OPTIONAL<int> Seed;
     };
 }
 

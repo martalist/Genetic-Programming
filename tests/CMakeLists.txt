@@ -1,20 +1,20 @@
 # Add gtest sources folder. Provides gtest, gtest_main
-add_subdirectory(/usr/src/gtest
-                ${PROJECT_BINARY_DIR}/gtest)
+# add_subdirectory(/usr/src/gtest
+                # ${PROJECT_BINARY_DIR}/gtest)
 
 include(CTest) # include testing cmake package.
 
 # Set binary name for convenience
-Set(TEST_BINARY run_test)
+Set(TEST_BINARY Test_integenetics)
 
 # This is an executable that runs the tests.
 add_executable(${TEST_BINARY} TestMain.cpp)
 
 # Link the executable to needed libraries.
 target_link_libraries(${TEST_BINARY}
-    prog               # Library we are testing
+    gtest_main   # GTest libraries
+    prog         # Library we are testing
     model
-    gtest gtest_main   # GTest libraries
 )
 
 # Add gtest to be able to run ctest

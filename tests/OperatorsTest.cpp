@@ -2,6 +2,7 @@
 #include <iostream>
 #include <memory>
 #include "../src/model/Operators.h"
+#include "../src/model/Terminal.h"
 
 namespace
 {

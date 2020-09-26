@@ -144,6 +144,6 @@ namespace Model { namespace Operators
                 func->AddChild(FunctionFactory::Create(variables[index]));
             }
         }
-        return std::move(root);
+        return root;
     }
 }}

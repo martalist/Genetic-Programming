@@ -1,20 +1,48 @@
 # This is the base CMakeLists file
 
 # give the project a name
-project(Genetic_Programming)
+project(Integenetics)
 cmake_minimum_required(VERSION 3.0) # and a version
 SET(CMAKE_CPP_COMPILER /usr/bin/g++) # specify the compiler
-SET(CMAKE_CXX_FLAGS "--std=c++17 -Wall")
+SET(CMAKE_CXX_FLAGS "-Wall")
+SET(CMAKE_CXX_STANDARD 17)
 
-# message(STATUS "!!!!!!!!!!!!! ${PROJECT_SOURCE_DIR}") # print a msg
+# Download and unpack googletest at configure time
+configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
+execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+  RESULT_VARIABLE result
+  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download )
+if(result)
+  message(FATAL_ERROR "CMake step for googletest failed: ${result}")
+endif()
+execute_process(COMMAND ${CMAKE_COMMAND} --build .
+  RESULT_VARIABLE result
+  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download )
+if(result)
+  message(FATAL_ERROR "Build step for googletest failed: ${result}")
+endif()
 
-include_directories(${PROJECT_SOURCE_DIR}/src) # tells cmake that all headers should be searched for, starting at this folder.
-include_directories(${PROJECT_SOURCE_DIR}/src/utils) # tells cmake that all headers should be searched for, starting at this folder.
-include_directories(${PROJECT_SOURCE_DIR}/src/model) # tells cmake that all headers should be searched for, starting at this folder.
+# Prevent overriding the parent project's compiler/linker
+# settings on Windows
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+
+# Add googletest directly to our build. This defines
+# the gtest and gtest_main targets.
+add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
+                 ${CMAKE_CURRENT_BINARY_DIR}/googletest-build
+                 EXCLUDE_FROM_ALL)
+
+# The gtest/gtest_main targets carry header search path
+# dependencies automatically when using CMake 2.8.11 or
+# later. Otherwise we have to add them here ourselves.
+# if (CMAKE_VERSION VERSION_LESS 2.8.11)
+  # include_directories("${gtest_SOURCE_DIR}/include")
+# endif()
+
+# include these source directories
 add_subdirectory(${PROJECT_SOURCE_DIR}/src) 
 
 # Must be defined in top-most CMakeLists.txt
 enable_testing() 
-
-# Outsource tests to another folder
+# include test directory
 add_subdirectory(${PROJECT_SOURCE_DIR}/tests) 

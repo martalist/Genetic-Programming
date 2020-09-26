@@ -1,8 +1,7 @@
 add_library(model 
-    INode.h
     Terminal.cpp
     Function.cpp
     FunctionFactory.cpp
     Operators.cpp
 )
-set_target_properties(model PROPERTIES LINKER_LANGUAGE CXX)
+# set_target_properties(model PROPERTIES LINKER_LANGUAGE CXX)
