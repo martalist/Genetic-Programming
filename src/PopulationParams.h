@@ -9,6 +9,8 @@
     #define OPTIONAL std::optional
 #endif
 
+#include <vector>
+
 namespace Model
 {
     enum class FunctionType;

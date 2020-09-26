@@ -13,7 +13,6 @@ namespace
 {
     std::vector<double>::const_iterator GetBestIterator(const std::vector<double>& vec)
     {
-        // TODO: min or max element ?? 
         auto best = std::min_element(vec.begin(), vec.end());
         if (best == vec.end())
         {
@@ -32,9 +31,11 @@ namespace Model
         , m_allowedFunctions(params.AllowedFunctions)
         , m_terminals(params.NumberOfTerminals)
     {
-        if (params.Seed)
+        if (params.Seed.has_value())
         {
             Operators::SetSeed(params.Seed.value());
+            m_randomProbability.SetSeed(params.Seed.value());
+            m_raffle.SetSeed(params.Seed.value());
         }
 
         for (auto& terminal : m_terminals)

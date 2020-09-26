@@ -70,9 +70,20 @@ namespace Util
             m_tickets.clear();
         }
 
+        /**
+         * @return the number of tickets issued for the raffle
+         */
         int NumberOfTicketsIssued() const
         {
             return static_cast<int>(m_tickets.size());
+        }
+
+        /**
+         * Sets the seed for the random number generator
+         */
+        void SetSeed(int seed)
+        {
+            m_randomTicket.SetSeed(seed);
         }
 
     private:

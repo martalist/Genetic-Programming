@@ -2,13 +2,8 @@
 #define Program_H
 
 #include <memory>
-#include <tuple>
-#include <vector>
 #include "PopulationParams.h"
 #include "Population.h"
-#include "model/INode.h"
-#include "utils/UniformRandomGenerator.h"
-#include "utils/Raffle.h"
 
 namespace Model
 {
