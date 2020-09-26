@@ -51,16 +51,23 @@ namespace Model { namespace Operators
             {
                 std::unique_ptr<INode> newFunction = nullptr;
 
-                // TODO: this will spin forever if no function in the set can
-                // handle the number of children
+                // copy function types, such that we can remove types and prevent an infinite loop 
+                // in the case where no function in the vector can handle the number of children.
+                std::vector<FunctionType> fTypes(allowedFunctions);
                 do
                 {
-                    int i = RandomIndex(allowedFunctions.size());
-                    newFunction = FunctionFactory::Create(allowedFunctions[i]);
-                } while(gene->NumberOfChildren() > newFunction->MaxChildren());
+                    int i = RandomIndex(fTypes.size());
+                    newFunction = FunctionFactory::Create(fTypes[i]);
+                    auto itr = fTypes.begin() + i;
+                    fTypes.erase(itr);
+                } while(gene->NumberOfChildren() > newFunction->MaxChildren() && !fTypes.empty());
 
-                gene->MoveChildrenTo(newFunction); // transfer sub tree
-                gene.swap(newFunction);
+                if (!fTypes.empty())
+                {
+                    gene->MoveChildrenTo(newFunction); // transfer sub tree
+                    gene.swap(newFunction);
+                }
+                // else the mutation fails
             }
         };
         
