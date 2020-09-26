@@ -26,11 +26,11 @@ namespace Model
         void Start();
 
     private:
-
         PopulationParams m_params{}; ///< parameters for the population
         std::unique_ptr<Population> m_population; ///< The chromosome population
         int m_numGenerations = 20; ///< Number of generations to evolve through to find a solution
-        Util::Logger<double, double, std::string> m_logger;
+        int m_iterations = 1; ///< Number of times to run the experiment
+        Util::Logger<double, double, std::string> m_logger{""};
     };
 }
 

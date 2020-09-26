@@ -5,13 +5,13 @@
 #include <tuple>
 #include <vector>
 #include "model/INode.h"
+#include "PopulationParams.h"
 #include "utils/UniformRandomGenerator.h"
 #include "utils/Raffle.h"
 
 namespace Model
 {
     enum class FunctionType;
-    struct PopulationParams;
 
     /**
      * Represents a population of S-expressions, and facilitates reproduction
@@ -25,6 +25,11 @@ namespace Model
          */
         Population(const PopulationParams& params);
         
+        /**
+         * Resets the population to a new, randomly created state
+         */
+        void Reset();
+
         /**
          * Replace the entire population with it's direct descendants.
          */
@@ -45,6 +50,9 @@ namespace Model
          */
         double GetBestFitness() const;
 
+        /**
+         * @return The best S-expression (by fitness) as a string
+         */
         std::string BestAsString() const;
 
     private:
@@ -75,13 +83,11 @@ namespace Model
 
         std::vector<std::unique_ptr<INode>> m_population; ///< The chromosome population
         std::vector<double> m_fitness; ///< The finess of chromosomes, in order of m_population
-        const double m_crossoverProb = 0.7; ///< The probability of genetic crossover when breeding
-        const double m_mutationProb = 0.001; ///< The probability of gene mutation when breeding
+        PopulationParams m_params; ///< The parameters of the population
         Util::UniformRandomGenerator<float> m_randomProbability; ///< Generates random floats in the range [0,1]
-        std::vector<FunctionType> m_allowedFunctions; ///< The set of functions permitted in chromosomes
         std::vector<double*> m_allowedTerminals; ///< The set of variables
         std::vector<double> m_terminals; ///< The terminal values to evaluate
-        Util::Raffle<double> m_raffle;
+        Util::Raffle<double> m_raffle; ///< Ticketing system used to select parents
     };
 }
 

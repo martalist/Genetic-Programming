@@ -10,7 +10,6 @@
 namespace Model
 {
     Program::Program()
-        : m_logger("output.csv")
     {
         // parse command line input
 
@@ -29,25 +28,31 @@ namespace Model
 
     void Program::Start()
     {
-        // evolve over m_numGenerations
-        for (auto i = 0; i < m_numGenerations; ++i)
+        // Run the experiment m_iterations times
+        for (int iteration = 0; iteration < m_iterations; ++iteration)
         {
+            m_logger.SetFilename("output" + std::to_string(iteration) + ".csv");
+            // evolve over m_numGenerations
+            for (auto i = 0; i < m_numGenerations; ++i)
+            {
+                m_population->CalculateFitness(FitnessCases);
+                auto avg = m_population->GetAverageFitness();
+                auto best = m_population->GetBestFitness();
+
+                m_logger.AddLine(avg, best, "\"" + m_population->BestAsString() + "\"");
+
+                m_population->Evolve();
+            }
+
             m_population->CalculateFitness(FitnessCases);
-            auto avg = m_population->GetAverageFitness();
             auto best = m_population->GetBestFitness();
+            auto bestStr = m_population->BestAsString();
+            m_logger.AddLine(m_population->GetAverageFitness(), best, "\"" + bestStr + "\"");
+            m_logger.Write();
 
-            m_logger.AddLine(avg, best, "\"" + m_population->BestAsString() + "\"");
-
-            m_population->Evolve();
+            // print best result
+            std::cout << "Best S-expression has fitness: " << best << std::endl;
+            std::cout << "\t" << bestStr << std::endl;
         }
-
-        m_population->CalculateFitness(FitnessCases);
-        auto best = m_population->GetBestFitness();
-        auto bestStr = m_population->BestAsString();
-        m_logger.AddLine(m_population->GetAverageFitness(), best, "\"" + bestStr + "\"");
-
-        // print best result
-        std::cout << "Best S-expression has fitness: " << best << std::endl;
-        std::cout << "\t" << bestStr << std::endl;
     }
 }

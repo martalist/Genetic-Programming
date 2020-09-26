@@ -4,7 +4,6 @@
 #include <cmath>
 #include <iostream>
 #include <stdexcept>
-#include "PopulationParams.h"
 #include "model/FunctionFactory.h"
 #include "model/Terminal.h"
 #include "model/Operators.h"
@@ -25,10 +24,8 @@ namespace
 namespace Model
 {
     Population::Population(const PopulationParams& params)
-        : m_crossoverProb(params.CrossoverProb)
-        , m_mutationProb(params.MutationProb)
+        : m_params(params)
         , m_randomProbability(.0, 1.)
-        , m_allowedFunctions(params.AllowedFunctions)
         , m_terminals(params.NumberOfTerminals)
     {
         if (params.Seed.has_value())
@@ -43,12 +40,19 @@ namespace Model
             m_allowedTerminals.push_back(&terminal);
         }
         
-        // generate m_params.PopulationSize chromosomes
-        for (auto i = 0; i < params.PopulationSize; ++i)
+        Reset();
+    }
+
+    void Population::Reset()
+    {
+        m_population.clear();
+
+        // generate an appropriately sized population
+        for (auto i = 0; i < m_params.PopulationSize; ++i)
         {
             auto itsABoy = Operators::CreateRandomChromosome(
-                    params.MinInitialTreeSize, 
-                    m_allowedFunctions, 
+                    m_params.MinInitialTreeSize, 
+                    m_params.AllowedFunctions, 
                     m_allowedTerminals);
             m_population.push_back(std::move(itsABoy));
         }
@@ -81,19 +85,19 @@ namespace Model
         auto daughter = mum.Clone();
         
         // should we crossover? 
-        if (m_randomProbability.Get() <= m_crossoverProb)
+        if (m_randomProbability.Get() <= m_params.CrossoverProb)
         {
             Operators::Crossover(son, daughter);
         }
 
         // should we mutate?
-        if (m_randomProbability.Get() <= m_mutationProb)
+        if (m_randomProbability.Get() <= m_params.MutationProb)
         {
-            Operators::Mutate(son, m_allowedFunctions, m_allowedTerminals);
+            Operators::Mutate(son, m_params.AllowedFunctions, m_allowedTerminals);
         }
-        if (m_randomProbability.Get() <= m_mutationProb)
+        if (m_randomProbability.Get() <= m_params.MutationProb)
         {
-            Operators::Mutate(daughter, m_allowedFunctions, m_allowedTerminals);
+            Operators::Mutate(daughter, m_params.AllowedFunctions, m_allowedTerminals);
         }
 
         return std::make_tuple(std::move(son), std::move(daughter));
