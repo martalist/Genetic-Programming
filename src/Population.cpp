@@ -104,8 +104,16 @@ namespace Model
         m_fitness.clear();
         m_raffle.Reset(); // get rid of the previous generation's tickets
         
-        auto ticketAllocation = [](double fitness) 
+        /**
+         * Returns the number of raffle tickets should be allocated for a given fitness value.
+         * The smaller (better) the fitness, the higher the ticket number. 
+         */
+        auto ticketAllocation = [](double fitness) -> double 
         {
+            if (fitness == std::numeric_limits<double>::infinity())
+            {
+                return 0.0;
+            }
             return std::exp(4.0 - std::pow(fitness, 2.0/5.0));
         };
 
@@ -113,16 +121,8 @@ namespace Model
         {
             m_fitness.push_back(CalculateChromosomeFitness(i, fitnessCases));
 
-            // TODO: We want to minimize fitness, so should calculate the
-            // inverse, 1/m_fitness... however we need to be careful to
-            // avoid zero division errors, and overflow when adding doubles
-            // that are close to the max double value.
-            if (!std::isnan(m_fitness[i]))
-            {
-                // Only buy tickets if the S-expression returned a valid number
-                // for all cases
-                m_raffle.BuyTickets(ticketAllocation(m_fitness[i]), i);
-            }
+            auto numberOfTickets = ticketAllocation(m_fitness.back());
+            m_raffle.BuyTickets(numberOfTickets, i);
         }
     }
 
@@ -136,12 +136,16 @@ namespace Model
                 m_terminals[i] = fCase[i];
             }
 
-            // calculate the fitness based on the variable values
-            // and expected result for each case
-            auto caseFitness = std::abs(m_population[index]->Evaluate() - fCase.back());
+            // calculate the fitness (absolute error) for this fitness case
+            auto returnVal = m_population[index]->Evaluate();
+            if (std::isnan(returnVal)) // could be sqrt(-1)
+            {
+                // eliminate it's chances of reproduction
+                return std::numeric_limits<double>::infinity();
+            }
 
             // add to the tally
-            sumOfErrors += caseFitness;
+            sumOfErrors += std::abs(returnVal - fCase.back());
         }
         return sumOfErrors;
     }
@@ -161,25 +165,25 @@ namespace Model
         {
             // Some functions have conditions that if not met result in NaN
             // For example, sqrt(a) requires that a >= 0. 
-            if (!std::isnan(m_fitness[i]))
+            // So only calculate the average of S-expressions that are defined across the entire terminal domain
+            if (!std::isnan(m_fitness[i]) && m_fitness[i] != std::numeric_limits<double>::infinity())
             {
                 total += m_fitness[i];
                 ++count;
             }
         }
-        return total / static_cast<double>(count);
+        return total / count;
     }
 
     double Population::GetBestFitness() const
     {
-        auto best = GetBestIterator(m_fitness);
-        return *best;
+        return *GetBestIterator(m_fitness);
     }
 
     std::string Population::BestAsString() const
     {
         auto best = GetBestIterator(m_fitness);
-        int index = best - m_fitness.begin();
+        auto index = std::distance(m_fitness.begin(), best);
         return m_population[index]->ToString();
     }
 }

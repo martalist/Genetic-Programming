@@ -82,12 +82,12 @@ namespace Model
     {
         auto func = [](const ChildNodes& children) -> double
         {
-            if (children.size() == 1u)
+            if (children.size() == 1)
             {
                 // TODO: consider having random creationg check for a MinChildren instead
                 return children[0]->Evaluate(); // assumes that the demoninator is 1
             }
-            if (children.size() == 2u)
+            if (children.size() == 2)
             {
                 return children[0]->Evaluate() / children[1]->Evaluate();
             }
@@ -98,13 +98,19 @@ namespace Model
 
     std::unique_ptr<INode> FunctionFactory::CreateSquareRoot()
     {
-        auto func = [](const ChildNodes& children) 
+        auto func = [](const ChildNodes& children) -> double
         {
             if (children.size() != 1u)
             {
                 throw std::logic_error("A square root function must have exactly 1 child.");
             }
-            return std::sqrt(children[0]->Evaluate());
+
+            auto mantissa = children[0]->Evaluate();
+            if (mantissa >= 0)
+            {
+                return std::sqrt(mantissa);
+            }
+            return NAN; // we're only dealing with real numbers here
         };
         return std::make_unique<Function>(func, "√", 1, 1);
     }
