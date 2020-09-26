@@ -21,7 +21,7 @@ namespace Model
         // Create random/initial population from params
         // m_params.Seed = 0;
 
-        m_params.AllowedFunctions = AllowedSets;
+        m_params.AllowedFunctions = AllowedFunctions;
         m_params.NumberOfTerminals = static_cast<int>(FitnessCases[0].size()-1);
         m_population = std::make_unique<Population>(m_params);
     }

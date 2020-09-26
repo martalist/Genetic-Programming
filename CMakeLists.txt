@@ -4,8 +4,13 @@
 project(Integenetics)
 cmake_minimum_required(VERSION 3.0) # and a version
 SET(CMAKE_CPP_COMPILER /usr/bin/g++) # specify the compiler
+
+if (APPLE)
 SET(CMAKE_CXX_FLAGS "-Wall")
 SET(CMAKE_CXX_STANDARD 17)
+else()
+SET(CMAKE_CXX_FLAGS "--std=c++17 -Wall")
+endif()
 
 # Download and unpack googletest at configure time
 configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)

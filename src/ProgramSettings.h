@@ -12,7 +12,7 @@
 
 namespace Model
 {
-    const std::vector<FunctionType> AllowedSets
+    const std::vector<FunctionType> AllowedFunctions
     {
         FunctionType::Addition,
         FunctionType::Subtraction,
