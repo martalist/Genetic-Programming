@@ -4,6 +4,7 @@
 #include <memory>
 #include "PopulationParams.h"
 #include "Population.h"
+#include "utils/Logger.h"
 
 namespace Model
 {
@@ -29,6 +30,7 @@ namespace Model
         PopulationParams m_params{}; ///< parameters for the population
         std::unique_ptr<Population> m_population; ///< The chromosome population
         int m_numGenerations = 20; ///< Number of generations to evolve through to find a solution
+        Util::Logger<double, double, std::string> m_logger;
     };
 }
 

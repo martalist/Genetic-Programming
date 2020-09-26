@@ -13,7 +13,7 @@ namespace Model
      */
     struct PopulationParams
     {
-        int PopulationSize = 500; ///< Number of chromosomes in the population
+        int PopulationSize = 5000; ///< Number of chromosomes in the population
         int MinInitialTreeSize = 10; ///< The minimum tree size of newly (randomly) created S-expressions
         double CrossoverProb = 0.7; ///< The probability that two child genes cross over
         double MutationProb = 0.001; ///< The probability that a child gene mutates

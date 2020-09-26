@@ -10,6 +10,7 @@
 namespace Model
 {
     Program::Program()
+        : m_logger("output.csv")
     {
         // parse command line input
 
@@ -32,21 +33,21 @@ namespace Model
         for (auto i = 0; i < m_numGenerations; ++i)
         {
             m_population->CalculateFitness(FitnessCases);
-            double avg = m_population->GetAverageFitness();
-            double best = m_population->GetBestFitness();
-            // TODO: log these parameters, for later analysis
+            auto avg = m_population->GetAverageFitness();
+            auto best = m_population->GetBestFitness();
 
-            std::cout << std::fixed << std::setprecision(2) << "Generation: " << i
-                << ", avg = " << avg << ", best = " << best << " [[ " << m_population->BestAsString() << " ]]"<< std::endl;
+            m_logger.AddLine(avg, best, "\"" + m_population->BestAsString() + "\"");
 
             m_population->Evolve();
         }
-        // m_population->CalculateFitness(FitnessCases);
+
+        m_population->CalculateFitness(FitnessCases);
+        auto best = m_population->GetBestFitness();
+        auto bestStr = m_population->BestAsString();
+        m_logger.AddLine(m_population->GetAverageFitness(), best, "\"" + bestStr + "\"");
 
         // print best result
-        std::cout << m_population->BestAsString() << std::endl;
-        
-        // TODO: report results
-        // Should be able to get all or top-N S-expressions.
+        std::cout << "Best S-expression has fitness: " << best << std::endl;
+        std::cout << "\t" << bestStr << std::endl;
     }
 }
