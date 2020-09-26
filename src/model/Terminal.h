@@ -63,11 +63,6 @@ namespace Model
         int Size() const override;
 
         /**
-         * @see INode::IsTerminal()
-         */
-        bool IsTerminal() const override;
-
-        /**
          * @see INode::Get
          */
         std::unique_ptr<INode>& Get(int index, std::unique_ptr<INode>& ptr) override;

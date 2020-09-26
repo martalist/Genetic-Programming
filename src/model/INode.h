@@ -58,19 +58,14 @@ namespace Model
         virtual int Size() const = 0;
 
         /**
-         * @return true if this node is a variable, else false (i.e. a function)
-         */
-        virtual bool IsTerminal() const = 0; // TODO: consider removing - MaxChildren can answer this question
-
-        /**
          * @return a copy of this (sub)tree
          */
         virtual std::unique_ptr<INode> Clone() const = 0;
 
-        /*
-         * Assignment operator
+        /**
+         * returns true if the number of children is less than the minimum required
          */
-        // virtual INode& operator=(const INode& rhs) = 0;
+        virtual bool LacksBreadth() const { return false; }
 
         /**
          * Returns a reference to the unique pointer at the specified index, pre-order

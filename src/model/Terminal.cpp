@@ -62,11 +62,6 @@ namespace Model
         return 1;
     }
 
-    bool Terminal::IsTerminal() const
-    {
-        return true;
-    }
-
     std::unique_ptr<INode>& Terminal::Get(int index, std::unique_ptr<INode>& ptr)
     {
         if (index != 0)

@@ -31,14 +31,12 @@ namespace Model
         Function(const Function& other);
 
         /**
-         * Evaluates the value of this subtree.
-         * @return the primitate value for a variable, or the return 
-         * value for a function
+         * @see INode::Evaluate
          */
         double Evaluate() const override;
 
         /**
-         * @return the string representation of this subtree.
+         * @see INode::ToString
          */
         std::string ToString() const override;
 
@@ -68,11 +66,6 @@ namespace Model
         int Size() const override;
 
         /**
-         * @see INode::IsTerminal()
-         */
-        bool IsTerminal() const override;
-
-        /**
          * @see INode::Get
          */
         std::unique_ptr<INode>& Get(int index, std::unique_ptr<INode>& ptr) override;
@@ -82,7 +75,10 @@ namespace Model
          */
         std::unique_ptr<INode> Clone() const override;
 
-        bool LacksBreadth() const;
+        /**
+         * returns true if the number of children is less than the minimum required
+         */
+        bool LacksBreadth() const override;
 
     private:
 

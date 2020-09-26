@@ -2,7 +2,6 @@
 
 #include <memory>
 #include "Terminal.h"
-#include "Function.h"
 #include "../utils/UniformRandomGenerator.h"
 
 namespace
@@ -21,6 +20,15 @@ namespace
         int maxIndex = static_cast<int>(--size);
         return RandInt.GetInRange(0, maxIndex);
     }
+
+    /**
+     * @param gene The S-expression gene to inspect
+     * @return true if the gene is a Terminal (not a Function)
+     */
+    auto isTerminal = [](const std::unique_ptr<Model::INode>& gene)
+    {
+        return gene->MaxChildren() == 0;
+    };
 }
 
 namespace Model { namespace Operators 
@@ -34,7 +42,7 @@ namespace Model { namespace Operators
     {
         auto randomMutation = [&](std::unique_ptr<INode>& gene) -> void
         {
-            if (gene->IsTerminal())
+            if (isTerminal(gene))
             {
                 int i = RandomIndex(variables.size());
                 gene = std::make_unique<Terminal>(variables[i]);
@@ -125,7 +133,8 @@ namespace Model { namespace Operators
             {
                 insertIndex = RandInt.GetInRange(0, root->Size()-1);
             } 
-            while (insertIndex != 0 && root->Get(insertIndex, root)->IsTerminal());
+            while (insertIndex != 0 && isTerminal(root->Get(insertIndex, root)) );
+
             // add the new node to the random position in the tree
             if (!root->Get(insertIndex, root)->AddChild(std::move(newNode)) && isFunction)
             {
@@ -133,11 +142,11 @@ namespace Model { namespace Operators
             }
         }
         
-        // Make sure none of the leaf nodes are functions
-        // TODO: check that all functions have the min req. children
+        // Make sure none of the leaf nodes are functions, and that functions have
+        // their minimum number of children.
         for (auto& func : functions)
         {
-            while (func->NumberOfChildren() == 0 || reinterpret_cast<Function*>(func)->LacksBreadth())
+            while (func->NumberOfChildren() == 0 || func->LacksBreadth())
             {
                 // add a variable
                 index = RandomIndex(variables.size());
