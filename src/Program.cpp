@@ -24,6 +24,7 @@ namespace Model
         m_params = config.Params;
         m_iterations = config.Iterations;
         m_numGenerations = config.NumGenerations;
+        m_fitnessCases = config.FitnessCases;
 
         // Create random/initial population from params
         m_population = std::make_unique<Population>(m_params);

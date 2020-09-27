@@ -38,9 +38,16 @@ namespace Model
         static std::unique_ptr<INode> Create(const double* variable);
 
         /**
-         *
+         * @param type The enum represtionation of a function type
+         * @return The string representation of a function type
          */
         static std::string AsString(const FunctionType& type);
+
+        /**
+         * @param name The string representation of a function type
+         * @return The enum represtionation of a function type
+         */
+        static FunctionType AsFunctionType(const std::string& name);
 
     private:
         /**

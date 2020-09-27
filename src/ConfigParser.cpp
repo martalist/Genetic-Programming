@@ -18,24 +18,36 @@ namespace Model
 
             pt::ptree tree;
             pt::read_xml(filename, tree);
-            // s_file = tree.get<std::string>("debug.filename");
-            //
-            // TODO: fetch config from XML and load up s_config
+            s_config.Iterations = tree.get("Config.Iterations", 1);
+            s_config.NumGenerations = tree.get("Config.Generations", 20);
+            auto fitnessCasesFile = tree.get("Config.FitnessCases.<xmlattr>.file", std::string("FitnessCases.csv"));
+            // TODO: not sure if this should be in config, or just fetched from the fitnessCasesFile
+            // s_config.Params.NumberOfTerminals = tree.get("Config.FitnessCases.<xmlattr>.numTerminals", 2);
+            s_config.Params.PopulationSize = tree.get("Config.Population.Size", 1000);
+            s_config.Params.CrossoverProb = tree.get<double>("Config.CrossoverProb", 0.7);
+            s_config.Params.MutationProb = tree.get<double>("Config.MutationProb", 0.001);
+            s_config.Params.MinInitialTreeSize = tree.get("Config.Population.MinInitTreeSize", 10);
+            auto optSeed = tree.get_optional<int>("Config.Seed");
+            if (optSeed)
+            {
+                s_config.Params.Seed = *optSeed;
+            }
+            for (const auto& func : tree.get_child("Config.AllowedFunctions"))
+            {
+                auto funcType = FunctionFactory::AsFunctionType(func.second.data());
+                s_config.Params.AllowedFunctions.push_back(funcType);
+            }
+            std::cout << "Configuration loaded:" << std::endl;
         }
         catch (std::exception& e)
         {
-            std::cout << "Failed to load " << filename << ". Continuing with default values..." << std::endl;
-            // do nothing; provide
+            std::cout << "Failed to load " << filename << ": " << e.what() << std::endl;
+            std::cout << "Continuing with default values...\n" << std::endl;
         }
 
-        s_config.Params.AllowedFunctions =  // TODO: should be loaded from XML
-        {
-            FunctionType::Addition,
-            FunctionType::Subtraction,
-            FunctionType::Multiplication,
-            FunctionType::Division,
-            FunctionType::SquareRoot
-        };
+        // TODO: load fitness cases from CSV file
+
+        // TODO: @see note above
         s_config.Params.NumberOfTerminals = static_cast<int>(s_config.FitnessCases[0].size()-1);
 
         PrintConfig();

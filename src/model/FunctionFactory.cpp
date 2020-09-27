@@ -51,6 +51,31 @@ namespace Model
         }
     }
 
+    FunctionType FunctionFactory::AsFunctionType(const std::string& name)
+    {
+        if (name == "Addition")
+        {
+            return FunctionType::Addition;
+        }
+        if (name == "Subtraction")
+        {
+            return FunctionType::Subtraction;
+        }
+        if (name == "Multiplication")
+        {
+            return FunctionType::Multiplication;
+        }
+        if (name == "Division")
+        {
+            return FunctionType::Division;
+        }
+        if (name == "Square Root")
+        {
+            return FunctionType::SquareRoot;
+        }
+        throw std::invalid_argument("The name provided does not specify a valid function type");
+    }
+
     std::unique_ptr<INode> FunctionFactory::CreateAddition()
     {
         auto func = [](const ChildNodes& children) -> double

@@ -60,6 +60,8 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
 # include these source directories
 add_subdirectory(${PROJECT_SOURCE_DIR}/src) 
 
+configure_file(${PROJECT_SOURCE_DIR}/src/config.xml config.xml COPYONLY)
+
 # Must be defined in top-most CMakeLists.txt
 enable_testing() 
 # include test directory
