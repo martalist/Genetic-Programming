@@ -2,6 +2,7 @@
 #define FunctionFactory_H
 
 #include <memory>
+#include <string>
 #include "INode.h"
 
 namespace Model
@@ -35,6 +36,11 @@ namespace Model
          * @return the new INode
          */
         static std::unique_ptr<INode> Create(const double* variable);
+
+        /**
+         *
+         */
+        static std::string AsString(const FunctionType& type);
 
     private:
         /**

@@ -32,6 +32,25 @@ namespace Model
         return std::make_unique<Terminal>(variable);
     }
 
+    std::string FunctionFactory::AsString(const FunctionType& type)
+    {
+        switch (type)
+        {
+        case FunctionType::Addition:
+            return "Addition";
+        case FunctionType::Subtraction:
+            return "Subtraction";
+        case FunctionType::Multiplication:
+            return "Multiplication";
+        case FunctionType::Division:
+            return "Division";
+        case FunctionType::SquareRoot:
+            return "Square Root";
+        default:
+            throw std::invalid_argument("The function type provided is not valid");
+        }
+    }
+
     std::unique_ptr<INode> FunctionFactory::CreateAddition()
     {
         auto func = [](const ChildNodes& children) -> double

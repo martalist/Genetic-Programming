@@ -12,6 +12,19 @@ else()
 SET(CMAKE_CXX_FLAGS "--std=c++17 -Wall")
 endif()
 
+# Boost libraries
+set(Boost_USE_STATIC_LIBS ON)  # only find static libs
+set(Boost_USE_DEBUG_LIBS OFF)  # ignore debug libs and
+set(Boost_USE_RELEASE_LIBS ON) # only find release libs
+set(Boost_USE_MULTITHREADED ON)
+set(Boost_USE_STATIC_RUNTIME OFF)
+find_package(Boost 1.66.0)
+if(Boost_FOUND)
+  include_directories(${Boost_INCLUDE_DIRS})
+else()
+  message(FATAL_ERROR "Could not find Boost")
+endif()
+
 # Download and unpack googletest at configure time
 configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
 execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
