@@ -33,10 +33,13 @@ namespace Model
             {
                 s_config.Params.Seed = *optSeed;
             }
-            for (const auto& func : tree.get_child("Config.AllowedFunctions"))
+            for (const auto& child : tree.get_child("Config.AllowedFunctions"))
             {
-                auto funcType = FunctionFactory::AsFunctionType(func.second.data());
-                s_config.Params.AllowedFunctions.push_back(funcType);
+                if (child.first == "Function")
+                {
+                    auto func = FunctionFactory::AsFunctionType(child.second.data());
+                    s_config.Params.AllowedFunctions.push_back(func);
+                }
             }
 
             auto fitnessCasesFile = tree.get("Config.FitnessCases.<xmlattr>.file", std::string("pythagorean_theorem.csv"));

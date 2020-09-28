@@ -6,6 +6,19 @@
 #include "Function.h"
 #include "Terminal.h"
 
+namespace
+{
+    const std::string Add = "Addition";
+    const std::string Sub = "Subtraction";
+    const std::string Mult = "Multiplication";
+    const std::string Div = "Division";
+    const std::string Sqrt = "Square Root";
+    const std::string Sin = "Sine";
+    const std::string Cos = "Cosine";
+    const std::string Exp = "Exponential";
+    const std::string Log = "Logarithm";
+}
+
 namespace Model
 {
     std::unique_ptr<INode> FunctionFactory::Create(const FunctionType& type)
@@ -22,6 +35,14 @@ namespace Model
             return CreateDivision();
         case FunctionType::SquareRoot:
             return CreateSquareRoot();
+        case FunctionType::Sine:
+            return CreateSine();
+        case FunctionType::Cosine:
+            return CreateCosine();
+        case FunctionType::NaturalExponential:
+            return CreateExponential();
+        case FunctionType::NaturalLogarithm:
+            return CreateLog();
         default:
             throw std::invalid_argument("The function type provided is not valid");
         }
@@ -37,15 +58,23 @@ namespace Model
         switch (type)
         {
         case FunctionType::Addition:
-            return "Addition";
+            return Add;
         case FunctionType::Subtraction:
-            return "Subtraction";
+            return Sub;
         case FunctionType::Multiplication:
-            return "Multiplication";
+            return Mult;
         case FunctionType::Division:
-            return "Division";
+            return Div;
         case FunctionType::SquareRoot:
-            return "Square Root";
+            return Sqrt;
+        case FunctionType::Sine:
+            return Sin;
+        case FunctionType::Cosine:
+            return Cos;
+        case FunctionType::NaturalExponential:
+            return Exp;
+        case FunctionType::NaturalLogarithm:
+            return Log;
         default:
             throw std::invalid_argument("The function type provided is not valid");
         }
@@ -53,25 +82,41 @@ namespace Model
 
     FunctionType FunctionFactory::AsFunctionType(const std::string& name)
     {
-        if (name == "Addition")
+        if (name == Add)
         {
             return FunctionType::Addition;
         }
-        if (name == "Subtraction")
+        if (name == Sub)
         {
             return FunctionType::Subtraction;
         }
-        if (name == "Multiplication")
+        if (name == Mult)
         {
             return FunctionType::Multiplication;
         }
-        if (name == "Division")
+        if (name == Div)
         {
             return FunctionType::Division;
         }
-        if (name == "Square Root")
+        if (name == Sqrt)
         {
             return FunctionType::SquareRoot;
+        }
+        if (name == Sin)
+        {
+            return FunctionType::Sine;
+        }
+        if (name == Cos)
+        {
+            return FunctionType::Cosine;
+        }
+        if (name == Exp)
+        {
+            return FunctionType::NaturalExponential;
+        }
+        if (name == Log)
+        {
+            return FunctionType::NaturalLogarithm;
         }
         throw std::invalid_argument("The name provided does not specify a valid function type");
     }
@@ -144,7 +189,7 @@ namespace Model
     {
         auto func = [](const ChildNodes& children) -> double
         {
-            if (children.size() != 1u)
+            if (children.size() != 1)
             {
                 throw std::logic_error("A square root function must have exactly 1 child.");
             }
@@ -157,5 +202,63 @@ namespace Model
             return NAN; // we're only dealing with real numbers here
         };
         return std::make_unique<Function>(func, "√", 1, 1);
+    }
+
+    std::unique_ptr<INode> FunctionFactory::CreateSine()
+    {
+        auto func = [](const ChildNodes& children) -> double
+        {
+            if (children.size() != 1)
+            {
+                throw std::logic_error("A sine function must have exactly 1 child.");
+            }
+            return std::sin(children[0]->Evaluate());
+        };
+        return std::make_unique<Function>(func, "sin", 1, 1);
+    }
+
+    std::unique_ptr<INode> FunctionFactory::CreateCosine()
+    {
+        auto func = [](const ChildNodes& children) -> double
+        {
+            if (children.size() != 1)
+            {
+                throw std::logic_error("A cosine function must have exactly 1 child.");
+            }
+            return std::cos(children[0]->Evaluate());
+        };
+        return std::make_unique<Function>(func, "cos", 1, 1);
+    }
+
+    std::unique_ptr<INode> FunctionFactory::CreateExponential()
+    {
+        auto func = [](const ChildNodes& children) -> double
+        {
+            if (children.size() != 1)
+            {
+                throw std::logic_error("A cosine function must have exactly 1 child.");
+            }
+            return std::exp(children[0]->Evaluate());
+        };
+        return std::make_unique<Function>(func, "e^", 1, 1);
+    }
+
+    std::unique_ptr<INode> FunctionFactory::CreateLog()
+    {
+        auto func = [](const ChildNodes& children) -> double
+        {
+            if (children.size() != 1)
+            {
+                throw std::logic_error("A logarithm function must have exactly 1 child.");
+            }
+
+            auto child = children[0]->Evaluate();
+            if (child >= 0)
+            {
+                return std::sqrt(child);
+            }
+            return NAN; // we're only dealing with real numbers here
+        };
+        return std::make_unique<Function>(func, "ln", 1, 1);
     }
 }

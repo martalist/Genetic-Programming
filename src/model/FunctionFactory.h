@@ -14,7 +14,11 @@ namespace Model
         Subtraction,
         Multiplication,
         Division,
-        SquareRoot
+        SquareRoot,
+        Sine,
+        Cosine,
+        NaturalExponential,
+        NaturalLogarithm
     };
 
     /**
@@ -74,6 +78,26 @@ namespace Model
          * Create a square root function
          */
         static std::unique_ptr<INode> CreateSquareRoot();
+
+        /**
+         * Create a sine function
+         */
+        static std::unique_ptr<INode> CreateSine();
+
+        /**
+         * Create a cosine function
+         */
+        static std::unique_ptr<INode> CreateCosine();
+
+        /**
+         * Create a natural exponential function
+         */
+        static std::unique_ptr<INode> CreateExponential();
+
+        /**
+         * Create a natural (base e) logarithm function
+         */
+        static std::unique_ptr<INode> CreateLog();
     };
 }
 #endif
