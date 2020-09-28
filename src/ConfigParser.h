@@ -14,19 +14,7 @@ namespace Model
         int Iterations = 1; ///< Number of times to run the experiment
         int NumGenerations = 20; ///< Number of generations to evolve through to find a solution
         PopulationParams Params{}; ///< Parameters for the population
-        std::vector<std::vector<double>> FitnessCases ///< Training cases
-        {
-            { 3.0, 5.0, 5.830952 }, // For now, hard-coded. XML file should specify a CSV filename to load these in
-            { 8.0, 14.0, 16.124515 },
-            { 18.0, 2.0, 18.11077 },
-            { 32.0, 11.0, 33.837849 },
-            { 4.0, 3.0, 5.0 },
-            { 12.0, 10.0, 15.620499 },
-            { 21.0, 6.0, 21.84033 },
-            { 7.0, 4.0, 8.062258 },
-            { 16.0, 24.0, 28.84441 },
-            { 2.0, 9.0, 9.219545 }
-        };
+        std::vector<std::vector<double>> FitnessCases; ///< Training cases
     };
 
     /**
@@ -47,6 +35,13 @@ namespace Model
          * Prints the config to stdout
          */
         static void PrintConfig();
+
+        /**
+         * Loads the fitness cases from the CSV file specified
+         * @param filename The CSV file name to load
+         * @return the number of Terminals in the CSV's fitness cases
+         */
+        static int LoadFitnessCases(const std::string& filename);
 
         static Config s_config; ///< the loaded/default config
     };

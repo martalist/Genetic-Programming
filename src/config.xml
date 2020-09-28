@@ -2,7 +2,12 @@
 <Config>
     <Iterations>2</Iterations>
     <Generations>20</Generations>
-    <FitnessCases file="FitnessCases.csv" numTerminals="2" />
+    <FitnessCases file="pythagorean_theorem.csv" />
+    <CrossoverProb>0.7</CrossoverProb>
+    <MutationProb>0.001</MutationProb>
+    <!-- <Seed>0</Seed> -->
+
+    <!-- delete the Functions that you don't require -->
     <AllowedFunctions>
         <Function>Addition</Function>
         <Function>Subtraction</Function>
@@ -10,11 +15,9 @@
         <Function>Division</Function>
         <Function>Square Root</Function>
     </AllowedFunctions>
+
     <Population>
         <Size>1000</Size>
         <MinInitTreeSize>10</MinInitTreeSize>
     </Population>
-    <CrossoverProb>0.7</CrossoverProb>
-    <MutationProb>0.001</MutationProb>
-    <!-- <Seed>0</Seed> -->
 </Config>

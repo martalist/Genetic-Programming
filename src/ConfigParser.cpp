@@ -1,8 +1,12 @@
 #include "ConfigParser.h"
 
 #include <iostream>
+#include <fstream>
+#include <stdexcept>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
+#include <boost/tokenizer.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include "model/FunctionFactory.h"
 
@@ -20,9 +24,6 @@ namespace Model
             pt::read_xml(filename, tree);
             s_config.Iterations = tree.get("Config.Iterations", 1);
             s_config.NumGenerations = tree.get("Config.Generations", 20);
-            auto fitnessCasesFile = tree.get("Config.FitnessCases.<xmlattr>.file", std::string("FitnessCases.csv"));
-            // TODO: not sure if this should be in config, or just fetched from the fitnessCasesFile
-            // s_config.Params.NumberOfTerminals = tree.get("Config.FitnessCases.<xmlattr>.numTerminals", 2);
             s_config.Params.PopulationSize = tree.get("Config.Population.Size", 1000);
             s_config.Params.CrossoverProb = tree.get<double>("Config.CrossoverProb", 0.7);
             s_config.Params.MutationProb = tree.get<double>("Config.MutationProb", 0.001);
@@ -37,6 +38,10 @@ namespace Model
                 auto funcType = FunctionFactory::AsFunctionType(func.second.data());
                 s_config.Params.AllowedFunctions.push_back(funcType);
             }
+
+            auto fitnessCasesFile = tree.get("Config.FitnessCases.<xmlattr>.file", std::string("pythagorean_theorem.csv"));
+            s_config.Params.NumberOfTerminals = LoadFitnessCases(fitnessCasesFile);
+
             std::cout << "Configuration loaded:" << std::endl;
         }
         catch (std::exception& e)
@@ -44,11 +49,6 @@ namespace Model
             std::cout << "Failed to load " << filename << ": " << e.what() << std::endl;
             std::cout << "Continuing with default values...\n" << std::endl;
         }
-
-        // TODO: load fitness cases from CSV file
-
-        // TODO: @see note above
-        s_config.Params.NumberOfTerminals = static_cast<int>(s_config.FitnessCases[0].size()-1);
 
         PrintConfig();
         return s_config;
@@ -77,5 +77,40 @@ namespace Model
             std::cout << "\tSeed: " << s_config.Params.Seed.value() << std::endl;
         }
         std::cout << std::endl;
+    }
+
+    int ConfigParser::LoadFitnessCases(const std::string& filename)
+    {
+        using Tokenizer = boost::tokenizer<boost::escaped_list_separator<char>>;
+        bool isHeader = true; // flags when we're reading the CSV header row
+        int columns = 0; // determines the number of columns of data
+
+        std::string line;
+        std::ifstream in(filename);
+        if (!in.is_open())
+        {
+            throw std::invalid_argument("Could not open the Fitness Cases file specified: " + filename);
+        }
+
+        while(std::getline(in, line))
+        {
+            Tokenizer tok(line);
+
+            if (isHeader)
+            {
+                isHeader = false;
+                columns = static_cast<int>(std::distance(tok.begin(), tok.end()));
+                continue;
+            }
+
+            std::vector<double> row;
+            for (Tokenizer::iterator itr = tok.begin(); itr != tok.end(); ++itr)
+            {
+                row.push_back(boost::lexical_cast<double>(*itr));
+            }
+            s_config.FitnessCases.push_back(row);
+        }
+        in.close();
+        return columns - 1; // last column is the expected value, not a terminal
     }
 }

@@ -60,7 +60,9 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
 # include these source directories
 add_subdirectory(${PROJECT_SOURCE_DIR}/src) 
 
+# copy the config file to the binary dir
 configure_file(${PROJECT_SOURCE_DIR}/src/config.xml config.xml COPYONLY)
+configure_file(${PROJECT_SOURCE_DIR}/src/pythagorean_theorem.csv pythagorean_theorem.csv COPYONLY)
 
 # Must be defined in top-most CMakeLists.txt
 enable_testing() 
