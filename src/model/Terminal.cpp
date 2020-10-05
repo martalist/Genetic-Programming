@@ -75,4 +75,9 @@ namespace Model
     {
         return std::make_unique<Terminal>(*this);
     }
+
+    std::string Terminal::GetSymbol() const
+    {
+        return m_symbol;
+    }
 }

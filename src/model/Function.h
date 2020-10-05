@@ -81,12 +81,16 @@ namespace Model
         bool LacksBreadth() const override;
 
     private:
+        /**
+         * @see INode::GetSymbol
+         */
+        std::string GetSymbol() const override;
 
         ChildNodes m_children;
         const int MinAllowedChildren;
         const int MaxAllowedChildren;
         const std::function<double(const ChildNodes&)> m_func;
-        const std::string m_symbol;
+        const std::string m_symbol; ///< A symbolic representation of the function
     };
 }
 #endif

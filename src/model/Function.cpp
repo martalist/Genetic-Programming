@@ -119,4 +119,9 @@ namespace Model
     {
         return NumberOfChildren() <  MinAllowedChildren;
     }
+
+    std::string Function::GetSymbol() const
+    {
+        return m_symbol;
+    }
 }

@@ -17,7 +17,7 @@ namespace
      */
     int RandomIndex(size_t size)
     {
-        int maxIndex = static_cast<int>(--size);
+        int maxIndex = static_cast<int>(size-1);
         return RandInt.GetInRange(0, maxIndex);
     }
 
@@ -40,41 +40,63 @@ namespace Model { namespace Operators
 
     void Mutate(std::unique_ptr<INode>& chromosome, const std::vector<FunctionType>& allowedFunctions, const std::vector<double*>& variables)
     {
-        auto randomMutation = [&](std::unique_ptr<INode>& gene) -> void
+        auto randomTerminalMutation = [&](std::unique_ptr<INode>& gene) -> void
         {
-            if (isTerminal(gene))
+            // Prevents mutation to the same terminal, if there are 2+ terminals available.
+            // TODO: this could likely be done in a more efficient manner.
+            std::vector<double*> tTypes(variables);
+            while (!tTypes.empty())
             {
-                int i = RandomIndex(variables.size());
-                gene = std::make_unique<Terminal>(variables[i]);
-            }
-            else
-            {
-                std::unique_ptr<INode> newFunction = nullptr;
-
-                // copy function types, such that we can remove types and prevent an infinite loop 
-                // in the case where no function in the vector can handle the number of children.
-                std::vector<FunctionType> fTypes(allowedFunctions);
-                do
+                int i = RandomIndex(tTypes.size());
+                auto newTerminal = FunctionFactory::Create(tTypes[i]);
+                if (!gene->IsEquivalent(*newTerminal))
                 {
-                    int i = RandomIndex(fTypes.size());
-                    newFunction = FunctionFactory::Create(fTypes[i]);
-                    auto itr = fTypes.begin() + i;
-                    fTypes.erase(itr);
-                } while(gene->NumberOfChildren() > newFunction->MaxChildren() && !fTypes.empty());
+                    gene.swap(newTerminal);
+                    break;
+                }
+                auto itr = tTypes.begin() + i;
+                tTypes.erase(itr);
+            }
+        };
 
-                if (!fTypes.empty())
+        auto randomFunctionMutation = [&](std::unique_ptr<INode>& gene) -> void
+        {
+            // copy function types, such that we can remove types and prevent an infinite loop 
+            // in the case where no function in the vector can handle the number of children.
+            // This does not (and cannot) guarantee that the function will change, since we 
+            // can't guarantee that a suitable replacement will be available to mutate to.
+            std::vector<FunctionType> fTypes(allowedFunctions);
+
+            while (!fTypes.empty())
+            {
+                int i = RandomIndex(fTypes.size());
+                auto newFunction = FunctionFactory::Create(fTypes[i]);
+
+                if (gene->NumberOfChildren() < newFunction->MaxChildren()) // TODO: and children > MinChildren?
                 {
                     gene->MoveChildrenTo(newFunction); // transfer sub tree
                     gene.swap(newFunction);
+                    break;
                 }
-                // else the mutation fails
+
+                auto itr = fTypes.begin() + i; 
+                fTypes.erase(itr);
             }
+            // else the mutation fails
         };
         
         // Randomly select a node in the chromosome tree 
         int index = RandInt.GetInRange(0, chromosome->Size()-1);
         auto& gene = chromosome->Get(index, chromosome);
-        randomMutation(gene);
+
+        if (isTerminal(gene))
+        {
+            randomTerminalMutation(gene);
+        }
+        else
+        {
+            randomFunctionMutation(gene);
+        }
     }
 
     void Crossover(std::unique_ptr<INode>& left, std::unique_ptr<INode>& right)

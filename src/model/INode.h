@@ -74,6 +74,19 @@ namespace Model
          * @throws an exception if index exceeds is >= the tree size
          */
         virtual std::unique_ptr<INode>& Get(int index, std::unique_ptr<INode>& ptr) = 0;
+
+        /**
+         * Compares two INodes to determine if they are the same (ignoring children)
+         * @param other The other INode to compare against
+         * @return true if they are the same.
+         */
+        bool IsEquivalent(const INode& other) const { return GetSymbol() == other.GetSymbol(); }
+
+    protected:
+        /**
+         * @retun the symbol for the INode
+         */
+        virtual std::string GetSymbol() const = 0;
     };
 }
 

@@ -28,11 +28,23 @@ namespace Tests
         ASSERT_DOUBLE_EQ(B-A, func->Evaluate());
     }
 
-    TEST(OperatorsTest, MutationOneTerminal)
+    TEST(OperatorsTest, DontMutateWithOnlyOneTerminal)
     {
         auto var = FunctionFactory::Create(&A);
         std::vector<FunctionType> allowedFunctions{};
-        std::vector<double*> allowedTerminals{ &B };
+        std::vector<double*> allowedTerminals{ &A };
+
+        // since there is only one node (Terminal), and only one allowed terminal,
+        // the mutation should change this to B.
+        Operators::Mutate(var, allowedFunctions, allowedTerminals);
+        ASSERT_DOUBLE_EQ(A, var->Evaluate());
+    }
+
+    TEST(OperatorsTest, MutationToOtherTerminal)
+    {
+        auto var = FunctionFactory::Create(&A);
+        std::vector<FunctionType> allowedFunctions{};
+        std::vector<double*> allowedTerminals{ &A, &B };
 
         // since there is only one node (Terminal), and only one allowed terminal,
         // the mutation should change this to B.

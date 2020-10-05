@@ -73,6 +73,11 @@ namespace Model
         std::unique_ptr<INode> Clone() const override;
 
     private:
+        /**
+         * @see INode::GetSymbol
+         */
+        std::string GetSymbol() const override;
+
         const double* m_variable; ///< A pointer to the terminal value
         std::string m_symbol; ///< A symbolic representation of the terminal
 
