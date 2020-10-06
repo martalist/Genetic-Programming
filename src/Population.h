@@ -21,9 +21,23 @@ namespace Model
     {
     public:
         /**
+        * Represents an individual chromosome (S-expression) in the population,
+        * together with it's fitness
+        */
+        struct Chromosome
+        {
+            Chromosome(std::unique_ptr<INode> tree, double fitness) 
+                : Tree(std::move(tree))
+                , Fitness(fitness) {}
+
+            std::unique_ptr<INode> Tree;
+            double Fitness = 0.0;
+        };
+
+        /**
          * Constructor
          */
-        Population(const PopulationParams& params);
+        Population(const PopulationParams& params, const std::vector<std::vector<double>>& fitnessCases);
         
         /**
          * Resets the population to a new, randomly created state
@@ -37,8 +51,9 @@ namespace Model
 
         /**
          * Calculate the fitness for all chromosomes in the population
+         * @param population The population of Chromosomes to evaulate
          */
-        void CalculateFitness(const std::vector<std::vector<double>>& fitnessCases);
+        void CalculateFitness(std::vector<Chromosome>& population);
 
         /**
          * @return the average fitness for the population
@@ -56,14 +71,13 @@ namespace Model
         std::string BestAsString() const;
 
     private:
-        using NodePair = std::tuple<std::unique_ptr<INode>, std::unique_ptr<INode>>;
 
         /**
          * Select a pair of parents. The more 'fit' the chromosome, the more
          * likely it will be selected as a parent.
          * @return a pointer to two parents
          */
-        std::tuple<INode*, INode*> SelectParents();
+        std::tuple<Chromosome*, Chromosome*> SelectParents();
 
         /**
          * Deep copy from parents, perform crossover and mutation
@@ -71,22 +85,22 @@ namespace Model
          * @param dad The father chromosome
          * @return two offspring created from mum and dad
          */
-        NodePair Reproduce(const INode& mum, const INode& dad);
+        void Reproduce(const Chromosome& mum, const Chromosome& dad, std::vector<Chromosome>& nextGeneration);
 
         /**
          * Calculate the fitness for one chromosome
-         * @param index The index of the chromosome
+         * @param chromosome The chromosome to evaluate
          * @param fitnessCases The test cases uses to assess the fitness of the chromosome
          * @return the chromosome fitness as a positive, real number
          */
-        double CalculateChromosomeFitness(unsigned int index, const std::vector<std::vector<double>>& fitnessCases);
+        double CalculateChromosomeFitness(const INode& chromosome);
 
-        std::vector<std::unique_ptr<INode>> m_population; ///< The chromosome population
-        std::vector<double> m_fitness; ///< The finess of chromosomes, in order of m_population
+        std::vector<Chromosome> m_population; ///< The chromosome population
         PopulationParams m_params; ///< The parameters of the population
         Util::UniformRandomGenerator<float> m_randomProbability; ///< Generates random floats in the range [0,1]
         std::vector<double*> m_allowedTerminals; ///< The set of variables
         std::vector<double> m_terminals; ///< The terminal values to evaluate
+        std::vector<std::vector<double>> m_fitnessCases; ///< Training cases
         Util::Raffle<double> m_raffle; ///< Ticketing system used to select parents
     };
 }

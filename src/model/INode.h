@@ -87,6 +87,8 @@ namespace Model
          * @retun the symbol for the INode
          */
         virtual std::string GetSymbol() const = 0;
+
+        double m_fitness = 0.0; ///< The fitness of this node
     };
 }
 

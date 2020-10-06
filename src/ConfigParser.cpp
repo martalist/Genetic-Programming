@@ -28,6 +28,11 @@ namespace Model
             s_config.Params.CrossoverProb = tree.get<double>("Config.CrossoverProb", 0.7);
             s_config.Params.MutationProb = tree.get<double>("Config.MutationProb", 0.001);
             s_config.Params.MinInitialTreeSize = tree.get("Config.Population.MinInitTreeSize", 10);
+            auto replaceParents = tree.get_child_optional("Config.Population.AlwaysReplaceParents");
+            if (replaceParents)
+            {
+                s_config.Params.AlwaysReplaceParents = true;
+            }
             auto optSeed = tree.get_optional<int>("Config.Seed");
             if (optSeed)
             {

@@ -24,10 +24,9 @@ namespace Model
         m_params = config.Params;
         m_iterations = config.Iterations;
         m_numGenerations = config.NumGenerations;
-        m_fitnessCases = config.FitnessCases;
 
         // Create random/initial population from params
-        m_population = std::make_unique<Population>(m_params);
+        m_population = std::make_unique<Population>(m_params, config.FitnessCases);
     }
 
     void Program::Start()
@@ -39,29 +38,25 @@ namespace Model
             // m_logger.WriteHeader("Average Fitness", "Best Fitness", "Best S-Expression"); // TODO
 
             m_population->Reset(); // start with a fresh population
+            auto avg = m_population->GetAverageFitness();
+            auto best = m_population->GetBestFitness();
+            m_logger.AddLine(avg, best, "\"" + m_population->BestAsString() + "\"");
 
             // evolve over m_numGenerations
             for (auto i = 0; i < m_numGenerations; ++i)
             {
-                m_population->CalculateFitness(m_fitnessCases);
-                auto avg = m_population->GetAverageFitness();
-                auto best = m_population->GetBestFitness();
-
-                m_logger.AddLine(avg, best, "\"" + m_population->BestAsString() + "\"");
-
                 m_population->Evolve();
+                avg = m_population->GetAverageFitness();
+                best = m_population->GetBestFitness();
+                m_logger.AddLine(avg, best, "\"" + m_population->BestAsString() + "\"");
             }
 
-            m_population->CalculateFitness(m_fitnessCases);
-            auto best = m_population->GetBestFitness();
-            auto bestStr = m_population->BestAsString();
-            m_logger.AddLine(m_population->GetAverageFitness(), best, "\"" + bestStr + "\"");
             m_logger.Write();
 
             // print best result
             std::cout << std::fixed << "Best S-expression in iteration " << iteration+1
                 << " has fitness: " << best << std::endl
-                << "\t" << bestStr << std::endl << std::endl;
+                << "\t" << m_population->BestAsString() << std::endl << std::endl;
         }
         std::cout << "Results written to " << m_logger.GetOutputDir() << std::endl << std::endl;
     }

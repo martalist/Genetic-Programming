@@ -23,5 +23,8 @@
     <Population>
         <Size>1000</Size>
         <MinInitTreeSize>10</MinInitTreeSize>
+
+        <!-- If AlwaysReplaceParents is uncommented parents are always replaced by children, even if they are less fit. -->
+        <!-- <AlwaysReplaceParents /> -->
     </Population>
 </Config>

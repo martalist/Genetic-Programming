@@ -20,6 +20,7 @@ namespace Model
         std::vector<FunctionType> AllowedFunctions; ///< The set of functions permitted in chromosomes
         int NumberOfTerminals; ///< The number of terminals
         std::optional<int> Seed;
+        bool AlwaysReplaceParents = false;
     };
 }
 
