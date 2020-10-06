@@ -29,6 +29,20 @@ namespace
     {
         return gene->MaxChildren() == 0;
     };
+
+    /**
+     * Adds terminals to a function to ensure it has a valid number of children.
+     * @pre This should only be called on Function objects.
+     * @param func The function to fill.
+     */
+    void FillFunction(Model::INode* func, const std::vector<double*>& variables)
+    {
+        while (func->LacksBreadth())
+        {
+            auto index = RandomIndex(variables.size());
+            func->AddChild(Model::FunctionFactory::Create(variables[index]));
+        }
+    }
 }
 
 namespace Model { namespace Operators 
@@ -42,20 +56,30 @@ namespace Model { namespace Operators
     {
         auto randomTerminalMutation = [&](std::unique_ptr<INode>& gene) -> void
         {
-            // Prevents mutation to the same terminal, if there are 2+ terminals available.
-            // TODO: this could likely be done in a more efficient manner.
-            std::vector<double*> tTypes(variables);
-            while (!tTypes.empty())
+            if (RandInt.GetInRange(0,1)) // mutate to a function
             {
-                int i = RandomIndex(tTypes.size());
-                auto newTerminal = FunctionFactory::Create(tTypes[i]);
-                if (!gene->IsEquivalent(*newTerminal))
+                int i = RandomIndex(allowedFunctions.size());
+                auto func = FunctionFactory::Create(allowedFunctions[i]);
+                FillFunction(func.get(), variables);
+                gene.swap(func);
+            }
+            else // mutate to a terminal
+            {
+                // Prevents mutation to the same terminal, if there are 2+ terminals available.
+                // TODO: this could likely be done in a more efficient manner.
+                std::vector<double*> tTypes(variables);
+                while (!tTypes.empty())
                 {
-                    gene.swap(newTerminal);
-                    break;
+                    int i = RandomIndex(tTypes.size());
+                    auto newTerminal = FunctionFactory::Create(tTypes[i]);
+                    if (!gene->IsEquivalent(*newTerminal))
+                    {
+                        gene.swap(newTerminal);
+                        break;
+                    }
+                    auto itr = tTypes.begin() + i;
+                    tTypes.erase(itr);
                 }
-                auto itr = tTypes.begin() + i;
-                tTypes.erase(itr);
             }
         };
 
@@ -175,12 +199,7 @@ namespace Model { namespace Operators
         // their minimum number of children.
         for (auto& func : functions)
         {
-            while (func->NumberOfChildren() == 0 || func->LacksBreadth())
-            {
-                // add a variable
-                index = RandomIndex(variables.size());
-                func->AddChild(FunctionFactory::Create(variables[index]));
-            }
+            FillFunction(func, variables);
         }
         return root;
     }
