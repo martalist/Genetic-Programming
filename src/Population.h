@@ -9,6 +9,11 @@
 #include "utils/UniformRandomGenerator.h"
 #include "utils/ISelector.h"
 
+namespace Tests
+{
+    class PopulationTest;
+}
+
 namespace Model
 {
     enum class FunctionType;
@@ -20,6 +25,7 @@ namespace Model
     class Population
     {
     public:
+        friend Tests::PopulationTest;
         using INodePtr = std::unique_ptr<INode>;
 
         /**
@@ -31,8 +37,8 @@ namespace Model
             /**
              * Constructor
              */
-            Chromosome(INodePtr tree);
-            Chromosome(INodePtr tree, double fitness);
+            Chromosome(Population& pop, INodePtr tree);
+            Chromosome(Population& pop, INodePtr tree, double fitness);
 
             /**
              * Less-than operator. Used for sorting collections of Chromosomes.
@@ -44,10 +50,14 @@ namespace Model
             * @param chromosome The chromosome to evaluate
             * @return the chromosome fitness as a positive, real number
             */
-            double CalculateFitness();
+            double CalculateFitness(Population& pop) const;
 
-            INodePtr Tree;
-            double Fitness;
+            double CalculateWeightedFitness(const Population& pop) const;
+
+            INodePtr Tree; ///< the S-expression
+            int Size; ///< the length (nodes in the tree)
+            double Fitness; ///< raw fitness of the chromosome
+            double WeightedFitness; ///< weighted fitness, with penalty for length/size
         };
 
         /**
@@ -66,12 +76,6 @@ namespace Model
         void Evolve();
 
         /**
-         * Prepares the selector, such that appropriate parents may be selected
-         * Called after a new generation/population has been created.
-         */
-        void RecalibrateParentSelector();
-
-        /**
          * @return the average fitness for the population
          */
         double GetAverageFitness() const;
@@ -87,6 +91,18 @@ namespace Model
         std::string BestAsString() const;
 
     private:
+
+        /**
+         * Prepares the selector, such that appropriate parents may be selected
+         * Called after a new generation/population has been created.
+         */
+        void RecalibrateParentSelector();
+
+        /**
+         * Sorts the m_population by WeightedFitness, and sorts a pointers to the Chromosomes in the population
+         * in order of Fitness.
+         */
+        void SortPopulation();
 
         /**
          * Select a pair of parents. The more 'fit' the chromosome, the more
@@ -109,15 +125,21 @@ namespace Model
          */
         std::tuple<INodePtr, INodePtr> GetNewOffspring(const Chromosome& mum, const Chromosome& dad) const;
 
+        /**
+         * Updates the parsimony coefficient
+         */
+        double UpdateParsimonyCoefficient();
+
         std::vector<Chromosome> m_population; ///< The chromosome population
+        std::vector<Chromosome*> m_sortedByFitness; ///< Pointers to the chromosome population, sorted by fitness
         PopulationParams m_params; ///< The parameters of the population
         mutable Util::UniformRandomGenerator<float> m_randomProbability; ///< Generates random floats in the range [0,1]
         std::vector<double*> m_allowedTerminals; ///< The set of variables
         std::unique_ptr<Util::ISelector<double>> m_selector; ///< Ticketing system used to select parents
 
-        // TODO: these should probably be moved out to Program (from Population)
-        static std::vector<double> s_terminals; ///< The terminal values to evaluate
-        static std::vector<std::vector<double>> s_fitnessCases; ///< Training cases
+        std::vector<double> m_terminals; ///< The terminal values to evaluate
+        std::vector<std::vector<double>> m_fitnessCases; ///< Training cases
+        double m_parsimonyCoefficient = 0.0;
     };
 }
 

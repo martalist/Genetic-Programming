@@ -7,6 +7,7 @@
 #include "model/FunctionFactory.h"
 #include "model/Terminal.h"
 #include "model/Operators.h"
+#include "utils/Math.h"
 #include "utils/Raffle.h"
 #include "utils/Tournament.h"
 
@@ -15,30 +16,34 @@ namespace Model
     using Chromosome = Population::Chromosome;
     using INodePtr = Population::INodePtr;
 
-    Chromosome::Chromosome(INodePtr tree)
+    Chromosome::Chromosome(Population& pop, INodePtr tree)
         : Tree(std::move(tree)) 
+        , Size(Tree->Size())
+        , Fitness(CalculateFitness(pop))
+        , WeightedFitness(CalculateWeightedFitness(pop))
     {
-        Chromosome::CalculateFitness();
     } 
 
-    Chromosome::Chromosome(INodePtr tree, double fitness)
+    Chromosome::Chromosome(Population& pop, INodePtr tree, double fitness)
         : Tree(std::move(tree)) 
+        , Size(Tree->Size())
         , Fitness(fitness)
+        , WeightedFitness(CalculateWeightedFitness(pop))
     {
     } 
 
     bool Chromosome::operator<(const Chromosome& rhs) const
     {
-        return Fitness < rhs.Fitness;
+        return WeightedFitness < rhs.WeightedFitness;
     }
 
-    double Chromosome::CalculateFitness()
+    double Chromosome::CalculateFitness(Population& pop) const
     {
         double sumOfErrors = 0.0;
-        for (const auto& fCase : s_fitnessCases) // FitnessCases are the training set
+        for (const auto& fCase : pop.m_fitnessCases) // FitnessCases are the training set
         {
             // load up the terminals for this fitness case
-            std::copy(fCase.begin(), fCase.end()-1, s_terminals.begin());
+            std::copy(fCase.begin(), fCase.end()-1, pop.m_terminals.begin());
 
             // calculate the fitness (absolute error) for this fitness case
             auto returnVal = Tree->Evaluate();
@@ -46,18 +51,23 @@ namespace Model
             // add to the tally
             sumOfErrors += std::abs(returnVal - fCase.back());
         }
-        Fitness = sumOfErrors / s_fitnessCases.size(); // mean absolute error
-        return Fitness;
+        return sumOfErrors / pop.m_fitnessCases.size(); // mean absolute error
     }
 
-    std::vector<double> Population::s_terminals;
-    std::vector<std::vector<double>> Population::s_fitnessCases;
+    double Chromosome::CalculateWeightedFitness(const Population& pop) const
+    {
+        return Fitness + pop.m_parsimonyCoefficient * Size;
+    }
 
     Population::Population(const PopulationParams& params, const std::vector<std::vector<double>>& fitnessCases)
         : m_params(params)
         , m_randomProbability(.0, 1.)
+        // TODO: allow config to select between raffle and tournament style selection
         // , m_selector(std::make_unique<Util::Raffle<double>>())
+        // TODO: make the tournament size configurable by XML
         , m_selector(std::make_unique<Util::Tournament<double>>(m_params.PopulationSize, 20))
+        , m_terminals(params.NumberOfTerminals)
+        , m_fitnessCases(fitnessCases)
     {
         if (params.Seed.has_value())
         {
@@ -66,9 +76,7 @@ namespace Model
             m_selector->SetSeed(params.Seed.value());
         }
 
-        s_fitnessCases = fitnessCases;
-        s_terminals.resize(params.NumberOfTerminals, 0.0);
-        for (auto& terminal : s_terminals)
+        for (auto& terminal : m_terminals)
         {
             m_allowedTerminals.push_back(&terminal);
         }
@@ -86,7 +94,7 @@ namespace Model
                     m_params.MinInitialTreeSize, 
                     m_params.AllowedFunctions, 
                     m_allowedTerminals);
-            m_population.emplace_back(std::move(itsABoy));
+            m_population.emplace_back(*this, std::move(itsABoy));
         }
         RecalibrateParentSelector(); // TODO
     }
@@ -122,31 +130,31 @@ namespace Model
 
         if (m_params.AlwaysReplaceParents)
         {
-            nextGeneration.emplace_back(std::move(son));
-            nextGeneration.emplace_back(std::move(daughter));
+            nextGeneration.emplace_back(*this, std::move(son));
+            nextGeneration.emplace_back(*this, std::move(daughter));
         }
         else
         {
             // add a couple more kiddos to the mix
-            // auto [s2, d2] = GetNewOffspring(mum, dad);
+            auto [s2, d2] = GetNewOffspring(mum, dad);
             // auto [s3, d3] = GetNewOffspring(mum, dad);
             std::vector<Chromosome> family;
-            family.emplace_back(dad.Tree->Clone());
-            family.emplace_back(mum.Tree->Clone());
-            family.emplace_back(std::move(son));
-            family.emplace_back(std::move(daughter));
-            // family.emplace_back(std::move(s2));
-            // family.emplace_back(std::move(s3));
-            // family.emplace_back(std::move(d2));
-            // family.emplace_back(std::move(d3));
+            family.emplace_back(*this, dad.Tree->Clone());
+            family.emplace_back(*this, mum.Tree->Clone());
+            family.emplace_back(*this, std::move(son));
+            family.emplace_back(*this, std::move(daughter));
+            family.emplace_back(*this, std::move(s2));
+            family.emplace_back(*this, std::move(d2));
+            // family.emplace_back(*this, std::move(s3));
+            // family.emplace_back(*this, std::move(d3));
             std::sort(family.begin(), family.end());
 
             auto inOrder = family.begin();
             auto fitness = inOrder->Fitness;
-            nextGeneration.emplace_back(std::move(inOrder->Tree), fitness);
+            nextGeneration.emplace_back(*this, std::move(inOrder->Tree), fitness);
             ++inOrder;
             fitness = inOrder->Fitness;
-            nextGeneration.emplace_back(std::move(inOrder->Tree), fitness);
+            nextGeneration.emplace_back(*this, std::move(inOrder->Tree), fitness);
         }
     }
 
@@ -176,7 +184,7 @@ namespace Model
 
     void Population::RecalibrateParentSelector()
     {
-        std::sort(m_population.begin(), m_population.end());
+        SortPopulation();
 
         m_selector->Reset(); // get rid of the previous generation's tickets
         
@@ -184,24 +192,41 @@ namespace Model
          * Returns the number of raffle tickets should be allocated for a given fitness value.
          * The smaller (better) the fitness, the higher the ticket number. 
          */
-        auto ticketAllocation = [](double fitness) -> double 
-        {
-            if (fitness == std::numeric_limits<double>::infinity())
-            {
-                return 0.0;
-            }
-            // return std::min(1.0/fitness, std::numeric_limits<double>::max()/10'000);
-            return std::exp(4.0 - std::pow(fitness, 2.0/5.0));
-            // return std::exp(7.0 - std::pow(fitness, 0.32));
-        };
+        // auto ticketAllocation = [](double fitness) -> double 
+        // {
+            // if (fitness == std::numeric_limits<double>::infinity())
+            // {
+                // return 0.0;
+            // }
+            // // return std::min(1.0/fitness, std::numeric_limits<double>::max()/10'000);
+            // return std::exp(4.0 - std::pow(fitness, 2.0/5.0));
+            // // return std::exp(7.0 - std::pow(fitness, 0.32));
+        // };
 
         int i = 0;
         for (auto& chromosome : m_population)
         {
             // TODO: only calculate ticketAllocation for raffle style
-            auto numberOfTickets = ticketAllocation(chromosome.Fitness);
+            // auto numberOfTickets = ticketAllocation(chromosome.Fitness);
+            auto numberOfTickets = chromosome.Fitness;
             m_selector->RegisterElement(numberOfTickets, i++);
         }
+        m_parsimonyCoefficient = UpdateParsimonyCoefficient();
+        // std::cout << "Parsimony Coefficient = " << m_parsimonyCoefficient << std::endl;
+    }
+    
+    void Population::SortPopulation()
+    {
+        // sort primary population by WeightedFitness
+        std::sort(m_population.begin(), m_population.end());
+
+        // sort pointers by fitness
+        m_sortedByFitness.clear();
+        for (auto& p : m_population)
+        {
+            m_sortedByFitness.push_back(&p);
+        }
+        std::sort(m_sortedByFitness.begin(), m_sortedByFitness.end(), [](const Chromosome* a, const Chromosome* b) { return a->Fitness < b->Fitness; });
     }
 
     std::tuple<Chromosome*, Chromosome*> Population::SelectParents()
@@ -232,11 +257,35 @@ namespace Model
 
     double Population::GetBestFitness() const
     {
-        return m_population[0].Fitness;
+        return m_sortedByFitness[0]->Fitness;
     }
 
     std::string Population::BestAsString() const
     {
-        return m_population[0].Tree->ToString();
+        return m_sortedByFitness[0]->Tree->ToString();
+    }
+
+    double Population::UpdateParsimonyCoefficient()
+    {
+        using Itr = std::vector<Chromosome>::iterator;
+        const double DenominatorThreshold = 0.001;
+
+        auto getSize = [](const Itr& itr) -> double { return static_cast<double>(itr->Size); };
+        auto getFitness = [](const Itr& itr) -> double { return itr->Fitness; };
+        
+        auto var = Util::Variance<Itr>(m_population.begin(), m_population.end(), getSize);
+        auto covar = Util::Covariance<Itr, Itr>( m_population.begin(), m_population.end(), getSize,
+                                            m_population.begin(), m_population.end(), getFitness);
+
+        return 0.025;
+        if (covar < DenominatorThreshold)
+        {
+            if (var < DenominatorThreshold)
+            {
+                return 0.0; // approaching 0/0
+            }
+            return 1.0; // approaching infty
+        }
+        return std::clamp(covar / var, 0.0, 1.0);
     }
 }
