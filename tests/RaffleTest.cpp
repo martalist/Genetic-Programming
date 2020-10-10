@@ -32,8 +32,8 @@ namespace Tests
     TEST_F(RaffleTest, BuyZeroTickets)
     {
         const int id = 123;
-        realRaffle.BuyTickets(0.0, id);
-        intRaffle.BuyTickets(0, id);
+        realRaffle.RegisterElement(0.0, id);
+        intRaffle.RegisterElement(0, id);
 
         EXPECT_EQ(-1, realRaffle.Draw());
         EXPECT_EQ(-1, intRaffle.Draw());
@@ -44,8 +44,8 @@ namespace Tests
     TEST_F(RaffleTest, OneParticipant)
     {
         const int id = 123;
-        realRaffle.BuyTickets(1.0, id);
-        intRaffle.BuyTickets(1, id);
+        realRaffle.RegisterElement(1.0, id);
+        intRaffle.RegisterElement(1, id);
 
         EXPECT_EQ(id, realRaffle.Draw());
         EXPECT_EQ(id, intRaffle.Draw());
@@ -57,10 +57,10 @@ namespace Tests
     {
         const int id1 = 1;
         const int id2 = 2;
-        realRaffle.BuyTickets(0.01, id1);
-        realRaffle.BuyTickets(0.01, id2);
-        intRaffle.BuyTickets(1, id1);
-        intRaffle.BuyTickets(1, id2);
+        realRaffle.RegisterElement(0.01, id1);
+        realRaffle.RegisterElement(0.01, id2);
+        intRaffle.RegisterElement(1, id1);
+        intRaffle.RegisterElement(1, id2);
 
         std::vector<int> realResults;
         std::vector<int> intResults;
@@ -83,10 +83,10 @@ namespace Tests
     {
         const int id1 = 1;
         const int id2 = 2;
-        realRaffle.BuyTickets(0.01, id1);
-        realRaffle.BuyTickets(0.01, id2);
-        intRaffle.BuyTickets(1, id1);
-        intRaffle.BuyTickets(1, id2);
+        realRaffle.RegisterElement(0.01, id1);
+        realRaffle.RegisterElement(0.01, id2);
+        intRaffle.RegisterElement(1, id1);
+        intRaffle.RegisterElement(1, id2);
 
         realRaffle.Reset();
         intRaffle.Reset();

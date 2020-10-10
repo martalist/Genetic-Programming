@@ -28,12 +28,26 @@ namespace Model
         */
         struct Chromosome
         {
-            Chromosome(INodePtr tree, double fitness) 
-                : Tree(std::move(tree))
-                , Fitness(fitness) {}
+            /**
+             * Constructor
+             */
+            Chromosome(INodePtr tree);
+            Chromosome(INodePtr tree, double fitness);
+
+            /**
+             * Less-than operator. Used for sorting collections of Chromosomes.
+             */
+            bool operator<(const Chromosome& rhs) const;
+
+            /**
+            * Calculate the fitness for one chromosome. Currently uses MAE (mean absolute error)
+            * @param chromosome The chromosome to evaluate
+            * @return the chromosome fitness as a positive, real number
+            */
+            double CalculateFitness();
 
             INodePtr Tree;
-            double Fitness = 0.0;
+            double Fitness;
         };
 
         /**
@@ -52,10 +66,10 @@ namespace Model
         void Evolve();
 
         /**
-         * Calculate the fitness for all chromosomes in the population
-         * @param population The population of Chromosomes to evaulate
+         * Prepares the selector, such that appropriate parents may be selected
+         * Called after a new generation/population has been created.
          */
-        void CalculateFitness(std::vector<Chromosome>& population);
+        void RecalibrateParentSelector();
 
         /**
          * @return the average fitness for the population
@@ -95,20 +109,15 @@ namespace Model
          */
         std::tuple<INodePtr, INodePtr> GetNewOffspring(const Chromosome& mum, const Chromosome& dad) const;
 
-        /**
-         * Calculate the fitness for one chromosome. Currently uses MAE (mean absolute error)
-         * @param chromosome The chromosome to evaluate
-         * @return the chromosome fitness as a positive, real number
-         */
-        double CalculateChromosomeFitness(const INode& chromosome);
-
         std::vector<Chromosome> m_population; ///< The chromosome population
         PopulationParams m_params; ///< The parameters of the population
         mutable Util::UniformRandomGenerator<float> m_randomProbability; ///< Generates random floats in the range [0,1]
         std::vector<double*> m_allowedTerminals; ///< The set of variables
-        std::vector<double> m_terminals; ///< The terminal values to evaluate
-        std::vector<std::vector<double>> m_fitnessCases; ///< Training cases
         Util::Raffle<double> m_raffle; ///< Ticketing system used to select parents
+
+        // TODO: these should probably be moved out to Program (from Population)
+        static std::vector<double> s_terminals; ///< The terminal values to evaluate
+        static std::vector<std::vector<double>> s_fitnessCases; ///< Training cases
     };
 }
 

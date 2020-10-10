@@ -11,10 +11,15 @@
 namespace
 {
     using Chromosome = Model::Population::Chromosome;
+    
+    /**
+     * A utility function used to get the index of the most fit chromosome
+     * @param population The collection of Chromosomes
+     * @return a const_iterator to the best Chromosome in the population
+     */
     std::vector<Chromosome>::const_iterator GetBestIterator(const std::vector<Chromosome>& population)
     {
-        auto best = std::min_element(population.begin(), population.end(),
-                [](const Chromosome& a, const Chromosome& b) { return a.Fitness < b.Fitness; });
+        auto best = std::min_element(population.begin(), population.end());
 
         if (best == population.end())
         {
@@ -29,11 +34,47 @@ namespace Model
     using Chromosome = Population::Chromosome;
     using INodePtr = Population::INodePtr;
 
+    Chromosome::Chromosome(INodePtr tree)
+        : Tree(std::move(tree)) 
+    {
+        Chromosome::CalculateFitness();
+    } 
+
+    Chromosome::Chromosome(INodePtr tree, double fitness)
+        : Tree(std::move(tree)) 
+        , Fitness(fitness)
+    {
+    } 
+
+    bool Chromosome::operator<(const Chromosome& rhs) const
+    {
+        return Fitness < rhs.Fitness;
+    }
+
+    double Chromosome::CalculateFitness()
+    {
+        double sumOfErrors = 0.0;
+        for (const auto& fCase : s_fitnessCases) // FitnessCases are the training set
+        {
+            // load up the terminals for this fitness case
+            std::copy(fCase.begin(), fCase.end()-1, s_terminals.begin());
+
+            // calculate the fitness (absolute error) for this fitness case
+            auto returnVal = Tree->Evaluate();
+
+            // add to the tally
+            sumOfErrors += std::abs(returnVal - fCase.back());
+        }
+        Fitness = sumOfErrors / s_fitnessCases.size(); // mean absolute error
+        return Fitness;
+    }
+
+    std::vector<double> Population::s_terminals;
+    std::vector<std::vector<double>> Population::s_fitnessCases;
+
     Population::Population(const PopulationParams& params, const std::vector<std::vector<double>>& fitnessCases)
         : m_params(params)
         , m_randomProbability(.0, 1.)
-        , m_terminals(params.NumberOfTerminals)
-        , m_fitnessCases(fitnessCases)
     {
         if (params.Seed.has_value())
         {
@@ -42,12 +83,12 @@ namespace Model
             m_raffle.SetSeed(params.Seed.value());
         }
 
-        for (auto& terminal : m_terminals)
+        s_fitnessCases = fitnessCases;
+        s_terminals.resize(params.NumberOfTerminals, 0.0);
+        for (auto& terminal : s_terminals)
         {
             m_allowedTerminals.push_back(&terminal);
         }
-        
-        Reset();
     }
 
     void Population::Reset()
@@ -62,9 +103,9 @@ namespace Model
                     m_params.MinInitialTreeSize, 
                     m_params.AllowedFunctions, 
                     m_allowedTerminals);
-            m_population.emplace_back(std::move(itsABoy), 0.0);
+            m_population.emplace_back(std::move(itsABoy));
         }
-        CalculateFitness(m_population);
+        RecalibrateParentSelector(); // TODO
     }
 
     void Population::Evolve()
@@ -89,7 +130,7 @@ namespace Model
         m_population.swap(newPopulation);
 
         // calculate the fitness of the new population
-        // CalculateFitness(m_population); 
+        RecalibrateParentSelector(); 
     }
 
     void Population::Reproduce(const Chromosome& mum, const Chromosome& dad, std::vector<Chromosome>& nextGeneration)
@@ -98,35 +139,31 @@ namespace Model
 
         if (m_params.AlwaysReplaceParents)
         {
-            nextGeneration.emplace_back(std::move(son), 0.0);
-            nextGeneration.emplace_back(std::move(daughter), 0.0);
+            nextGeneration.emplace_back(std::move(son));
+            nextGeneration.emplace_back(std::move(daughter));
         }
         else
         {
-            // Use a set to order the family, and pick the best to survive
-            auto CompareINodePtr = [&](const Chromosome& a, const Chromosome& b) -> bool
-            { 
-                return a.Fitness < b.Fitness;
-            };
-
             // add a couple more kiddos to the mix
             // auto [s2, d2] = GetNewOffspring(mum, dad);
             // auto [s3, d3] = GetNewOffspring(mum, dad);
             std::vector<Chromosome> family;
-            family.emplace_back(dad.Tree->Clone(), CalculateChromosomeFitness(*dad.Tree));
-            family.emplace_back(mum.Tree->Clone(), CalculateChromosomeFitness(*mum.Tree));
-            family.emplace_back(std::move(son), CalculateChromosomeFitness(*son));
-            family.emplace_back(std::move(daughter), CalculateChromosomeFitness(*daughter));
-            // family.emplace_back(std::move(s2), CalculateChromosomeFitness(*s2));
-            // family.emplace_back(std::move(s3), CalculateChromosomeFitness(*s3));
-            // family.emplace_back(std::move(d2), CalculateChromosomeFitness(*d2));
-            // family.emplace_back(std::move(d3), CalculateChromosomeFitness(*d3));
-            std::sort(family.begin(), family.end(), CompareINodePtr);
+            family.emplace_back(dad.Tree->Clone());
+            family.emplace_back(mum.Tree->Clone());
+            family.emplace_back(std::move(son));
+            family.emplace_back(std::move(daughter));
+            // family.emplace_back(std::move(s2));
+            // family.emplace_back(std::move(s3));
+            // family.emplace_back(std::move(d2));
+            // family.emplace_back(std::move(d3));
+            std::sort(family.begin(), family.end());
 
             auto inOrder = family.begin();
-            nextGeneration.emplace_back(std::move(inOrder->Tree), inOrder->Fitness);
+            auto fitness = inOrder->Fitness;
+            nextGeneration.emplace_back(std::move(inOrder->Tree), fitness);
             ++inOrder;
-            nextGeneration.emplace_back(std::move(inOrder->Tree), inOrder->Fitness);
+            fitness = inOrder->Fitness;
+            nextGeneration.emplace_back(std::move(inOrder->Tree), fitness);
         }
     }
 
@@ -153,8 +190,8 @@ namespace Model
         }
         return std::make_tuple(std::move(son), std::move(daughter));
     }
-    
-    void Population::CalculateFitness(std::vector<Chromosome>& population)
+
+    void Population::RecalibrateParentSelector()
     {
         m_raffle.Reset(); // get rid of the previous generation's tickets
         
@@ -174,36 +211,12 @@ namespace Model
         };
 
         int i = 0;
-        for (auto& chromosome : population)
+        for (auto& chromosome : m_population)
         {
-            chromosome.Fitness = CalculateChromosomeFitness(*chromosome.Tree);
+            // TODO: only calculate ticketAllocation for raffle style
             auto numberOfTickets = ticketAllocation(chromosome.Fitness);
-            m_raffle.BuyTickets(numberOfTickets, i++);
+            m_raffle.RegisterElement(numberOfTickets, i++);
         }
-    }
-
-    double Population::CalculateChromosomeFitness(const INode& chromosome)
-    {
-        double sumOfErrors = 0.0;
-        for (const auto& fCase : m_fitnessCases) // FitnessCases are the training set
-        {
-            for (auto i = 0u; i < fCase.size()-1; ++i)
-            {
-                m_terminals[i] = fCase[i];
-            }
-
-            // calculate the fitness (absolute error) for this fitness case
-            auto returnVal = chromosome.Evaluate();
-            if (std::isnan(returnVal)) // TODO: with closure changes (237c984) this shouldn't be necessary.
-            {
-                // eliminate it's chances of reproduction
-                return std::numeric_limits<double>::infinity();
-            }
-
-            // add to the tally
-            sumOfErrors += std::abs(returnVal - fCase.back());
-        }
-        return sumOfErrors / m_fitnessCases.size(); // mean absolute error
     }
 
     std::tuple<Chromosome*, Chromosome*> Population::SelectParents()
@@ -222,9 +235,10 @@ namespace Model
             // Some functions have conditions that if not met result in NaN
             // For example, sqrt(a) requires that a >= 0. 
             // So only calculate the average of S-expressions that are defined across the entire terminal domain
-            if (!std::isnan(m_population[i].Fitness) && m_population[i].Fitness != std::numeric_limits<double>::infinity())
+            auto& fitness = m_population[i].Fitness;
+            if (!std::isnan(fitness) && fitness != std::numeric_limits<double>::infinity())
             {
-                total += m_population[i].Fitness;
+                total += fitness;
                 ++count;
             }
         }

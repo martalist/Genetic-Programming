@@ -29,7 +29,7 @@ namespace Util
          * @param quantity The number of tickets to buy. Must be >= 0. Can be floating point.
          * @param id The identifier of the ticket holder
          */
-        void BuyTickets(T quantity, int id)
+        void RegisterElement(T quantity, int id)
         {
             if (quantity == static_cast<T>(0))
             {
