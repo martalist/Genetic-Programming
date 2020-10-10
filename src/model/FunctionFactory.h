@@ -19,6 +19,7 @@ namespace Model
         Cosine,
         NaturalExponential,
         NaturalLogarithm
+            // TODO: inverse, max, min, negation, absolute, arsin, arcos, artan
     };
 
     /**

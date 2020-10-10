@@ -17,6 +17,8 @@ namespace
     const std::string Cos = "Cosine";
     const std::string Exp = "Exponential";
     const std::string Log = "Logarithm";
+
+    const double Threshold = 0.001; // A threshold used to prevent infty for division, sqrt, log, etc.
 }
 
 namespace Model
@@ -178,6 +180,11 @@ namespace Model
             }
             if (children.size() == 2)
             {
+                auto denom = children[1]->Evaluate();
+                if (std::abs(denom) < Threshold)
+                { // 
+                    return 1.0;
+                }
                 return children[0]->Evaluate() / children[1]->Evaluate();
             }
             throw std::logic_error("A division function must have no more than 2 children.");
@@ -194,12 +201,8 @@ namespace Model
                 throw std::logic_error("A square root function must have exactly 1 child.");
             }
 
-            auto mantissa = children[0]->Evaluate();
-            if (mantissa >= 0)
-            {
-                return std::sqrt(mantissa);
-            }
-            return NAN; // we're only dealing with real numbers here
+            // returns sqrt(|x|) to prevent NaN
+            return std::sqrt(std::abs(children[0]->Evaluate()));
         };
         return std::make_unique<Function>(func, "√", 1, 1);
     }
@@ -252,12 +255,12 @@ namespace Model
                 throw std::logic_error("A logarithm function must have exactly 1 child.");
             }
 
-            auto child = children[0]->Evaluate();
-            if (child >= 0)
+            auto child = std::abs(children[0]->Evaluate());
+            if (child < Threshold)
             {
-                return std::sqrt(child);
+                return 0.0;
             }
-            return NAN; // we're only dealing with real numbers here
+            return std::log(child);
         };
         return std::make_unique<Function>(func, "ln", 1, 1);
     }
