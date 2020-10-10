@@ -8,27 +8,6 @@
 #include "model/Terminal.h"
 #include "model/Operators.h"
 
-namespace
-{
-    using Chromosome = Model::Population::Chromosome;
-    
-    /**
-     * A utility function used to get the index of the most fit chromosome
-     * @param population The collection of Chromosomes
-     * @return a const_iterator to the best Chromosome in the population
-     */
-    std::vector<Chromosome>::const_iterator GetBestIterator(const std::vector<Chromosome>& population)
-    {
-        auto best = std::min_element(population.begin(), population.end());
-
-        if (best == population.end())
-        {
-            throw std::runtime_error("Can't get best fitness from empty population.");
-        }
-        return best;
-    }
-}
-
 namespace Model
 {
     using Chromosome = Population::Chromosome;
@@ -193,6 +172,8 @@ namespace Model
 
     void Population::RecalibrateParentSelector()
     {
+        std::sort(m_population.begin(), m_population.end());
+
         m_raffle.Reset(); // get rid of the previous generation's tickets
         
         /**
@@ -247,11 +228,11 @@ namespace Model
 
     double Population::GetBestFitness() const
     {
-        return GetBestIterator(m_population)->Fitness;
+        return m_population[0].Fitness;
     }
 
     std::string Population::BestAsString() const
     {
-        return GetBestIterator(m_population)->Tree->ToString();
+        return m_population[0].Tree->ToString();
     }
 }
