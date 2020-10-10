@@ -3,6 +3,7 @@
 #include "FunctionTest.cpp"
 #include "OperatorsTest.cpp"
 #include "PopulationTest.cpp"
+#include "MathTest.cpp"
 
 int main(int argc, char **argv)
 {
