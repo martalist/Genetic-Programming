@@ -62,7 +62,14 @@ namespace Tests
         std::vector<double*> allowedTerminals{ &two };
         Operators::Mutate(func, allowedFunctions, allowedTerminals);
 
-        ASSERT_DOUBLE_EQ(two, func->Evaluate());
+        if (func->Size() > 2)
+        {
+            ASSERT_DOUBLE_EQ(std::sqrt(2), func->Evaluate());
+        }
+        else
+        {
+            ASSERT_DOUBLE_EQ(two, func->Evaluate());
+        }
     }
 
     TEST(OperatorsTest, TestFunctionThatCantHoldAllChildren)

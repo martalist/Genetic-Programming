@@ -102,11 +102,11 @@ namespace Tests
         // sqrt can only have one child
         ASSERT_FALSE(func->AddChild(std::make_unique<Terminal>(&b)));
 
-        // we're only dealing with real numbers, sqrt of a negative number should be NAN
+        // we're only dealing with real numbers, so sqrt should be of abs value
         const double minus = -1.0;
         func = FunctionFactory::Create(FunctionType::SquareRoot);
         ASSERT_TRUE(func->AddChild(std::make_unique<Terminal>(&minus)));
-        ASSERT_TRUE(std::isnan(func->Evaluate()));
+        ASSERT_DOUBLE_EQ(1.0, func->Evaluate());
     }
 
     TEST_F(FunctionTest, CompositeFunction)

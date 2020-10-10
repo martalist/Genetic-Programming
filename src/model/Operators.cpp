@@ -56,7 +56,7 @@ namespace Model { namespace Operators
     {
         auto randomTerminalMutation = [&](std::unique_ptr<INode>& gene) -> void
         {
-            if (RandInt.GetInRange(0,1)) // mutate to a function
+            if (RandInt.GetInRange(0,1) && !allowedFunctions.empty()) // mutate to a function
             {
                 int i = RandomIndex(allowedFunctions.size());
                 auto func = FunctionFactory::Create(allowedFunctions[i]);
@@ -96,7 +96,7 @@ namespace Model { namespace Operators
                 int i = RandomIndex(fTypes.size());
                 auto newFunction = FunctionFactory::Create(fTypes[i]);
 
-                if (gene->NumberOfChildren() < newFunction->MaxChildren()) // TODO: and children > MinChildren?
+                if (gene->NumberOfChildren() <= newFunction->MaxChildren()) // TODO: and children > MinChildren?
                 {
                     gene->MoveChildrenTo(newFunction); // transfer sub tree
                     gene.swap(newFunction);
