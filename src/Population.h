@@ -20,17 +20,19 @@ namespace Model
     class Population
     {
     public:
+        using INodePtr = std::unique_ptr<INode>;
+
         /**
         * Represents an individual chromosome (S-expression) in the population,
         * together with it's fitness
         */
         struct Chromosome
         {
-            Chromosome(std::unique_ptr<INode> tree, double fitness) 
+            Chromosome(INodePtr tree, double fitness) 
                 : Tree(std::move(tree))
                 , Fitness(fitness) {}
 
-            std::unique_ptr<INode> Tree;
+            INodePtr Tree;
             double Fitness = 0.0;
         };
 
@@ -80,24 +82,29 @@ namespace Model
         std::tuple<Chromosome*, Chromosome*> SelectParents();
 
         /**
-         * Deep copy from parents, perform crossover and mutation
+         * Adds two offspring from mum and dad to the nextGeneration
          * @param mum The mother chromosome 
          * @param dad The father chromosome
-         * @return two offspring created from mum and dad
+         * @param nextGeneration The next generation of chromosomes (that will replace current generation)
          */
         void Reproduce(const Chromosome& mum, const Chromosome& dad, std::vector<Chromosome>& nextGeneration);
 
         /**
-         * Calculate the fitness for one chromosome
+         * Deep copy from parents, perform crossover and mutation 
+         * @return Two offsprint S-expressions
+         */
+        std::tuple<INodePtr, INodePtr> GetNewOffspring(const Chromosome& mum, const Chromosome& dad) const;
+
+        /**
+         * Calculate the fitness for one chromosome. Currently uses MAE (mean absolute error)
          * @param chromosome The chromosome to evaluate
-         * @param fitnessCases The test cases uses to assess the fitness of the chromosome
          * @return the chromosome fitness as a positive, real number
          */
         double CalculateChromosomeFitness(const INode& chromosome);
 
         std::vector<Chromosome> m_population; ///< The chromosome population
         PopulationParams m_params; ///< The parameters of the population
-        Util::UniformRandomGenerator<float> m_randomProbability; ///< Generates random floats in the range [0,1]
+        mutable Util::UniformRandomGenerator<float> m_randomProbability; ///< Generates random floats in the range [0,1]
         std::vector<double*> m_allowedTerminals; ///< The set of variables
         std::vector<double> m_terminals; ///< The terminal values to evaluate
         std::vector<std::vector<double>> m_fitnessCases; ///< Training cases

@@ -1,9 +1,8 @@
 #include "Population.h"
 
-// #include <iostream>
 #include <algorithm>
 #include <cmath>
-#include <iostream>
+// #include <iostream>
 #include <stdexcept>
 #include "model/FunctionFactory.h"
 #include "model/Terminal.h"
@@ -28,6 +27,7 @@ namespace
 namespace Model
 {
     using Chromosome = Population::Chromosome;
+    using INodePtr = Population::INodePtr;
 
     Population::Population(const PopulationParams& params, const std::vector<std::vector<double>>& fitnessCases)
         : m_params(params)
@@ -89,10 +89,48 @@ namespace Model
         m_population.swap(newPopulation);
 
         // calculate the fitness of the new population
-        CalculateFitness(m_population); 
+        // CalculateFitness(m_population); 
     }
 
     void Population::Reproduce(const Chromosome& mum, const Chromosome& dad, std::vector<Chromosome>& nextGeneration)
+    {
+        auto [son, daughter] = GetNewOffspring(mum, dad);
+
+        if (m_params.AlwaysReplaceParents)
+        {
+            nextGeneration.emplace_back(std::move(son), 0.0);
+            nextGeneration.emplace_back(std::move(daughter), 0.0);
+        }
+        else
+        {
+            // Use a set to order the family, and pick the best to survive
+            auto CompareINodePtr = [&](const Chromosome& a, const Chromosome& b) -> bool
+            { 
+                return a.Fitness < b.Fitness;
+            };
+
+            // add a couple more kiddos to the mix
+            // auto [s2, d2] = GetNewOffspring(mum, dad);
+            // auto [s3, d3] = GetNewOffspring(mum, dad);
+            std::vector<Chromosome> family;
+            family.emplace_back(dad.Tree->Clone(), CalculateChromosomeFitness(*dad.Tree));
+            family.emplace_back(mum.Tree->Clone(), CalculateChromosomeFitness(*mum.Tree));
+            family.emplace_back(std::move(son), CalculateChromosomeFitness(*son));
+            family.emplace_back(std::move(daughter), CalculateChromosomeFitness(*daughter));
+            // family.emplace_back(std::move(s2), CalculateChromosomeFitness(*s2));
+            // family.emplace_back(std::move(s3), CalculateChromosomeFitness(*s3));
+            // family.emplace_back(std::move(d2), CalculateChromosomeFitness(*d2));
+            // family.emplace_back(std::move(d3), CalculateChromosomeFitness(*d3));
+            std::sort(family.begin(), family.end(), CompareINodePtr);
+
+            auto inOrder = family.begin();
+            nextGeneration.emplace_back(std::move(inOrder->Tree), inOrder->Fitness);
+            ++inOrder;
+            nextGeneration.emplace_back(std::move(inOrder->Tree), inOrder->Fitness);
+        }
+    }
+
+    std::tuple<INodePtr, INodePtr> Population::GetNewOffspring(const Chromosome& mum, const Chromosome& dad) const
     {
         // Deep copy mum & dad
         auto son = dad.Tree->Clone();
@@ -113,32 +151,7 @@ namespace Model
         {
             Operators::Mutate(daughter, m_params.AllowedFunctions, m_allowedTerminals);
         }
-
-        if (m_params.AlwaysReplaceParents)
-        {
-            nextGeneration.emplace_back(std::move(son), 0.0);
-            nextGeneration.emplace_back(std::move(daughter), 0.0);
-        }
-        else
-        {
-            if (CalculateChromosomeFitness(*son) < dad.Fitness)
-            {
-                nextGeneration.emplace_back(std::move(son), 0.0);
-            }
-            else
-            {
-                nextGeneration.emplace_back(dad.Tree->Clone(), 0.0);
-            }
-
-            if (CalculateChromosomeFitness(*daughter) < mum.Fitness)
-            {
-                nextGeneration.emplace_back(std::move(daughter), 0.0);
-            }
-            else
-            {
-                nextGeneration.emplace_back(mum.Tree->Clone(), 0.0);
-            }
-        }
+        return std::make_tuple(std::move(son), std::move(daughter));
     }
     
     void Population::CalculateFitness(std::vector<Chromosome>& population)
@@ -155,7 +168,9 @@ namespace Model
             {
                 return 0.0;
             }
+            // return std::min(1.0/fitness, std::numeric_limits<double>::max()/10'000);
             return std::exp(4.0 - std::pow(fitness, 2.0/5.0));
+            // return std::exp(7.0 - std::pow(fitness, 0.32));
         };
 
         int i = 0;
@@ -170,7 +185,7 @@ namespace Model
     double Population::CalculateChromosomeFitness(const INode& chromosome)
     {
         double sumOfErrors = 0.0;
-        for (auto& fCase : m_fitnessCases) // FitnessCases are the training set
+        for (const auto& fCase : m_fitnessCases) // FitnessCases are the training set
         {
             for (auto i = 0u; i < fCase.size()-1; ++i)
             {
@@ -179,7 +194,7 @@ namespace Model
 
             // calculate the fitness (absolute error) for this fitness case
             auto returnVal = chromosome.Evaluate();
-            if (std::isnan(returnVal)) // could be sqrt(-1)
+            if (std::isnan(returnVal)) // TODO: with closure changes (237c984) this shouldn't be necessary.
             {
                 // eliminate it's chances of reproduction
                 return std::numeric_limits<double>::infinity();
@@ -188,7 +203,7 @@ namespace Model
             // add to the tally
             sumOfErrors += std::abs(returnVal - fCase.back());
         }
-        return sumOfErrors;
+        return sumOfErrors / m_fitnessCases.size(); // mean absolute error
     }
 
     std::tuple<Chromosome*, Chromosome*> Population::SelectParents()
