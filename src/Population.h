@@ -5,13 +5,13 @@
 #include <tuple>
 #include <vector>
 #include "model/INode.h"
+#include "PopulationParams.h"
 #include "utils/UniformRandomGenerator.h"
 #include "utils/Raffle.h"
 
 namespace Model
 {
     enum class FunctionType;
-    struct PopulationParams;
 
     /**
      * Represents a population of S-expressions, and facilitates reproduction
@@ -21,10 +21,29 @@ namespace Model
     {
     public:
         /**
+        * Represents an individual chromosome (S-expression) in the population,
+        * together with it's fitness
+        */
+        struct Chromosome
+        {
+            Chromosome(std::unique_ptr<INode> tree, double fitness) 
+                : Tree(std::move(tree))
+                , Fitness(fitness) {}
+
+            std::unique_ptr<INode> Tree;
+            double Fitness = 0.0;
+        };
+
+        /**
          * Constructor
          */
-        Population(const PopulationParams& params);
+        Population(const PopulationParams& params, const std::vector<std::vector<double>>& fitnessCases);
         
+        /**
+         * Resets the population to a new, randomly created state
+         */
+        void Reset();
+
         /**
          * Replace the entire population with it's direct descendants.
          */
@@ -32,8 +51,9 @@ namespace Model
 
         /**
          * Calculate the fitness for all chromosomes in the population
+         * @param population The population of Chromosomes to evaulate
          */
-        void CalculateFitness(const std::vector<std::vector<double>>& fitnessCases);
+        void CalculateFitness(std::vector<Chromosome>& population);
 
         /**
          * @return the average fitness for the population
@@ -45,17 +65,19 @@ namespace Model
          */
         double GetBestFitness() const;
 
+        /**
+         * @return The best S-expression (by fitness) as a string
+         */
         std::string BestAsString() const;
 
     private:
-        using NodePair = std::tuple<std::unique_ptr<INode>, std::unique_ptr<INode>>;
 
         /**
          * Select a pair of parents. The more 'fit' the chromosome, the more
          * likely it will be selected as a parent.
          * @return a pointer to two parents
          */
-        std::tuple<INode*, INode*> SelectParents();
+        std::tuple<Chromosome*, Chromosome*> SelectParents();
 
         /**
          * Deep copy from parents, perform crossover and mutation
@@ -63,25 +85,23 @@ namespace Model
          * @param dad The father chromosome
          * @return two offspring created from mum and dad
          */
-        NodePair Reproduce(const INode& mum, const INode& dad);
+        void Reproduce(const Chromosome& mum, const Chromosome& dad, std::vector<Chromosome>& nextGeneration);
 
         /**
          * Calculate the fitness for one chromosome
-         * @param index The index of the chromosome
+         * @param chromosome The chromosome to evaluate
          * @param fitnessCases The test cases uses to assess the fitness of the chromosome
          * @return the chromosome fitness as a positive, real number
          */
-        double CalculateChromosomeFitness(unsigned int index, const std::vector<std::vector<double>>& fitnessCases);
+        double CalculateChromosomeFitness(const INode& chromosome);
 
-        std::vector<std::unique_ptr<INode>> m_population; ///< The chromosome population
-        std::vector<double> m_fitness; ///< The finess of chromosomes, in order of m_population
-        const double m_crossoverProb = 0.7; ///< The probability of genetic crossover when breeding
-        const double m_mutationProb = 0.001; ///< The probability of gene mutation when breeding
+        std::vector<Chromosome> m_population; ///< The chromosome population
+        PopulationParams m_params; ///< The parameters of the population
         Util::UniformRandomGenerator<float> m_randomProbability; ///< Generates random floats in the range [0,1]
-        std::vector<FunctionType> m_allowedFunctions; ///< The set of functions permitted in chromosomes
         std::vector<double*> m_allowedTerminals; ///< The set of variables
         std::vector<double> m_terminals; ///< The terminal values to evaluate
-        Util::Raffle<double> m_raffle;
+        std::vector<std::vector<double>> m_fitnessCases; ///< Training cases
+        Util::Raffle<double> m_raffle; ///< Ticketing system used to select parents
     };
 }
 

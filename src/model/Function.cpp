@@ -83,11 +83,6 @@ namespace Model
                 [](int a, const auto& child) { return a + child->Size(); });
     }
 
-    bool Function::IsTerminal() const
-    {
-        return false;
-    }
-
     std::unique_ptr<INode>& Function::Get(int index, std::unique_ptr<INode>& ptr)
     {
         // TODO: this function needs to be thoroughly tested
@@ -123,5 +118,10 @@ namespace Model
     bool Function::LacksBreadth() const
     {
         return NumberOfChildren() <  MinAllowedChildren;
+    }
+
+    std::string Function::GetSymbol() const
+    {
+        return m_symbol;
     }
 }

@@ -2,13 +2,10 @@
 #define Program_H
 
 #include <memory>
-#include <tuple>
 #include <vector>
 #include "PopulationParams.h"
 #include "Population.h"
-#include "model/INode.h"
-#include "utils/UniformRandomGenerator.h"
-#include "utils/Raffle.h"
+#include "utils/Logger.h"
 
 namespace Model
 {
@@ -30,10 +27,11 @@ namespace Model
         void Start();
 
     private:
-
         PopulationParams m_params{}; ///< parameters for the population
         std::unique_ptr<Population> m_population; ///< The chromosome population
         int m_numGenerations = 20; ///< Number of generations to evolve through to find a solution
+        int m_iterations = 1; ///< Number of times to run the experiment
+        Util::Logger<double, double, std::string> m_logger{""};
     };
 }
 

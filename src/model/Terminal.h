@@ -63,11 +63,6 @@ namespace Model
         int Size() const override;
 
         /**
-         * @see INode::IsTerminal()
-         */
-        bool IsTerminal() const override;
-
-        /**
          * @see INode::Get
          */
         std::unique_ptr<INode>& Get(int index, std::unique_ptr<INode>& ptr) override;
@@ -78,6 +73,11 @@ namespace Model
         std::unique_ptr<INode> Clone() const override;
 
     private:
+        /**
+         * @see INode::GetSymbol
+         */
+        std::string GetSymbol() const override;
+
         const double* m_variable; ///< A pointer to the terminal value
         std::string m_symbol; ///< A symbolic representation of the terminal
 

@@ -67,8 +67,8 @@ namespace Tests
     {
         auto func = FunctionFactory::Create(FunctionType::Division);
         func->AddChild(std::make_unique<Terminal>(&a));
-        // ASSERT_DOUBLE_EQ(1.0, func->Evaluate()); // TODO: what happens if we only have a numerator
-        // but no denominator? .... should this be allowed?
+        ASSERT_DOUBLE_EQ(1.0, func->Evaluate());
+        // TODO: no denominator .... should this be allowed?
 
         func->AddChild(std::make_unique<Terminal>(&b));
         ASSERT_DOUBLE_EQ(0.5, func->Evaluate());
@@ -101,6 +101,12 @@ namespace Tests
 
         // sqrt can only have one child
         ASSERT_FALSE(func->AddChild(std::make_unique<Terminal>(&b)));
+
+        // we're only dealing with real numbers, sqrt of a negative number should be NAN
+        const double minus = -1.0;
+        func = FunctionFactory::Create(FunctionType::SquareRoot);
+        ASSERT_TRUE(func->AddChild(std::make_unique<Terminal>(&minus)));
+        ASSERT_TRUE(std::isnan(func->Evaluate()));
     }
 
     TEST_F(FunctionTest, CompositeFunction)

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Config>
+    <Iterations>2</Iterations>
+    <Generations>20</Generations>
+    <FitnessCases file="pythagorean_theorem.csv" />
+    <CrossoverProb>0.7</CrossoverProb>
+    <MutationProb>0.001</MutationProb>
+    <!-- <Seed>0</Seed> -->
+
+    <!-- delete or comment-out the Functions that you don't require -->
+    <AllowedFunctions>
+        <Function>Addition</Function>
+        <Function>Subtraction</Function>
+        <Function>Multiplication</Function>
+        <Function>Division</Function>
+        <Function>Square Root</Function>
+        <!-- <Function>Sine</Function> -->
+        <!-- <Function>Cosine</Function> -->
+        <!-- <Function>Exponential</Function> -->
+        <!-- <Function>Logarithm</Function> -->
+    </AllowedFunctions>
+
+    <Population>
+        <Size>1000</Size>
+        <MinInitTreeSize>10</MinInitTreeSize>
+
+        <!-- If AlwaysReplaceParents is uncommented parents are always replaced by children, even if they are less fit. -->
+        <!-- <AlwaysReplaceParents /> -->
+    </Population>
+</Config>

@@ -62,11 +62,6 @@ namespace Model
         return 1;
     }
 
-    bool Terminal::IsTerminal() const
-    {
-        return true;
-    }
-
     std::unique_ptr<INode>& Terminal::Get(int index, std::unique_ptr<INode>& ptr)
     {
         if (index != 0)
@@ -79,5 +74,10 @@ namespace Model
     std::unique_ptr<INode> Terminal::Clone() const
     {
         return std::make_unique<Terminal>(*this);
+    }
+
+    std::string Terminal::GetSymbol() const
+    {
+        return m_symbol;
     }
 }

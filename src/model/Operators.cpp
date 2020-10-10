@@ -2,7 +2,6 @@
 
 #include <memory>
 #include "Terminal.h"
-#include "Function.h"
 #include "../utils/UniformRandomGenerator.h"
 
 namespace
@@ -18,8 +17,31 @@ namespace
      */
     int RandomIndex(size_t size)
     {
-        int maxIndex = static_cast<int>(--size);
+        int maxIndex = static_cast<int>(size-1);
         return RandInt.GetInRange(0, maxIndex);
+    }
+
+    /**
+     * @param gene The S-expression gene to inspect
+     * @return true if the gene is a Terminal (not a Function)
+     */
+    auto isTerminal = [](const std::unique_ptr<Model::INode>& gene)
+    {
+        return gene->MaxChildren() == 0;
+    };
+
+    /**
+     * Adds terminals to a function to ensure it has a valid number of children.
+     * @pre This should only be called on Function objects.
+     * @param func The function to fill.
+     */
+    void FillFunction(Model::INode* func, const std::vector<double*>& variables)
+    {
+        while (func->LacksBreadth())
+        {
+            auto index = RandomIndex(variables.size());
+            func->AddChild(Model::FunctionFactory::Create(variables[index]));
+        }
     }
 }
 
@@ -32,34 +54,73 @@ namespace Model { namespace Operators
 
     void Mutate(std::unique_ptr<INode>& chromosome, const std::vector<FunctionType>& allowedFunctions, const std::vector<double*>& variables)
     {
-        auto randomMutation = [&](std::unique_ptr<INode>& gene) -> void
+        auto randomTerminalMutation = [&](std::unique_ptr<INode>& gene) -> void
         {
-            if (gene->IsTerminal())
+            if (RandInt.GetInRange(0,1)) // mutate to a function
             {
-                int i = RandomIndex(variables.size());
-                gene = std::make_unique<Terminal>(variables[i]);
+                int i = RandomIndex(allowedFunctions.size());
+                auto func = FunctionFactory::Create(allowedFunctions[i]);
+                FillFunction(func.get(), variables);
+                gene.swap(func);
             }
-            else
+            else // mutate to a terminal
             {
-                std::unique_ptr<INode> newFunction = nullptr;
-
-                // TODO: this will spin forever if no function in the set can
-                // handle the number of children
-                do
+                // Prevents mutation to the same terminal, if there are 2+ terminals available.
+                // TODO: this could likely be done in a more efficient manner.
+                std::vector<double*> tTypes(variables);
+                while (!tTypes.empty())
                 {
-                    int i = RandomIndex(allowedFunctions.size());
-                    newFunction = FunctionFactory::Create(allowedFunctions[i]);
-                } while(gene->NumberOfChildren() > newFunction->MaxChildren());
-
-                gene->MoveChildrenTo(newFunction); // transfer sub tree
-                gene.swap(newFunction);
+                    int i = RandomIndex(tTypes.size());
+                    auto newTerminal = FunctionFactory::Create(tTypes[i]);
+                    if (!gene->IsEquivalent(*newTerminal))
+                    {
+                        gene.swap(newTerminal);
+                        break;
+                    }
+                    auto itr = tTypes.begin() + i;
+                    tTypes.erase(itr);
+                }
             }
+        };
+
+        auto randomFunctionMutation = [&](std::unique_ptr<INode>& gene) -> void
+        {
+            // copy function types, such that we can remove types and prevent an infinite loop 
+            // in the case where no function in the vector can handle the number of children.
+            // This does not (and cannot) guarantee that the function will change, since we 
+            // can't guarantee that a suitable replacement will be available to mutate to.
+            std::vector<FunctionType> fTypes(allowedFunctions);
+
+            while (!fTypes.empty())
+            {
+                int i = RandomIndex(fTypes.size());
+                auto newFunction = FunctionFactory::Create(fTypes[i]);
+
+                if (gene->NumberOfChildren() < newFunction->MaxChildren()) // TODO: and children > MinChildren?
+                {
+                    gene->MoveChildrenTo(newFunction); // transfer sub tree
+                    gene.swap(newFunction);
+                    break;
+                }
+
+                auto itr = fTypes.begin() + i; 
+                fTypes.erase(itr);
+            }
+            // else the mutation fails
         };
         
         // Randomly select a node in the chromosome tree 
         int index = RandInt.GetInRange(0, chromosome->Size()-1);
         auto& gene = chromosome->Get(index, chromosome);
-        randomMutation(gene);
+
+        if (isTerminal(gene))
+        {
+            randomTerminalMutation(gene);
+        }
+        else
+        {
+            randomFunctionMutation(gene);
+        }
     }
 
     void Crossover(std::unique_ptr<INode>& left, std::unique_ptr<INode>& right)
@@ -125,7 +186,8 @@ namespace Model { namespace Operators
             {
                 insertIndex = RandInt.GetInRange(0, root->Size()-1);
             } 
-            while (insertIndex != 0 && root->Get(insertIndex, root)->IsTerminal());
+            while (insertIndex != 0 && isTerminal(root->Get(insertIndex, root)) );
+
             // add the new node to the random position in the tree
             if (!root->Get(insertIndex, root)->AddChild(std::move(newNode)) && isFunction)
             {
@@ -133,17 +195,12 @@ namespace Model { namespace Operators
             }
         }
         
-        // Make sure none of the leaf nodes are functions
-        // TODO: check that all functions have the min req. children
+        // Make sure none of the leaf nodes are functions, and that functions have
+        // their minimum number of children.
         for (auto& func : functions)
         {
-            while (func->NumberOfChildren() == 0 || reinterpret_cast<Function*>(func)->LacksBreadth())
-            {
-                // add a variable
-                index = RandomIndex(variables.size());
-                func->AddChild(FunctionFactory::Create(variables[index]));
-            }
+            FillFunction(func, variables);
         }
-        return std::move(root);
+        return root;
     }
 }}
