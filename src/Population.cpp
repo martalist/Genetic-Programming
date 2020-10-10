@@ -7,6 +7,8 @@
 #include "model/FunctionFactory.h"
 #include "model/Terminal.h"
 #include "model/Operators.h"
+#include "utils/Raffle.h"
+#include "utils/Tournament.h"
 
 namespace Model
 {
@@ -54,12 +56,14 @@ namespace Model
     Population::Population(const PopulationParams& params, const std::vector<std::vector<double>>& fitnessCases)
         : m_params(params)
         , m_randomProbability(.0, 1.)
+        // , m_selector(std::make_unique<Util::Raffle<double>>())
+        , m_selector(std::make_unique<Util::Tournament<double>>(m_params.PopulationSize, 20))
     {
         if (params.Seed.has_value())
         {
             Operators::SetSeed(params.Seed.value());
             m_randomProbability.SetSeed(params.Seed.value());
-            m_raffle.SetSeed(params.Seed.value());
+            m_selector->SetSeed(params.Seed.value());
         }
 
         s_fitnessCases = fitnessCases;
@@ -73,7 +77,7 @@ namespace Model
     void Population::Reset()
     {
         m_population.clear();
-        m_raffle.Reset();
+        m_selector->Reset();
 
         // generate an appropriately sized population
         for (auto i = 0; i < m_params.PopulationSize; ++i)
@@ -174,7 +178,7 @@ namespace Model
     {
         std::sort(m_population.begin(), m_population.end());
 
-        m_raffle.Reset(); // get rid of the previous generation's tickets
+        m_selector->Reset(); // get rid of the previous generation's tickets
         
         /**
          * Returns the number of raffle tickets should be allocated for a given fitness value.
@@ -196,14 +200,14 @@ namespace Model
         {
             // TODO: only calculate ticketAllocation for raffle style
             auto numberOfTickets = ticketAllocation(chromosome.Fitness);
-            m_raffle.RegisterElement(numberOfTickets, i++);
+            m_selector->RegisterElement(numberOfTickets, i++);
         }
     }
 
     std::tuple<Chromosome*, Chromosome*> Population::SelectParents()
     {
-        int mum = m_raffle.Draw();
-        int dad = m_raffle.Draw();
+        int mum = m_selector->Draw();
+        int dad = m_selector->Draw();
         return std::make_tuple( &m_population[mum], &m_population[dad] );
     }
 

@@ -7,7 +7,7 @@
 #include "model/INode.h"
 #include "PopulationParams.h"
 #include "utils/UniformRandomGenerator.h"
-#include "utils/Raffle.h"
+#include "utils/ISelector.h"
 
 namespace Model
 {
@@ -113,7 +113,7 @@ namespace Model
         PopulationParams m_params; ///< The parameters of the population
         mutable Util::UniformRandomGenerator<float> m_randomProbability; ///< Generates random floats in the range [0,1]
         std::vector<double*> m_allowedTerminals; ///< The set of variables
-        Util::Raffle<double> m_raffle; ///< Ticketing system used to select parents
+        std::unique_ptr<Util::ISelector<double>> m_selector; ///< Ticketing system used to select parents
 
         // TODO: these should probably be moved out to Program (from Population)
         static std::vector<double> s_terminals; ///< The terminal values to evaluate

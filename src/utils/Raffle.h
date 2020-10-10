@@ -3,6 +3,7 @@
 
 #include <utility>
 #include <vector>
+#include "ISelector.h"
 #include "UniformRandomGenerator.h"
 
 namespace Util
@@ -15,7 +16,7 @@ namespace Util
      * Ticket numbers may be floating-point/continuous in this simulated raffle.
      */
     template <typename T, typename Distribution = std::uniform_real_distribution<T>>
-    class Raffle
+    class Raffle : public ISelector<T>
     {
     public:
         /**
