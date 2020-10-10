@@ -2,6 +2,7 @@
 #include "RaffleTest.cpp"
 #include "FunctionTest.cpp"
 #include "OperatorsTest.cpp"
+#include "PopulationTest.cpp"
 
 int main(int argc, char **argv)
 {
