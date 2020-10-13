@@ -26,7 +26,8 @@ namespace Model
             s_config.NumGenerations = tree.get("Config.Generations", 20);
             s_config.Params.PopulationSize = tree.get("Config.Population.Size", 1000);
             s_config.Params.CrossoverProb = tree.get<double>("Config.CrossoverProb", 0.7);
-            s_config.Params.MutationProb = tree.get<double>("Config.MutationProb", 0.001);
+            s_config.Params.MutationProb = tree.get<double>("Config.MutationProb", 0.01);
+            s_config.Params.HoistMutationProb = tree.get<double>("Config.HoistMutationProb", 0.01);
             s_config.Params.MinInitialTreeSize = tree.get("Config.Population.MinInitTreeSize", 10);
             auto replaceParents = tree.get_child_optional("Config.Population.AlwaysReplaceParents");
             if (replaceParents)
@@ -70,6 +71,7 @@ namespace Model
         std::cout << "\tMinimum initial S-expressions size: " << s_config.Params.MinInitialTreeSize << std::endl;
         std::cout << "\tCrossover probability: " << s_config.Params.CrossoverProb << std::endl;
         std::cout << "\tMutation probability: " << s_config.Params.MutationProb << std::endl;
+        std::cout << "\tHoistMutation probability: " << s_config.Params.HoistMutationProb << std::endl;
         std::cout << "\tNumber of terminals: " << s_config.Params.NumberOfTerminals << std::endl;
 
         std::cout << "\tAllowed functions: ";

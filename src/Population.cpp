@@ -170,15 +170,28 @@ namespace Model
             Operators::Crossover(son, daughter);
         }
 
-        // should we mutate?
-        if (m_randomProbability.Get() <= m_params.MutationProb)
+        // should we mutate son?
+        auto mutationLikelihood = m_randomProbability.Get();
+        if (mutationLikelihood <= m_params.MutationProb)
         {
             Operators::Mutate(son, m_params.AllowedFunctions, m_allowedTerminals);
         }
-        if (m_randomProbability.Get() <= m_params.MutationProb)
+        else if (mutationLikelihood <= m_params.MutationProb + m_params.HoistMutationProb)
+        {
+            Operators::HoistMutate(son);
+        }
+
+        // should we mutate daughter?
+        mutationLikelihood = m_randomProbability.Get();
+        if (mutationLikelihood <= m_params.MutationProb)
         {
             Operators::Mutate(daughter, m_params.AllowedFunctions, m_allowedTerminals);
         }
+        else if (mutationLikelihood <= m_params.MutationProb + m_params.HoistMutationProb)
+        {
+            Operators::HoistMutate(daughter);
+        }
+
         return std::make_tuple(std::move(son), std::move(daughter));
     }
 

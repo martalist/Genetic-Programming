@@ -3,8 +3,9 @@
     <Iterations>2</Iterations>
     <Generations>20</Generations>
     <FitnessCases file="pythagorean_theorem.csv" />
-    <CrossoverProb>0.8</CrossoverProb>
+    <CrossoverProb>0.7</CrossoverProb>
     <MutationProb>0.1</MutationProb>
+    <HoistMutationProb>0.1</HoistMutationProb>
     <!-- <Seed>0</Seed> -->
 
     <!-- delete or comment-out the Functions that you don't require -->
@@ -21,8 +22,8 @@
     </AllowedFunctions>
 
     <Population>
-        <Size>1000</Size>
-        <MinInitTreeSize>25</MinInitTreeSize>
+        <Size>500</Size>
+        <MinInitTreeSize>15</MinInitTreeSize>
 
         <!-- If AlwaysReplaceParents is uncommented parents are always replaced by children, even if they are less fit. -->
         <!-- <AlwaysReplaceParents /> -->

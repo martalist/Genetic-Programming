@@ -129,9 +129,7 @@ namespace Model { namespace Operators
         int size = chromosome->Size();
         if (size == 1) 
         {
-            // In normal execution of the GP program we should never need to call
-            // Hoist mutate on a terminal.
-            throw std::length_error("Attempted to hoist-mutate a terminal.");
+            return; // chromosome is a terminal; nothing to hoist
         }
 
         // get the target gene (that we'll hoist into)

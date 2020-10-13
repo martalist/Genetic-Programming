@@ -10,6 +10,7 @@ namespace
         10, // The minimum tree size of newly (randomly) created S-expressions
         0.7, // crossover probability
         0.001, // mutation probability
+        0.001, // hoist mutation probability
         { Model::FunctionType::SquareRoot }, // allowed functions
         1, // The number of terminals
         0, // random seed
@@ -22,6 +23,7 @@ namespace
         10, // The minimum tree size of newly (randomly) created S-expressions
         0.7, // crossover probability
         0.001, // mutation probability
+        0.001, // hoist mutation probability
         { Model::FunctionType::Addition, Model::FunctionType::Multiplication, Model::FunctionType::SquareRoot }, // allowed functions
         2, // The number of terminals
         0, // random seed

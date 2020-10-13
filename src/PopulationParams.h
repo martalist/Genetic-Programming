@@ -17,6 +17,7 @@ namespace Model
         int MinInitialTreeSize = 10; ///< The minimum tree size of newly (randomly) created S-expressions
         double CrossoverProb = 0.7; ///< The probability that two child genes cross over
         double MutationProb = 0.001; ///< The probability that a child gene mutates
+        double HoistMutationProb = 0.001; ///< The probability that hoist mutation occurs when reproducing
         std::vector<FunctionType> AllowedFunctions; ///< The set of functions permitted in chromosomes
         int NumberOfTerminals; ///< The number of terminals
         std::optional<int> Seed;
