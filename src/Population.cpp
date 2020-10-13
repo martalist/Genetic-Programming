@@ -137,16 +137,16 @@ namespace Model
         {
             // add a couple more kiddos to the mix
             auto [s2, d2] = GetNewOffspring(mum, dad);
-            // auto [s3, d3] = GetNewOffspring(mum, dad);
+            auto [s3, d3] = GetNewOffspring(mum, dad);
             std::vector<Chromosome> family;
-            family.emplace_back(*this, dad.Tree->Clone());
-            family.emplace_back(*this, mum.Tree->Clone());
+            // family.emplace_back(*this, dad.Tree->Clone());
+            // family.emplace_back(*this, mum.Tree->Clone());
             family.emplace_back(*this, std::move(son));
             family.emplace_back(*this, std::move(daughter));
             family.emplace_back(*this, std::move(s2));
             family.emplace_back(*this, std::move(d2));
-            // family.emplace_back(*this, std::move(s3));
-            // family.emplace_back(*this, std::move(d3));
+            family.emplace_back(*this, std::move(s3));
+            family.emplace_back(*this, std::move(d3));
             std::sort(family.begin(), family.end());
 
             auto inOrder = family.begin();
@@ -236,28 +236,38 @@ namespace Model
         return std::make_tuple( &m_population[mum], &m_population[dad] );
     }
 
-    double Population::GetAverageFitness() const
+    std::tuple<double, double, double, double, double> Population::GetRangeStatistics() const
     {
-        int count = 0;
-        double total = 0.0;
-        for (auto i = 0u; i < m_population.size(); i++)
+        auto size = m_population.size();
+        auto min = m_sortedByFitness[0]->Fitness;
+        auto max = m_sortedByFitness[size-1]->Fitness;
+
+        auto getMedian = [&](int begin, int end)
         {
-            // Some functions have conditions that if not met result in NaN
-            // For example, sqrt(a) requires that a >= 0. 
-            // So only calculate the average of S-expressions that are defined across the entire terminal domain
-            auto& fitness = m_population[i].Fitness;
-            if (!std::isnan(fitness) && fitness != std::numeric_limits<double>::infinity())
+            auto size = end - begin;
+            auto middle = begin + size/2;
+            double median = m_sortedByFitness[middle]->Fitness;
+            if (size % 2 == 0) // even
             {
-                total += fitness;
-                ++count;
+                auto middleLeft = m_sortedByFitness[middle-1]->Fitness;
+                // if even, need to return the average of the middle two elems
+                median = (middleLeft + median) * 0.5;
             }
-        }
-        return total / count;
+            return median;
+        };
+
+        auto median = getMedian(0, size);
+        auto firstQuartile = getMedian(0, size/2);
+        auto thirdQuartile = getMedian(size/2, size);
+
+        return std::make_tuple(min, firstQuartile, median, thirdQuartile, max);
     }
 
-    double Population::GetBestFitness() const
+    double Population::GetAverageFitness() const
     {
-        return m_sortedByFitness[0]->Fitness;
+        using ConstItr = std::vector<Chromosome>::const_iterator;
+        auto getFitness = [](const ConstItr& itr) { return itr->Fitness; };
+        return Util::Average<ConstItr>(m_population.begin(), m_population.end(), getFitness);
     }
 
     std::string Population::BestAsString() const
@@ -268,24 +278,26 @@ namespace Model
     double Population::UpdateParsimonyCoefficient()
     {
         using Itr = std::vector<Chromosome>::iterator;
-        const double DenominatorThreshold = 0.001;
+        const double DenominatorThreshold = 1e-06;
 
         auto getSize = [](const Itr& itr) -> double { return static_cast<double>(itr->Size); };
         auto getFitness = [](const Itr& itr) -> double { return itr->Fitness; };
         
-        auto var = Util::Variance<Itr>(m_population.begin(), m_population.end(), getSize);
+        auto varSize = Util::Variance<Itr>(m_population.begin(), m_population.end(), getSize);
         auto covar = Util::Covariance<Itr, Itr>( m_population.begin(), m_population.end(), getSize,
                                             m_population.begin(), m_population.end(), getFitness);
 
-        return 0.025;
+        return 0.025; 
+        // TODO: this may be affected by allowing > 2 children per function
         if (covar < DenominatorThreshold)
         {
-            if (var < DenominatorThreshold)
+            if (varSize < DenominatorThreshold)
             {
                 return 0.0; // approaching 0/0
             }
             return 1.0; // approaching infty
         }
-        return std::clamp(covar / var, 0.0, 1.0);
+        return covar / varSize;
+        return std::clamp(covar / varSize, 0.0, 1.0);
     }
 }

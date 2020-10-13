@@ -7,7 +7,7 @@
 namespace Util
 {
     template <class Iterator>
-    double Average(Iterator first, Iterator last, std::function<double(const Iterator&)> value)
+    double Average(const Iterator& first, const Iterator& last, std::function<double(Iterator&)> value)
     {
         auto n = std::distance(first, last);
         double sum = 0.0;
@@ -19,7 +19,7 @@ namespace Util
     }
 
     template <class Iterator>
-    double Variance(Iterator first, Iterator last, std::function<double(const Iterator&)> value)
+    double Variance(const Iterator& first, const Iterator& last, std::function<double(const Iterator&)> value)
     {
         auto mean = Average<Iterator>(first, last, value);
         auto n = std::distance(first, last);
@@ -32,8 +32,8 @@ namespace Util
     }
 
     template <class Iterator1, class Iterator2>
-    double Covariance(Iterator1 first1, Iterator1 last1, std::function<double(Iterator1)> value1,
-                      Iterator2 first2, Iterator2 last2, std::function<double(Iterator2)> value2)
+    double Covariance(const Iterator1& first1, const Iterator1& last1, std::function<double(Iterator1)> value1,
+                      const Iterator2& first2, const Iterator2& last2, std::function<double(Iterator2)> value2)
     {
         auto n1 = std::distance(first1, last1);
         auto n2 = std::distance(first2, last2);

@@ -76,14 +76,15 @@ namespace Model
         void Evolve();
 
         /**
+         * @return the minimum, first quartile, median, third quartile and maximum fitness.
+         * @pre Assumes that the population has already been sorted.
+         */
+        std::tuple<double, double, double, double, double> GetRangeStatistics() const;
+
+        /**
          * @return the average fitness for the population
          */
         double GetAverageFitness() const;
-
-        /**
-         * @return the best fitness value for the population
-         */
-        double GetBestFitness() const;
 
         /**
          * @return The best S-expression (by fitness) as a string

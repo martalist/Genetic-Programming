@@ -136,7 +136,8 @@ namespace Tests
         // test the method correctly returns the best
         // for 0, 1, more chromosomes
         p1.Reset();
-        ASSERT_DOUBLE_EQ(12.992451294754199, p1.GetBestFitness());
+        auto [ min, qrt1, median, qrt3, max ] = p1.GetRangeStatistics();
+        ASSERT_DOUBLE_EQ(12.992451294754199, min);
 
         // need to test after a couple of evolutions
     }

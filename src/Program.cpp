@@ -38,24 +38,23 @@ namespace Model
             // m_logger.WriteHeader("Average Fitness", "Best Fitness", "Best S-Expression"); // TODO
 
             m_population->Reset(); // start with a fresh population
-            auto avg = m_population->GetAverageFitness();
-            auto best = m_population->GetBestFitness();
-            m_logger.AddLine(avg, best, "\"" + m_population->BestAsString() + "\"");
+            auto [ min, firstQtr, median, thirdQtr, max ] = m_population->GetRangeStatistics();
+            m_logger.AddLine(min, firstQtr, median, thirdQtr, max, "\"" + m_population->BestAsString() + "\"");
 
             // evolve over m_numGenerations
             for (auto i = 0; i < m_numGenerations; ++i)
             {
                 m_population->Evolve();
-                avg = m_population->GetAverageFitness();
-                best = m_population->GetBestFitness();
-                m_logger.AddLine(avg, best, "\"" + m_population->BestAsString() + "\"");
+                auto [ minimum, firstQtr, median, thirdQtr, max ] = m_population->GetRangeStatistics();
+                m_logger.AddLine(minimum, firstQtr, median, thirdQtr, max, "\"" + m_population->BestAsString() + "\"");
+                min = minimum;
             }
 
             m_logger.Write();
 
             // print best result
             std::cout << std::fixed << "Best S-expression in iteration " << iteration+1
-                << " has fitness: " << best << std::endl
+                << " has fitness: " << min << std::endl
                 << "\t" << m_population->BestAsString() << std::endl << std::endl;
         }
         std::cout << "Results written to " << m_logger.GetOutputDir() << std::endl << std::endl;
