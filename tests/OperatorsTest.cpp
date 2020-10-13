@@ -72,6 +72,34 @@ namespace Tests
         }
     }
 
+    TEST(OperatorsTest, HoistMutate)
+    {
+        auto root = FunctionFactory::Create(FunctionType::SquareRoot);
+        auto func = FunctionFactory::Create(FunctionType::SquareRoot);
+        func->AddChild(FunctionFactory::Create(&A));
+        root->AddChild(std::move(func));
+
+        int size = root->Size();
+        while (size > 1)
+        {
+            Operators::HoistMutate(root);
+            size = root->Size();
+
+            if (size == 3)
+            {
+                ASSERT_DOUBLE_EQ(std::sqrt(std::sqrt(A)), root->Evaluate());
+            }
+            else if (size ==2)
+            {
+                ASSERT_DOUBLE_EQ(std::sqrt(A), root->Evaluate());
+            }
+            else
+            {
+                ASSERT_DOUBLE_EQ(A, root->Evaluate());
+            }
+        }
+    }
+
     TEST(OperatorsTest, TestFunctionThatCantHoldAllChildren)
     {
         // TODO: what happens when none of the allowed functions can

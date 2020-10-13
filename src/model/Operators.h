@@ -14,12 +14,25 @@ namespace Model { namespace Operators
     void SetSeed(int seed);
     
     /**
-     * Performs mutation on a chromosome
+     * Performs standard mutation on a chromosome. 
+     * 
+     * A gene is randomly selected, and mutated to another valid, random gene from the set of allowed 
+     * functions and terminals.
      * @param chromosome The S-expression to mutate
      * @param allowedFunctions The allowed set of functions that may be selected from
      * @param variables The allowed set of terminals that may be selected from
      */
     void Mutate(std::unique_ptr<INode>& chromosome, const std::vector<FunctionType>& allowedFunctions, const std::vector<double*>& variables);
+
+    /**
+     * Performs hoist mutation on a chromosome. 
+     *
+     * Selects a gene (subtree) at random from within the chromosome, then randomly selects another node
+     * within the subtree. The second gene is hoisted into the position of the first. This type of 
+     * mutation is beneficial to reduce the size of chromosomes.
+     * @param chromosome The S-expression to mutate.
+     */
+    void HoistMutate(std::unique_ptr<INode>& chromosome);
 
     /**
      * Performs crossover on a pair of chromosomes

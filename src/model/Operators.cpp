@@ -123,6 +123,33 @@ namespace Model { namespace Operators
         }
     }
 
+    void HoistMutate(std::unique_ptr<INode>& chromosome)
+    {
+        // get the target gene from within chromosome
+        int size = chromosome->Size();
+        if (size == 1) 
+        {
+            // In normal execution of the GP program we should never need to call
+            // Hoist mutate on a terminal.
+            throw std::length_error("Attempted to hoist-mutate a terminal.");
+        }
+
+        // get the target gene (that we'll hoist into)
+        auto index = RandInt.GetInRange(0, size-1);
+        auto& target = index == 0 ? chromosome : chromosome->Get(index, chromosome);
+
+        int targetSize = target->Size();
+        if (targetSize == 1)
+        {
+            return; // target is a terminal, so there is no subtree to hoist
+        }
+
+        // get the subtree to hoist, and swap them
+        index = RandInt.GetInRange(0, targetSize-1);
+        auto& toHoist = index == 0 ? target : target->Get(index, target);
+        target = std::move(toHoist);
+    }
+
     void Crossover(std::unique_ptr<INode>& left, std::unique_ptr<INode>& right)
     {
         int leftSize = left->Size();
