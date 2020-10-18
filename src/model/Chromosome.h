@@ -15,14 +15,24 @@ namespace Model
      */
     class Chromosome
     {
-    public:
         using INodePtr = std::unique_ptr<INode>;
 
+    public:
         /**
-         * Constructor
+         * Constructor - Does no fitness calculations upon construction
+         * @param tree The underlying S-expression
+         */
+        Chromosome(INodePtr tree);
+
+        /**
+         * Constructor - Calculates fitness and weighted fitness upon construction.
          */
         Chromosome(INodePtr tree, const std::vector<std::vector<double>>& fitnessCases, 
                 std::vector<double>& terminals, double parsimonyCoefficient);
+
+        /**
+         * Constructor - Calculates only the weighted fitness upon construction.
+         */
         Chromosome(INodePtr tree, double fitness, double parsimonyCoefficient);
 
         /**
@@ -41,8 +51,8 @@ namespace Model
 
         INodePtr Tree; ///< the S-expression
         int Size; ///< the length (nodes in the tree)
-        double Fitness; ///< raw fitness of the chromosome
-        double WeightedFitness; ///< weighted fitness, with penalty for length/size
+        double Fitness = std::numeric_limits<double>::max(); ///< raw fitness of the chromosome
+        double WeightedFitness = std::numeric_limits<double>::max(); ///< weighted fitness, with penalty for length/size
     };
 }
 

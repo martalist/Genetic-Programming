@@ -13,8 +13,6 @@
 
 namespace Model
 {
-    using INodePtr = Population::INodePtr;
-
     Population::Population(const PopulationParams& params, const std::vector<std::vector<double>>& fitnessCases)
         : m_params(params)
         , m_randomProbability(.0, 1.)
@@ -86,8 +84,8 @@ namespace Model
 
         if (m_params.AlwaysReplaceParents)
         {
-            nextGeneration.emplace_back(std::move(son), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
-            nextGeneration.emplace_back(std::move(daughter), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
+            nextGeneration.emplace_back(std::move(son.Tree), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
+            nextGeneration.emplace_back(std::move(daughter.Tree), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
         }
         else
         {
@@ -97,16 +95,16 @@ namespace Model
             std::vector<Chromosome> family;
             // family.emplace_back(dad.Tree->Clone(), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
             // family.emplace_back(mum.Tree->Clone(), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
-            family.emplace_back(std::move(son), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
-            family.emplace_back(std::move(daughter), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
-            family.emplace_back(std::move(s2), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
-            family.emplace_back(std::move(d2), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
-            family.emplace_back(std::move(s3), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
-            family.emplace_back(std::move(d3), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
+            family.emplace_back(std::move(son.Tree), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
+            family.emplace_back(std::move(daughter.Tree), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
+            family.emplace_back(std::move(s2.Tree), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
+            family.emplace_back(std::move(d2.Tree), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
+            family.emplace_back(std::move(s3.Tree), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
+            family.emplace_back(std::move(d3.Tree), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
             std::sort(family.begin(), family.end());
 
             auto inOrder = family.begin();
-            auto fitness = inOrder->Fitness;
+            double fitness = inOrder->Fitness;
             nextGeneration.emplace_back(std::move(inOrder->Tree), fitness, m_parsimonyCoefficient);
             ++inOrder;
             fitness = inOrder->Fitness;
@@ -114,12 +112,13 @@ namespace Model
         }
     }
 
-    std::tuple<INodePtr, INodePtr> Population::GetNewOffspring(const Chromosome& mum, const Chromosome& dad) const
+    // TODO: return Chromosomes!!
+    std::tuple<Chromosome, Chromosome> Population::GetNewOffspring(const Chromosome& mum, const Chromosome& dad) const
     {
         // Deep copy mum & dad
-        auto son = dad.Tree->Clone();
-        auto daughter = mum.Tree->Clone();
-        
+        Chromosome son{ dad.Tree->Clone() };
+        Chromosome daughter{ mum.Tree->Clone() };
+
         // should we crossover? 
         if (m_randomProbability.Get() <= m_params.CrossoverProb)
         {

@@ -5,6 +5,12 @@
 
 namespace Model
 {
+    Chromosome::Chromosome(Chromosome::INodePtr tree)
+        : Tree(std::move(tree)) 
+        , Size(Tree->Size())
+    {
+    }
+
     Chromosome::Chromosome(Chromosome::INodePtr tree, const std::vector<std::vector<double>>& fitnessCases, 
             std::vector<double>& terminals, double parsimonyCoefficient)
         : Tree(std::move(tree)) 

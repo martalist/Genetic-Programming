@@ -52,7 +52,7 @@ namespace Model { namespace Operators
         RandInt.SetSeed(seed);
     }
 
-    void Mutate(std::unique_ptr<INode>& chromosome, const std::vector<FunctionType>& allowedFunctions, const std::vector<double*>& variables)
+    void Mutate(Chromosome& chromosome, const std::vector<FunctionType>& allowedFunctions, const std::vector<double*>& variables)
     {
         auto randomTerminalMutation = [&](std::unique_ptr<INode>& gene) -> void
         {
@@ -110,8 +110,8 @@ namespace Model { namespace Operators
         };
         
         // Randomly select a node in the chromosome tree 
-        int index = RandInt.GetInRange(0, chromosome->Size()-1);
-        auto& gene = chromosome->Get(index, chromosome);
+        int index = RandInt.GetInRange(0, chromosome.Size-1);
+        auto& gene = chromosome.Tree->Get(index, chromosome.Tree);
 
         if (isTerminal(gene))
         {
@@ -121,20 +121,22 @@ namespace Model { namespace Operators
         {
             randomFunctionMutation(gene);
         }
+
+        // update the cached size of the chromosome
+        chromosome.Size = chromosome.Tree->Size();
     }
 
-    void HoistMutate(std::unique_ptr<INode>& chromosome)
+    void HoistMutate(Chromosome& chromosome)
     {
         // get the target gene from within chromosome
-        int size = chromosome->Size();
-        if (size == 1) 
+        if (chromosome.Size == 1) 
         {
             return; // chromosome is a terminal; nothing to hoist
         }
 
         // get the target gene (that we'll hoist into)
-        auto index = RandInt.GetInRange(0, size-1);
-        auto& target = index == 0 ? chromosome : chromosome->Get(index, chromosome);
+        auto index = RandInt.GetInRange(0, chromosome.Size-1);
+        auto& target = index == 0 ? chromosome.Tree : chromosome.Tree->Get(index, chromosome.Tree);
 
         int targetSize = target->Size();
         if (targetSize == 1)
@@ -146,34 +148,38 @@ namespace Model { namespace Operators
         index = RandInt.GetInRange(0, targetSize-1);
         auto& toHoist = index == 0 ? target : target->Get(index, target);
         target = std::move(toHoist);
+
+        // update the cached size of the chromosome
+        chromosome.Size = chromosome.Tree->Size();
     }
 
-    void Crossover(std::unique_ptr<INode>& left, std::unique_ptr<INode>& right)
+    void Crossover(Chromosome& left, Chromosome& right)
     {
-        int leftSize = left->Size();
-        int rightSize = right->Size();
-        if (leftSize == 1 && rightSize == 1)
+        if (left.Size == 1 && right.Size == 1)
         {
-            left.swap(right);
+            // do nothing; swapping at the base yields two S-expressions the same
+            return;
         }
 
         // Pick a random node in left
-        if (leftSize == 1)
+        if (left.Size == 1)
         {
-            left.swap(right->Get(RandInt.GetInRange(1, rightSize-1), right));
-            return;
+            left.Tree.swap(right.Tree->Get(RandInt.GetInRange(1, right.Size-1), right.Tree));
         }
-        else if (rightSize == 1)
+        else if (right.Size == 1)
         {
-            right.swap(left->Get(RandInt.GetInRange(1, leftSize-1), left));
+            right.Tree.swap(left.Tree->Get(RandInt.GetInRange(1, left.Size-1), left.Tree));
         }
         else
         {
-            int leftIndex = RandInt.GetInRange(1, leftSize-1);
-            int rightIndex = RandInt.GetInRange(1, rightSize-1);
-            auto& leftSubtree = left->Get(leftIndex, left);
-            leftSubtree.swap(right->Get(rightIndex, right));
+            int leftIndex = RandInt.GetInRange(1, left.Size-1);
+            int rightIndex = RandInt.GetInRange(1, right.Size-1);
+            auto& leftSubtree = left.Tree->Get(leftIndex, left.Tree);
+            leftSubtree.swap(right.Tree->Get(rightIndex, right.Tree));
         }
+
+        left.Size = left.Tree->Size();
+        right.Size = right.Tree->Size();
     }
 
     std::unique_ptr<INode> CreateRandomChromosome(int targetSize, const std::vector<FunctionType>& allowedFunctions, const std::vector<double*>& variables)

@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "INode.h"
+#include "Chromosome.h"
 #include "FunctionFactory.h" // TODO: consider moving FunctionType out of this file
 
 namespace Model { namespace Operators
@@ -22,7 +23,7 @@ namespace Model { namespace Operators
      * @param allowedFunctions The allowed set of functions that may be selected from
      * @param variables The allowed set of terminals that may be selected from
      */
-    void Mutate(std::unique_ptr<INode>& chromosome, const std::vector<FunctionType>& allowedFunctions, const std::vector<double*>& variables);
+    void Mutate(Chromosome& chromosome, const std::vector<FunctionType>& allowedFunctions, const std::vector<double*>& variables);
 
     /**
      * Performs hoist mutation on a chromosome. 
@@ -32,14 +33,14 @@ namespace Model { namespace Operators
      * mutation is beneficial to reduce the size of chromosomes.
      * @param chromosome The S-expression to mutate.
      */
-    void HoistMutate(std::unique_ptr<INode>& chromosome);
+    void HoistMutate(Chromosome& chromosome);
 
     /**
      * Performs crossover on a pair of chromosomes
      * @param left The first S-expression/chromosome
      * @param right The second S-expression/chromosome
      */
-    void Crossover(std::unique_ptr<INode>& left, std::unique_ptr<INode>& right);
+    void Crossover(Chromosome& left, Chromosome& right);
 
     /**
      * Creates a new, random chromosome

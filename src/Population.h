@@ -5,7 +5,6 @@
 #include <tuple>
 #include <vector>
 #include "model/Chromosome.h"
-#include "model/INode.h" // TODO: ought not be required --> use Chromosome instead
 #include "PopulationParams.h"
 #include "utils/UniformRandomGenerator.h"
 #include "utils/ISelector.h"
@@ -27,7 +26,6 @@ namespace Model
     {
     public:
         friend Tests::PopulationTest;
-        using INodePtr = std::unique_ptr<INode>;
 
         /**
          * Constructor
@@ -93,7 +91,7 @@ namespace Model
          * Deep copy from parents, perform crossover and mutation 
          * @return Two offsprint S-expressions
          */
-        std::tuple<INodePtr, INodePtr> GetNewOffspring(const Chromosome& mum, const Chromosome& dad) const;
+        std::tuple<Chromosome, Chromosome> GetNewOffspring(const Chromosome& mum, const Chromosome& dad) const;
 
         /**
          * Updates the parsimony coefficient
