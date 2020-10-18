@@ -5,8 +5,7 @@
 // #include <iostream>
 #include <stdexcept>
 #include "model/FunctionFactory.h"
-#include "model/Terminal.h"
-#include "model/Operators.h"
+#include "model/Chromosome.h"
 #include "utils/Math.h"
 #include "utils/Raffle.h"
 #include "utils/Tournament.h"
@@ -54,7 +53,7 @@ namespace Model
     void Population::Evolve()
     {
         // Create a new population
-        std::vector<std::unique_ptr<Chromosome>> newPopulation;
+        std::vector<std::unique_ptr<IChromosome>> newPopulation;
         while (newPopulation.size() < m_population.size())
         {
             // select a breeding pair
@@ -76,15 +75,15 @@ namespace Model
         RecalibrateParentSelector(); 
     }
 
-    void Population::Reproduce(const Chromosome& mum, const Chromosome& dad, std::vector<std::unique_ptr<Chromosome>>& nextGeneration)
+    void Population::Reproduce(const IChromosome& mum, const IChromosome& dad, std::vector<std::unique_ptr<IChromosome>>& nextGeneration)
     {
         auto [son, daughter] = GetNewOffspring(mum, dad);
 
         if (m_params.AlwaysReplaceParents)
         {
-            nextGeneration.push_back(std::make_unique<Chromosome>(std::move(son.GetTree()), m_fitnessCases, 
+            nextGeneration.push_back(std::make_unique<Chromosome>(std::move(son->GetTree()), m_fitnessCases, 
                         m_terminals, m_parsimonyCoefficient));
-            nextGeneration.push_back(std::make_unique<Chromosome>(std::move(daughter.GetTree()), m_fitnessCases, 
+            nextGeneration.push_back(std::make_unique<Chromosome>(std::move(daughter->GetTree()), m_fitnessCases, 
                         m_terminals, m_parsimonyCoefficient));
         }
         else
@@ -95,12 +94,12 @@ namespace Model
             std::vector<Chromosome> family;
             // family.push_back(dad.GetTree()->Clone(), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
             // family.push_back(mum.GetTree()->Clone(), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
-            family.emplace_back(std::move(son.GetTree()), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
-            family.emplace_back(std::move(daughter.GetTree()), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
-            family.emplace_back(std::move(s2.GetTree()), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
-            family.emplace_back(std::move(d2.GetTree()), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
-            family.emplace_back(std::move(s3.GetTree()), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
-            family.emplace_back(std::move(d3.GetTree()), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
+            family.emplace_back(std::move(son->GetTree()), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
+            family.emplace_back(std::move(daughter->GetTree()), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
+            family.emplace_back(std::move(s2->GetTree()), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
+            family.emplace_back(std::move(d2->GetTree()), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
+            family.emplace_back(std::move(s3->GetTree()), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
+            family.emplace_back(std::move(d3->GetTree()), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
             std::sort(family.begin(), family.end());
 
             auto inOrder = family.begin();
@@ -112,39 +111,38 @@ namespace Model
         }
     }
 
-    // TODO: return Chromosomes!!
-    std::tuple<Chromosome, Chromosome> Population::GetNewOffspring(const Chromosome& mum, const Chromosome& dad) const
+    std::tuple<std::unique_ptr<IChromosome>, std::unique_ptr<IChromosome>> Population::GetNewOffspring(const IChromosome& mum, const IChromosome& dad) const
     {
         // Deep copy mum & dad
-        Chromosome son{ dad.GetTree()->Clone() };
-        Chromosome daughter{ mum.GetTree()->Clone() };
+        auto son = std::make_unique<Chromosome>( dad.GetTree()->Clone() );
+        auto daughter = std::make_unique<Chromosome>( mum.GetTree()->Clone() );
 
         // should we crossover? 
         if (m_randomProbability.Get() <= m_params.CrossoverProb)
         {
-            son.Crossover(daughter);
+            son->Crossover(*daughter);
         }
 
         // should we mutate son?
         auto mutationLikelihood = m_randomProbability.Get();
         if (mutationLikelihood <= m_params.MutationProb)
         {
-            son.Mutate(m_params.AllowedFunctions, m_allowedTerminals);
+            son->Mutate(m_params.AllowedFunctions, m_allowedTerminals);
         }
         else if (mutationLikelihood <= m_params.MutationProb + m_params.HoistMutationProb)
         {
-            son.HoistMutate();
+            son->HoistMutate();
         }
 
         // should we mutate daughter?
         mutationLikelihood = m_randomProbability.Get();
         if (mutationLikelihood <= m_params.MutationProb)
         {
-            daughter.Mutate(m_params.AllowedFunctions, m_allowedTerminals);
+            daughter->Mutate(m_params.AllowedFunctions, m_allowedTerminals);
         }
         else if (mutationLikelihood <= m_params.MutationProb + m_params.HoistMutationProb)
         {
-            daughter.HoistMutate();
+            daughter->HoistMutate();
         }
 
         return std::make_tuple(std::move(son), std::move(daughter));
@@ -186,7 +184,7 @@ namespace Model
     void Population::SortPopulation()
     {
         // sort primary population by WeightedFitness
-        std::sort(m_population.begin(), m_population.end(), [] (const std::unique_ptr<Chromosome>& a, const std::unique_ptr<Chromosome>& b) { return *a < *b; });
+        std::sort(m_population.begin(), m_population.end(), [] (const std::unique_ptr<IChromosome>& a, const std::unique_ptr<IChromosome>& b) { return *a < *b; });
 
         // sort pointers by fitness
         m_sortedByFitness.clear();
@@ -194,10 +192,10 @@ namespace Model
         {
             m_sortedByFitness.push_back(p.get());
         }
-        std::sort(m_sortedByFitness.begin(), m_sortedByFitness.end(), [](const Chromosome* a, const Chromosome* b) { return a->Fitness() < b->Fitness(); });
+        std::sort(m_sortedByFitness.begin(), m_sortedByFitness.end(), [](const IChromosome* a, const IChromosome* b) { return a->Fitness() < b->Fitness(); });
     }
 
-    std::tuple<Chromosome*, Chromosome*> Population::SelectParents()
+    std::tuple<IChromosome*, IChromosome*> Population::SelectParents()
     {
         int mum = m_selector->Draw();
         int dad = m_selector->Draw();
@@ -233,7 +231,7 @@ namespace Model
 
     double Population::GetAverageFitness() const
     {
-        using ConstItr = std::vector<std::unique_ptr<Chromosome>>::const_iterator;
+        using ConstItr = std::vector<std::unique_ptr<IChromosome>>::const_iterator;
         auto getFitness = [](const ConstItr& itr) { return (*itr)->Fitness(); };
         return Util::Average<ConstItr>(m_population.begin(), m_population.end(), getFitness);
     }
@@ -245,7 +243,7 @@ namespace Model
 
     double Population::UpdateParsimonyCoefficient()
     {
-        using Itr = std::vector<std::unique_ptr<Chromosome>>::iterator;
+        using Itr = std::vector<std::unique_ptr<IChromosome>>::iterator;
         const double DenominatorThreshold = 1e-06;
 
         auto getSize = [](const Itr& itr) -> double { return static_cast<double>((*itr)->Size()); };

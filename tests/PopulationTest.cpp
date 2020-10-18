@@ -66,7 +66,7 @@ namespace Tests
     class PopulationTest : public ::testing::Test
     {
     public:
-        const std::vector<std::unique_ptr<Chromosome>>& AccessPopulation(const Population& p) { return p.m_population; }
+        const std::vector<std::unique_ptr<IChromosome>>& AccessPopulation(const Population& p) { return p.m_population; }
         static double WeightedFitness(const Chromosome& c) { return c.m_weightedFitness; }
     protected:
         PopulationTest() { }
@@ -96,13 +96,13 @@ namespace Tests
     {
         p2.Reset();
         // test that operator< works properly
-        const auto& c1 = *AccessPopulation(p2)[0];
-        const auto& c2 = *AccessPopulation(p2)[1];
+        const auto& c1 = dynamic_cast<Chromosome*>(AccessPopulation(p2)[0].get());
+        const auto& c2 = dynamic_cast<Chromosome*>(AccessPopulation(p2)[1].get());
 
         // Less than operator includes parsimony coefficient
-        ASSERT_EQ(WeightedFitness(c1) < WeightedFitness(c2), c1 < c2);
-        ASSERT_EQ(WeightedFitness(c2) < WeightedFitness(c1), c2 < c1);
-        ASSERT_FALSE(WeightedFitness(c2) < WeightedFitness(c2));
+        ASSERT_EQ(WeightedFitness(*c1) < WeightedFitness(*c2), *c1 < *c2);
+        ASSERT_EQ(WeightedFitness(*c2) < WeightedFitness(*c1), *c2 < *c1);
+        ASSERT_FALSE(WeightedFitness(*c2) < WeightedFitness(*c2));
     }
 
     TEST_F(PopulationTest, PopulationConstructor) 

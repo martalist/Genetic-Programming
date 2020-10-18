@@ -4,7 +4,7 @@
 #include <memory>
 #include <tuple>
 #include <vector>
-#include "model/Chromosome.h"
+#include "model/IChromosome.h"
 #include "PopulationParams.h"
 #include "utils/UniformRandomGenerator.h"
 #include "utils/ISelector.h"
@@ -77,7 +77,7 @@ namespace Model
          * likely it will be selected as a parent.
          * @return a pointer to two parents
          */
-        std::tuple<Chromosome*, Chromosome*> SelectParents();
+        std::tuple<IChromosome*, IChromosome*> SelectParents();
 
         /**
          * Adds two offspring from mum and dad to the nextGeneration
@@ -85,21 +85,21 @@ namespace Model
          * @param dad The father chromosome
          * @param nextGeneration The next generation of chromosomes (that will replace current generation)
          */
-        void Reproduce(const Chromosome& mum, const Chromosome& dad, std::vector<std::unique_ptr<Chromosome>>& nextGeneration);
+        void Reproduce(const IChromosome& mum, const IChromosome& dad, std::vector<std::unique_ptr<IChromosome>>& nextGeneration);
 
         /**
          * Deep copy from parents, perform crossover and mutation 
          * @return Two offsprint S-expressions
          */
-        std::tuple<Chromosome, Chromosome> GetNewOffspring(const Chromosome& mum, const Chromosome& dad) const;
+        std::tuple<std::unique_ptr<IChromosome>, std::unique_ptr<IChromosome>> GetNewOffspring(const IChromosome& mum, const IChromosome& dad) const;
 
         /**
          * Updates the parsimony coefficient
          */
         double UpdateParsimonyCoefficient();
 
-        std::vector<std::unique_ptr<Chromosome>> m_population; ///< The chromosome population
-        std::vector<Chromosome*> m_sortedByFitness; ///< Pointers to the chromosome population, sorted by fitness
+        std::vector<std::unique_ptr<IChromosome>> m_population; ///< The chromosome population
+        std::vector<IChromosome*> m_sortedByFitness; ///< Pointers to the chromosome population, sorted by fitness
         PopulationParams m_params; ///< The parameters of the population
         mutable Util::UniformRandomGenerator<float> m_randomProbability; ///< Generates random floats in the range [0,1]
         std::vector<double*> m_allowedTerminals; ///< The set of variables
