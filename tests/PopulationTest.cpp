@@ -66,7 +66,8 @@ namespace Tests
     class PopulationTest : public ::testing::Test
     {
     public:
-        const std::vector<Chromosome>& AccessPopulation(const Population& p) { return p.m_population; }
+        const std::vector<std::unique_ptr<Chromosome>>& AccessPopulation(const Population& p) { return p.m_population; }
+        static double WeightedFitness(const Chromosome& c) { return c.m_weightedFitness; }
     protected:
         PopulationTest() { }
 
@@ -83,7 +84,7 @@ namespace Tests
         p1.Reset();
 
         // All chromosomes in p1 are guaranteed to be (sqrt a)
-        ASSERT_DOUBLE_EQ(12.992451294754199, AccessPopulation(p1)[0].Fitness);
+        ASSERT_DOUBLE_EQ(12.992451294754199, AccessPopulation(p1)[0]->Fitness());
     }
 
     TEST_F(PopulationTest, ChromosomeFitness) 
@@ -95,13 +96,13 @@ namespace Tests
     {
         p2.Reset();
         // test that operator< works properly
-        const auto& c1 = AccessPopulation(p2)[0];
-        const auto& c2 = AccessPopulation(p2)[1];
+        const auto& c1 = *AccessPopulation(p2)[0];
+        const auto& c2 = *AccessPopulation(p2)[1];
 
         // Less than operator includes parsimony coefficient
-        ASSERT_EQ(c1.WeightedFitness < c2.WeightedFitness, c1 < c2);
-        ASSERT_EQ(c2.WeightedFitness < c1.WeightedFitness, c2 < c1);
-        ASSERT_FALSE(c2.WeightedFitness < c2.WeightedFitness);
+        ASSERT_EQ(WeightedFitness(c1) < WeightedFitness(c2), c1 < c2);
+        ASSERT_EQ(WeightedFitness(c2) < WeightedFitness(c1), c2 < c1);
+        ASSERT_FALSE(WeightedFitness(c2) < WeightedFitness(c2));
     }
 
     TEST_F(PopulationTest, PopulationConstructor) 

@@ -85,7 +85,7 @@ namespace Model
          * @param dad The father chromosome
          * @param nextGeneration The next generation of chromosomes (that will replace current generation)
          */
-        void Reproduce(const Chromosome& mum, const Chromosome& dad, std::vector<Chromosome>& nextGeneration);
+        void Reproduce(const Chromosome& mum, const Chromosome& dad, std::vector<std::unique_ptr<Chromosome>>& nextGeneration);
 
         /**
          * Deep copy from parents, perform crossover and mutation 
@@ -98,7 +98,7 @@ namespace Model
          */
         double UpdateParsimonyCoefficient();
 
-        std::vector<Chromosome> m_population; ///< The chromosome population
+        std::vector<std::unique_ptr<Chromosome>> m_population; ///< The chromosome population
         std::vector<Chromosome*> m_sortedByFitness; ///< Pointers to the chromosome population, sorted by fitness
         PopulationParams m_params; ///< The parameters of the population
         mutable Util::UniformRandomGenerator<float> m_randomProbability; ///< Generates random floats in the range [0,1]
