@@ -24,6 +24,10 @@ namespace Model
         m_params = config.Params;
         m_iterations = config.Iterations;
         m_numGenerations = config.NumGenerations;
+        if (config.StoppingCriteria.has_value())
+        {
+            m_stoppingCriteria = config.StoppingCriteria.value();
+        }
 
         // Create random/initial population from params
         m_population = std::make_unique<Population>(m_params, config.FitnessCases);
@@ -48,6 +52,11 @@ namespace Model
                 auto [ minimum, firstQtr, median, thirdQtr, max ] = m_population->GetRangeStatistics();
                 m_logger.AddLine(minimum, firstQtr, median, thirdQtr, max, "\"" + m_population->BestAsString() + "\"");
                 min = minimum;
+
+                if (m_stoppingCriteria.has_value() && minimum < m_stoppingCriteria.value())
+                {
+                    break;
+                }
             }
 
             m_logger.Write();

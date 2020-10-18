@@ -1,6 +1,7 @@
 #ifndef CONFIGPARSER_H
 #define CONFIGPARSER_H
 
+#include <optional>
 #include "PopulationParams.h"
 
 namespace Model
@@ -13,6 +14,7 @@ namespace Model
     {
         int Iterations = 1; ///< Number of times to run the experiment
         int NumGenerations = 20; ///< Number of generations to evolve through to find a solution
+        std::optional<double> StoppingCriteria;
         PopulationParams Params{}; ///< Parameters for the population
         std::vector<std::vector<double>> FitnessCases; ///< Training cases
     };

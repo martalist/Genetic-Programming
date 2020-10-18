@@ -24,6 +24,10 @@ namespace Model
             pt::read_xml(filename, tree);
             s_config.Iterations = tree.get("Config.Iterations", 1);
             s_config.NumGenerations = tree.get("Config.Generations", 20);
+            if (tree.get_child_optional("Config.StoppingCriteria"))
+            {
+                s_config.StoppingCriteria = tree.get<double>("Config.StoppingCriteria", 0.0);
+            }
             s_config.Params.PopulationSize = tree.get("Config.Population.Size", 1000);
             s_config.Params.CrossoverProb = tree.get<double>("Config.CrossoverProb", 0.7);
             s_config.Params.MutationProb = tree.get<double>("Config.MutationProb", 0.01);
