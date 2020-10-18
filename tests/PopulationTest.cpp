@@ -66,7 +66,7 @@ namespace Tests
     class PopulationTest : public ::testing::Test
     {
     public:
-        const std::vector<Population::Chromosome>& AccessPopulation(const Population& p) { return p.m_population; }
+        const std::vector<Chromosome>& AccessPopulation(const Population& p) { return p.m_population; }
     protected:
         PopulationTest() { }
 

@@ -3,5 +3,6 @@ add_library(model
     Function.cpp
     FunctionFactory.cpp
     Operators.cpp
+    Chromosome.cpp
 )
 # set_target_properties(model PROPERTIES LINKER_LANGUAGE CXX)
