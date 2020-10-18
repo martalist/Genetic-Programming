@@ -37,8 +37,9 @@ namespace Model
             /**
              * Constructor
              */
-            Chromosome(Population& pop, INodePtr tree);
-            Chromosome(Population& pop, INodePtr tree, double fitness);
+            Chromosome(INodePtr tree, const std::vector<std::vector<double>>& fitnessCases, 
+                    std::vector<double>& terminals, double parsimonyCoefficient);
+            Chromosome(INodePtr tree, double fitness, double parsimonyCoefficient);
 
             /**
              * Less-than operator. Used for sorting collections of Chromosomes.
@@ -50,9 +51,9 @@ namespace Model
             * @param chromosome The chromosome to evaluate
             * @return the chromosome fitness as a positive, real number
             */
-            double CalculateFitness(Population& pop) const;
+            double CalculateFitness(const std::vector<std::vector<double>>& fitnessCases, std::vector<double>& terminals) const;
 
-            double CalculateWeightedFitness(const Population& pop) const;
+            double CalculateWeightedFitness(double parsimonyCoefficient) const;
 
             INodePtr Tree; ///< the S-expression
             int Size; ///< the length (nodes in the tree)

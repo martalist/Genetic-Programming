@@ -16,19 +16,20 @@ namespace Model
     using Chromosome = Population::Chromosome;
     using INodePtr = Population::INodePtr;
 
-    Chromosome::Chromosome(Population& pop, INodePtr tree)
+    Chromosome::Chromosome(INodePtr tree, const std::vector<std::vector<double>>& fitnessCases, 
+            std::vector<double>& terminals, double parsimonyCoefficient)
         : Tree(std::move(tree)) 
         , Size(Tree->Size())
-        , Fitness(CalculateFitness(pop))
-        , WeightedFitness(CalculateWeightedFitness(pop))
+        , Fitness(CalculateFitness(fitnessCases, terminals))
+        , WeightedFitness(CalculateWeightedFitness(parsimonyCoefficient))
     {
     } 
 
-    Chromosome::Chromosome(Population& pop, INodePtr tree, double fitness)
+    Chromosome::Chromosome(INodePtr tree, double fitness, double parsimonyCoefficient)
         : Tree(std::move(tree)) 
         , Size(Tree->Size())
         , Fitness(fitness)
-        , WeightedFitness(CalculateWeightedFitness(pop))
+        , WeightedFitness(CalculateWeightedFitness(parsimonyCoefficient))
     {
     } 
 
@@ -37,13 +38,13 @@ namespace Model
         return WeightedFitness < rhs.WeightedFitness;
     }
 
-    double Chromosome::CalculateFitness(Population& pop) const
+    double Chromosome::CalculateFitness(const std::vector<std::vector<double>>& fitnessCases, std::vector<double>& terminals) const
     {
         double sumOfErrors = 0.0;
-        for (const auto& fCase : pop.m_fitnessCases) // FitnessCases are the training set
+        for (const auto& fCase : fitnessCases) // FitnessCases are the training set
         {
             // load up the terminals for this fitness case
-            std::copy(fCase.begin(), fCase.end()-1, pop.m_terminals.begin());
+            std::copy(fCase.begin(), fCase.end()-1, terminals.begin());
 
             // calculate the fitness (absolute error) for this fitness case
             auto returnVal = Tree->Evaluate();
@@ -51,12 +52,12 @@ namespace Model
             // add to the tally
             sumOfErrors += std::abs(returnVal - fCase.back());
         }
-        return sumOfErrors / pop.m_fitnessCases.size(); // mean absolute error
+        return sumOfErrors / fitnessCases.size(); // mean absolute error
     }
 
-    double Chromosome::CalculateWeightedFitness(const Population& pop) const
+    double Chromosome::CalculateWeightedFitness(double parsimonyCoefficient) const
     {
-        return Fitness + pop.m_parsimonyCoefficient * Size;
+        return Fitness + parsimonyCoefficient * Size;
     }
 
     Population::Population(const PopulationParams& params, const std::vector<std::vector<double>>& fitnessCases)
@@ -94,7 +95,7 @@ namespace Model
                     m_params.MinInitialTreeSize, 
                     m_params.AllowedFunctions, 
                     m_allowedTerminals);
-            m_population.emplace_back(*this, std::move(itsABoy));
+            m_population.emplace_back(std::move(itsABoy), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
         }
         RecalibrateParentSelector(); // TODO
     }
@@ -130,8 +131,8 @@ namespace Model
 
         if (m_params.AlwaysReplaceParents)
         {
-            nextGeneration.emplace_back(*this, std::move(son));
-            nextGeneration.emplace_back(*this, std::move(daughter));
+            nextGeneration.emplace_back(std::move(son), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
+            nextGeneration.emplace_back(std::move(daughter), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
         }
         else
         {
@@ -139,22 +140,22 @@ namespace Model
             auto [s2, d2] = GetNewOffspring(mum, dad);
             auto [s3, d3] = GetNewOffspring(mum, dad);
             std::vector<Chromosome> family;
-            // family.emplace_back(*this, dad.Tree->Clone());
-            // family.emplace_back(*this, mum.Tree->Clone());
-            family.emplace_back(*this, std::move(son));
-            family.emplace_back(*this, std::move(daughter));
-            family.emplace_back(*this, std::move(s2));
-            family.emplace_back(*this, std::move(d2));
-            family.emplace_back(*this, std::move(s3));
-            family.emplace_back(*this, std::move(d3));
+            // family.emplace_back(dad.Tree->Clone(), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
+            // family.emplace_back(mum.Tree->Clone(), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
+            family.emplace_back(std::move(son), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
+            family.emplace_back(std::move(daughter), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
+            family.emplace_back(std::move(s2), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
+            family.emplace_back(std::move(d2), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
+            family.emplace_back(std::move(s3), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
+            family.emplace_back(std::move(d3), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
             std::sort(family.begin(), family.end());
 
             auto inOrder = family.begin();
             auto fitness = inOrder->Fitness;
-            nextGeneration.emplace_back(*this, std::move(inOrder->Tree), fitness);
+            nextGeneration.emplace_back(std::move(inOrder->Tree), fitness, m_parsimonyCoefficient);
             ++inOrder;
             fitness = inOrder->Fitness;
-            nextGeneration.emplace_back(*this, std::move(inOrder->Tree), fitness);
+            nextGeneration.emplace_back(std::move(inOrder->Tree), fitness, m_parsimonyCoefficient);
         }
     }
 
