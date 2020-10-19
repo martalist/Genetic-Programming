@@ -12,8 +12,6 @@ namespace Tests
 
 namespace Model
 {
-    enum class FunctionType;
-
     /**
      * Represents an individual chromosome (S-expression) in the population,
      * together with it's fitness
@@ -40,15 +38,20 @@ namespace Model
         Chromosome(IChromosome::INodePtr tree);
 
         /**
+         * Copy Constructor
+         */
+        Chromosome(const Chromosome& other);
+
+        /**
          * Constructor - Calculates fitness and weighted fitness upon construction.
          */
-        Chromosome(IChromosome::INodePtr tree, const std::vector<std::vector<double>>& fitnessCases, 
+        Chromosome(IChromosome::INodePtr& tree, const std::vector<std::vector<double>>& fitnessCases, 
                 std::vector<double>& terminals, double parsimonyCoefficient);
 
         /**
          * Constructor - Calculates only the weighted fitness upon construction.
          */
-        Chromosome(IChromosome::INodePtr tree, double fitness, double parsimonyCoefficient);
+        Chromosome(IChromosome::INodePtr& tree, double fitness, double parsimonyCoefficient);
 
         /**
          * Less-than operator. Used for sorting collections of Chromosomes.
@@ -64,6 +67,11 @@ namespace Model
          * @see IChromosome::Fitness
          */
         double Fitness() const override;
+
+        /**
+         * @see IChromosome::Clone
+         */
+        std::unique_ptr<IChromosome> Clone() const override;
 
         /**
          * @see IChromosome::Mutate
@@ -97,6 +105,7 @@ namespace Model
         static std::unique_ptr<INode> CreateRandomChromosome(int targetSize, const std::vector<FunctionType>& allowedFunctions, const std::vector<double*>& variables);
 
     private:
+
         /**
          * Calculate the fitness for one chromosome. Currently uses MAE (mean absolute error)
          * @param chromosome The chromosome to evaluate

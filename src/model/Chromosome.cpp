@@ -72,7 +72,7 @@ namespace Model
     {
     }
 
-    Chromosome::Chromosome(IChromosome::INodePtr tree, const std::vector<std::vector<double>>& fitnessCases, 
+    Chromosome::Chromosome(IChromosome::INodePtr& tree, const std::vector<std::vector<double>>& fitnessCases, 
             std::vector<double>& terminals, double parsimonyCoefficient)
         : m_tree(std::move(tree)) 
         , m_size(m_tree->Size())
@@ -81,7 +81,7 @@ namespace Model
     {
     } 
 
-    Chromosome::Chromosome(IChromosome::INodePtr tree, double fitness, double parsimonyCoefficient)
+    Chromosome::Chromosome(IChromosome::INodePtr& tree, double fitness, double parsimonyCoefficient)
         : m_tree(std::move(tree)) 
         , m_size(m_tree->Size())
         , m_fitness(fitness)
@@ -125,6 +125,19 @@ namespace Model
     double Chromosome::Fitness() const
     {
         return m_fitness;
+    }
+
+    std::unique_ptr<IChromosome> Chromosome::Clone() const
+    {
+        return std::make_unique<Chromosome>(*this);
+    }
+
+    Chromosome::Chromosome(const Chromosome& other)
+    {
+        m_tree = other.m_tree->Clone();
+        m_size = other.m_size;
+        m_fitness = other.m_fitness;
+        m_weightedFitness = other.m_weightedFitness;
     }
 
     void Chromosome::Mutate(const std::vector<FunctionType>& allowedFunctions, const std::vector<double*>& variables)

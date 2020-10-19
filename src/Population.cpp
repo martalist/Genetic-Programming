@@ -5,7 +5,7 @@
 // #include <iostream>
 #include <stdexcept>
 #include "model/FunctionFactory.h"
-#include "model/Chromosome.h"
+#include "model/ChromosomeFactory.h"
 #include "utils/Math.h"
 #include "utils/Raffle.h"
 #include "utils/Tournament.h"
@@ -68,6 +68,10 @@ namespace Model
         {
             m_allowedTerminals.push_back(&terminal);
         }
+
+        // TODO: change the type by config
+        ChromosomeFactory::Initialise(ChromosomeType::Normal, m_params.MinInitialTreeSize, 
+                m_params.AllowedFunctions, m_allowedTerminals, m_fitnessCases, m_terminals);
     }
 
     void Population::Reset()
@@ -78,9 +82,7 @@ namespace Model
         // generate an appropriately sized population
         for (auto i = 0; i < m_params.PopulationSize; ++i)
         {
-            auto itsABoy = std::make_unique<Chromosome>(m_params.MinInitialTreeSize, m_params.AllowedFunctions, 
-                    m_allowedTerminals, m_fitnessCases, m_terminals, m_parsimonyCoefficient);
-            m_population.push_back(std::move(itsABoy));
+            m_population.push_back(ChromosomeFactory::Inst().CreateRandom(m_parsimonyCoefficient));
         }
         RecalibrateParentSelector(); // TODO
     }
@@ -140,41 +142,41 @@ namespace Model
     std::tuple<Population::ChromoPtr, Population::ChromoPtr> Population::GetNewOffspring(const IChromosome& mum, const IChromosome& dad, const std::vector<std::vector<double>>& fitnessCases, std::vector<double>& terminals, double parsimonyCoefficient) const
     {
         // Deep copy mum & dad
-        Chromosome son( dad.GetTree()->Clone() );
-        Chromosome daughter( mum.GetTree()->Clone() );
+        auto son = dad.Clone();
+        auto daughter = mum.Clone();
 
         // should we crossover? 
         if (m_randomProbability.Get() <= m_params.CrossoverProb)
         {
-            son.Crossover(daughter);
+            son->Crossover(*daughter);
         }
 
         // should we mutate son?
         auto mutationLikelihood = m_randomProbability.Get();
         if (mutationLikelihood <= m_params.MutationProb)
         {
-            son.Mutate(m_params.AllowedFunctions, m_allowedTerminals);
+            son->Mutate(m_params.AllowedFunctions, m_allowedTerminals);
         }
         else if (mutationLikelihood <= m_params.MutationProb + m_params.HoistMutationProb)
         {
-            son.HoistMutate();
+            son->HoistMutate();
         }
 
         // should we mutate daughter?
         mutationLikelihood = m_randomProbability.Get();
         if (mutationLikelihood <= m_params.MutationProb)
         {
-            daughter.Mutate(m_params.AllowedFunctions, m_allowedTerminals);
+            daughter->Mutate(m_params.AllowedFunctions, m_allowedTerminals);
         }
         else if (mutationLikelihood <= m_params.MutationProb + m_params.HoistMutationProb)
         {
-            daughter.HoistMutate();
+            daughter->HoistMutate();
         }
 
         return 
         {
-            std::make_unique<Chromosome>(std::move(son.GetTree()), fitnessCases, terminals, parsimonyCoefficient),
-            std::make_unique<Chromosome>(std::move(daughter.GetTree()), fitnessCases, terminals, parsimonyCoefficient)
+            ChromosomeFactory::Inst().CopyAndEvaluate(son->GetTree(), parsimonyCoefficient),
+            ChromosomeFactory::Inst().CopyAndEvaluate(daughter->GetTree(), parsimonyCoefficient),
         };
     }
 

@@ -7,6 +7,7 @@
     <CrossoverProb>0.7</CrossoverProb>
     <MutationProb>0.1</MutationProb>
     <HoistMutationProb>0.1</HoistMutationProb>
+    <ProgramType>Normal</ProgramType> <!-- other value type is "Time Series" -->
     <!-- <Seed>0</Seed> -->
 
     <!-- delete or comment-out the Functions that you don't require -->

@@ -37,6 +37,11 @@ namespace Model
         virtual double Fitness() const = 0;
 
         /**
+         * @return a clone of the current Chromosome
+         */
+        virtual std::unique_ptr<IChromosome> Clone() const = 0;
+
+        /**
          * Performs standard mutation on a chromosome. 
          * 
          * A gene is randomly selected, and mutated to another valid, random gene from the set of allowed 
