@@ -18,6 +18,16 @@ namespace
     // The default parsimony coefficient
     const double DefaultParsimonyCoefficient = 0.025;
 
+    // The number of twins to produce from each mating pair. Only 2 children will survive
+    // so the mortality rate is impied.
+    const int TwinsPerMatingPair = 3;
+
+    // Utility function for ordering the population
+    const auto ChromoPtrOrder = [] (const Model::Population::ChromoPtr& a, const Model::Population::ChromoPtr& b) 
+    { 
+        return *a < *b; 
+    };
+
     /**
      * Returns the number of raffle tickets should be allocated for a given fitness value.
      * The smaller (better) the fitness, the higher the ticket number. 
@@ -78,7 +88,7 @@ namespace Model
     void Population::Evolve()
     {
         // Create a new population
-        std::vector<std::unique_ptr<IChromosome>> newPopulation;
+        std::vector<Population::ChromoPtr> newPopulation;
         while (newPopulation.size() < m_population.size())
         {
             // select a breeding pair
@@ -100,78 +110,72 @@ namespace Model
         RecalibrateParentSelector(); 
     }
 
-    void Population::Reproduce(const IChromosome& mum, const IChromosome& dad, std::vector<std::unique_ptr<IChromosome>>& nextGeneration)
+    void Population::Reproduce(const IChromosome& mum, const IChromosome& dad, std::vector<Population::ChromoPtr>& nextGeneration)
     {
-        // TODO: tidy this up!
-        auto [son, daughter] = GetNewOffspring(mum, dad);
-
+        // TODO: this is no longer useful. Would be better to specify the number twins/pairs per set of parents.
         if (m_params.AlwaysReplaceParents)
         {
-            nextGeneration.push_back(std::make_unique<Chromosome>(std::move(son->GetTree()), m_fitnessCases, 
-                        m_terminals, m_parsimonyCoefficient));
-            nextGeneration.push_back(std::make_unique<Chromosome>(std::move(daughter->GetTree()), m_fitnessCases, 
-                        m_terminals, m_parsimonyCoefficient));
+            auto [son, daughter] = GetNewOffspring(mum, dad, m_fitnessCases, m_terminals, m_parsimonyCoefficient);
+            nextGeneration.push_back(std::move(son));
+            nextGeneration.push_back(std::move(daughter));
         }
         else
         {
-            // add a couple more kiddos to the mix
-            auto [s2, d2] = GetNewOffspring(mum, dad);
-            auto [s3, d3] = GetNewOffspring(mum, dad);
-            std::vector<Chromosome> family;
-            // family.push_back(dad.GetTree()->Clone(), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
-            // family.push_back(mum.GetTree()->Clone(), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
-            family.emplace_back(std::move(son->GetTree()), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
-            family.emplace_back(std::move(daughter->GetTree()), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
-            family.emplace_back(std::move(s2->GetTree()), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
-            family.emplace_back(std::move(d2->GetTree()), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
-            family.emplace_back(std::move(s3->GetTree()), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
-            family.emplace_back(std::move(d3->GetTree()), m_fitnessCases, m_terminals, m_parsimonyCoefficient);
-            std::sort(family.begin(), family.end());
+            std::vector<Population::ChromoPtr> family;
+            for (int i = 0; i < TwinsPerMatingPair; ++i)
+            {
+                auto [son, daughter] = GetNewOffspring(mum, dad, m_fitnessCases, m_terminals, m_parsimonyCoefficient);
+                family.push_back(std::move(son));
+                family.push_back(std::move(daughter));
+            }
+            std::sort(family.begin(), family.end(), ChromoPtrOrder);
 
             auto inOrder = family.begin();
-            double fitness = inOrder->Fitness();
-            nextGeneration.push_back(std::make_unique<Chromosome>(std::move(inOrder->GetTree()), fitness, m_parsimonyCoefficient));
+            nextGeneration.push_back(std::move(*inOrder));
             ++inOrder;
-            fitness = inOrder->Fitness();
-            nextGeneration.push_back(std::make_unique<Chromosome>(std::move(inOrder->GetTree()), fitness, m_parsimonyCoefficient));
+            nextGeneration.push_back(std::move(*inOrder));
         }
     }
 
-    std::tuple<std::unique_ptr<IChromosome>, std::unique_ptr<IChromosome>> Population::GetNewOffspring(const IChromosome& mum, const IChromosome& dad) const
+    std::tuple<Population::ChromoPtr, Population::ChromoPtr> Population::GetNewOffspring(const IChromosome& mum, const IChromosome& dad, const std::vector<std::vector<double>>& fitnessCases, std::vector<double>& terminals, double parsimonyCoefficient) const
     {
         // Deep copy mum & dad
-        auto son = std::make_unique<Chromosome>( dad.GetTree()->Clone() );
-        auto daughter = std::make_unique<Chromosome>( mum.GetTree()->Clone() );
+        Chromosome son( dad.GetTree()->Clone() );
+        Chromosome daughter( mum.GetTree()->Clone() );
 
         // should we crossover? 
         if (m_randomProbability.Get() <= m_params.CrossoverProb)
         {
-            son->Crossover(*daughter);
+            son.Crossover(daughter);
         }
 
         // should we mutate son?
         auto mutationLikelihood = m_randomProbability.Get();
         if (mutationLikelihood <= m_params.MutationProb)
         {
-            son->Mutate(m_params.AllowedFunctions, m_allowedTerminals);
+            son.Mutate(m_params.AllowedFunctions, m_allowedTerminals);
         }
         else if (mutationLikelihood <= m_params.MutationProb + m_params.HoistMutationProb)
         {
-            son->HoistMutate();
+            son.HoistMutate();
         }
 
         // should we mutate daughter?
         mutationLikelihood = m_randomProbability.Get();
         if (mutationLikelihood <= m_params.MutationProb)
         {
-            daughter->Mutate(m_params.AllowedFunctions, m_allowedTerminals);
+            daughter.Mutate(m_params.AllowedFunctions, m_allowedTerminals);
         }
         else if (mutationLikelihood <= m_params.MutationProb + m_params.HoistMutationProb)
         {
-            daughter->HoistMutate();
+            daughter.HoistMutate();
         }
 
-        return std::make_tuple(std::move(son), std::move(daughter));
+        return 
+        {
+            std::make_unique<Chromosome>(std::move(son.GetTree()), fitnessCases, terminals, parsimonyCoefficient),
+            std::make_unique<Chromosome>(std::move(daughter.GetTree()), fitnessCases, terminals, parsimonyCoefficient)
+        };
     }
 
     void Population::RecalibrateParentSelector()
@@ -196,7 +200,7 @@ namespace Model
     void Population::SortPopulation()
     {
         // sort primary population by WeightedFitness
-        std::sort(m_population.begin(), m_population.end(), [] (const std::unique_ptr<IChromosome>& a, const std::unique_ptr<IChromosome>& b) { return *a < *b; });
+        std::sort(m_population.begin(), m_population.end(), ChromoPtrOrder);
 
         // sort pointers by fitness
         m_sortedByFitness.clear();
@@ -243,7 +247,7 @@ namespace Model
 
     double Population::GetAverageFitness() const
     {
-        using ConstItr = std::vector<std::unique_ptr<IChromosome>>::const_iterator;
+        using ConstItr = std::vector<Population::ChromoPtr>::const_iterator;
         auto getFitness = [](const ConstItr& itr) { return (*itr)->Fitness(); };
         return Util::Average<ConstItr>(m_population.begin(), m_population.end(), getFitness);
     }
@@ -259,7 +263,7 @@ namespace Model
 
         // TODO: This implementation of dynamic parsimony coefficient calculation does not yield
         // the desired result. So for now we're returning the default value above.
-        using Itr = std::vector<std::unique_ptr<IChromosome>>::iterator;
+        using Itr = std::vector<Population::ChromoPtr>::iterator;
         const double DenominatorThreshold = 1e-06;
 
         auto getSize = [](const Itr& itr) -> double { return static_cast<double>((*itr)->Size()); };

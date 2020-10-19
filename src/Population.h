@@ -25,6 +25,7 @@ namespace Model
     class Population
     {
     public:
+        using ChromoPtr = std::unique_ptr<IChromosome>;
         friend Tests::PopulationTest;
 
         /**
@@ -59,7 +60,6 @@ namespace Model
         std::string BestAsString() const;
 
     private:
-
         /**
          * Prepares the selector, such that appropriate parents may be selected
          * Called after a new generation/population has been created.
@@ -85,20 +85,22 @@ namespace Model
          * @param dad The father chromosome
          * @param nextGeneration The next generation of chromosomes (that will replace current generation)
          */
-        void Reproduce(const IChromosome& mum, const IChromosome& dad, std::vector<std::unique_ptr<IChromosome>>& nextGeneration);
+        void Reproduce(const IChromosome& mum, const IChromosome& dad, std::vector<ChromoPtr>& nextGeneration);
 
         /**
          * Deep copy from parents, perform crossover and mutation 
          * @return Two offsprint S-expressions
          */
-        std::tuple<std::unique_ptr<IChromosome>, std::unique_ptr<IChromosome>> GetNewOffspring(const IChromosome& mum, const IChromosome& dad) const;
+        std::tuple<ChromoPtr, ChromoPtr> GetNewOffspring(const IChromosome& mum, const IChromosome& dad,
+                const std::vector<std::vector<double>>& fitnessCases, std::vector<double>& terminals, 
+                double parsimonyCoefficient) const;
 
         /**
          * Updates the parsimony coefficient
          */
         double UpdateParsimonyCoefficient();
 
-        std::vector<std::unique_ptr<IChromosome>> m_population; ///< The chromosome population
+        std::vector<ChromoPtr> m_population; ///< The chromosome population
         std::vector<IChromosome*> m_sortedByFitness; ///< Pointers to the chromosome population, sorted by fitness
         PopulationParams m_params; ///< The parameters of the population
         mutable Util::UniformRandomGenerator<float> m_randomProbability; ///< Generates random floats in the range [0,1]
