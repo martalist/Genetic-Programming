@@ -4,21 +4,11 @@
 #include <iomanip>
 #include "ConfigParser.h"
 #include "model/FunctionFactory.h"
-#include "model/Terminal.h"
-#include "model/Operators.h"
 
 namespace Model
 {
     Program::Program()
     {
-        // parse command line input
-
-        // TODO: things that need to be user defined are:
-            // Allowed functions
-            // Terminals
-            // Fitness Cases
-            // Crossover/Mutation probabilites
-
         // Get user configuration
         auto config = ConfigParser::Load("config.xml");
         m_params = config.Params;

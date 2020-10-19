@@ -18,28 +18,7 @@ namespace Model
         using INodePtr = std::unique_ptr<INode>;
 
     public:
-        /**
-         * Constructor - Creates a new, random Chromosom
-         */
-        // IChromosome(int targetSize);
-
-        /**
-         * Constructor - Does no fitness calculations upon construction
-         * @param tree The underlying S-expression
-         */
-        // IChromosome(INodePtr tree);
-
-        /**
-         * Constructor - Calculates fitness and weighted fitness upon construction.
-         */
-        // IChromosome(INodePtr tree, const std::vector<std::vector<double>>& fitnessCases, 
-                // std::vector<double>& terminals, double parsimonyCoefficient);
-
-        /**
-         * Constructor - Calculates only the weighted fitness upon construction.
-         */
-        // IChromosome(INodePtr tree, double fitness, double parsimonyCoefficient);
-
+        IChromosome() = default;
         virtual ~IChromosome() = default;
 
         /**

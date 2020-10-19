@@ -2,8 +2,7 @@
 #include <iostream>
 #include <memory>
 #include "../src/model/Chromosome.h"
-#include "../src/model/Operators.h"
-#include "../src/model/Terminal.h"
+#include "../src/model/FunctionFactory.h"
 
 namespace
 {
@@ -24,8 +23,8 @@ namespace Tests
         // since there is only one node, and only one allowed function,
         // the mutation should change this to a sutraction
         func.Mutate(allowedFunctions, allowedTerminals);
-        func.GetTree()->AddChild(std::make_unique<Terminal>(&B));
-        func.GetTree()->AddChild(std::make_unique<Terminal>(&A));
+        func.GetTree()->AddChild(FunctionFactory::Create(&B));
+        func.GetTree()->AddChild(FunctionFactory::Create(&A));
         ASSERT_DOUBLE_EQ(B-A, func.GetTree()->Evaluate());
     }
 
@@ -116,7 +115,7 @@ namespace Tests
     {
         std::vector<FunctionType> allowedFunctions{ FunctionType::Addition };
         std::vector<double*> allowedTerminals{ &A };
-        auto chromosome = Operators::CreateRandomChromosome(1, allowedFunctions, allowedTerminals);
+        auto chromosome = Chromosome::CreateRandomChromosome(1, allowedFunctions, allowedTerminals);
 
         // std::cout << chromosome->ToString() << std::endl;
         ASSERT_DOUBLE_EQ(A+A, chromosome->Evaluate());
@@ -126,7 +125,7 @@ namespace Tests
     {
         std::vector<FunctionType> allowedFunctions{ FunctionType::Addition };
         std::vector<double*> allowedTerminals{ &A, &B };
-        auto chromosome = Operators::CreateRandomChromosome(3, allowedFunctions, allowedTerminals);
+        auto chromosome = Chromosome::CreateRandomChromosome(3, allowedFunctions, allowedTerminals);
 
         // std::cout << chromosome->ToString() << std::endl;
         // ASSERT_DOUBLE_EQ(A, chromosome->Evaluate());

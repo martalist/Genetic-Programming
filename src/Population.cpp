@@ -10,6 +10,31 @@
 #include "utils/Raffle.h"
 #include "utils/Tournament.h"
 
+namespace
+{
+    // The size of the tournament for individual parent selection
+    const int TournamentSize = 20; 
+
+    // The default parsimony coefficient
+    const double DefaultParsimonyCoefficient = 0.025;
+
+    /**
+     * Returns the number of raffle tickets should be allocated for a given fitness value.
+     * The smaller (better) the fitness, the higher the ticket number. 
+     * This is only used in conjunction with Raffle ticketing (i.e. not Tournament).
+     */
+    // auto ticketAllocation = [](double fitness) -> double 
+    // {
+        // if (fitness == std::numeric_limits<double>::infinity())
+        // {
+            // return 0.0;
+        // }
+        // // return std::min(1.0/fitness, std::numeric_limits<double>::max()/10'000);
+        // return std::exp(4.0 - std::pow(fitness, 2.0/5.0));
+        // // return std::exp(7.0 - std::pow(fitness, 0.32));
+    // };
+}
+
 namespace Model
 {
     Population::Population(const PopulationParams& params, const std::vector<std::vector<double>>& fitnessCases)
@@ -18,13 +43,13 @@ namespace Model
         // TODO: allow config to select between raffle and tournament style selection
         // , m_selector(std::make_unique<Util::Raffle<double>>())
         // TODO: make the tournament size configurable by XML
-        , m_selector(std::make_unique<Util::Tournament<double>>(m_params.PopulationSize, 20))
+        , m_selector(std::make_unique<Util::Tournament<double>>(m_params.PopulationSize, TournamentSize))
         , m_terminals(params.NumberOfTerminals)
         , m_fitnessCases(fitnessCases)
     {
         if (params.Seed.has_value())
         {
-            IChromosome::SetSeed(params.Seed.value()); // TODO: This should be IChromosome::SetSeed
+            IChromosome::SetSeed(params.Seed.value());
             m_randomProbability.SetSeed(params.Seed.value());
             m_selector->SetSeed(params.Seed.value());
         }
@@ -77,6 +102,7 @@ namespace Model
 
     void Population::Reproduce(const IChromosome& mum, const IChromosome& dad, std::vector<std::unique_ptr<IChromosome>>& nextGeneration)
     {
+        // TODO: tidy this up!
         auto [son, daughter] = GetNewOffspring(mum, dad);
 
         if (m_params.AlwaysReplaceParents)
@@ -154,28 +180,14 @@ namespace Model
 
         m_selector->Reset(); // get rid of the previous generation's tickets
         
-        /**
-         * Returns the number of raffle tickets should be allocated for a given fitness value.
-         * The smaller (better) the fitness, the higher the ticket number. 
-         */
-        // auto ticketAllocation = [](double fitness) -> double 
-        // {
-            // if (fitness == std::numeric_limits<double>::infinity())
-            // {
-                // return 0.0;
-            // }
-            // // return std::min(1.0/fitness, std::numeric_limits<double>::max()/10'000);
-            // return std::exp(4.0 - std::pow(fitness, 2.0/5.0));
-            // // return std::exp(7.0 - std::pow(fitness, 0.32));
-        // };
-
         int i = 0;
         for (auto& chromosome : m_population)
         {
             // TODO: only calculate ticketAllocation for raffle style
             // auto numberOfTickets = ticketAllocation(chromosome.Fitness());
             auto numberOfTickets = chromosome->Fitness();
-            m_selector->RegisterElement(numberOfTickets, i++);
+            m_selector->RegisterElement(numberOfTickets, i);
+            ++i;
         }
         m_parsimonyCoefficient = UpdateParsimonyCoefficient();
         // std::cout << "Parsimony Coefficient = " << m_parsimonyCoefficient << std::endl;
@@ -243,6 +255,10 @@ namespace Model
 
     double Population::UpdateParsimonyCoefficient()
     {
+        return DefaultParsimonyCoefficient; 
+
+        // TODO: This implementation of dynamic parsimony coefficient calculation does not yield
+        // the desired result. So for now we're returning the default value above.
         using Itr = std::vector<std::unique_ptr<IChromosome>>::iterator;
         const double DenominatorThreshold = 1e-06;
 
@@ -253,8 +269,8 @@ namespace Model
         auto covar = Util::Covariance<Itr, Itr>( m_population.begin(), m_population.end(), getSize,
                                             m_population.begin(), m_population.end(), getFitness);
 
-        return 0.025; 
-        // TODO: this may be affected by allowing > 2 children per function
+        // TODO: Revisit the paper documenting this method. It may be affected by allowing > 2 children
+        // per node.
         if (covar < DenominatorThreshold)
         {
             if (varSize < DenominatorThreshold)
@@ -264,6 +280,5 @@ namespace Model
             return 1.0; // approaching infty
         }
         return covar / varSize;
-        return std::clamp(covar / varSize, 0.0, 1.0);
     }
 }

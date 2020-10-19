@@ -107,7 +107,7 @@ namespace Model
 
         std::vector<double> m_terminals; ///< The terminal values to evaluate
         std::vector<std::vector<double>> m_fitnessCases; ///< Training cases
-        double m_parsimonyCoefficient = 0.0;
+        double m_parsimonyCoefficient = 0.0; ///< The coefficient used to penalize long S-expressions.
     };
 }
 
