@@ -6,6 +6,7 @@ namespace
 {
     const Model::PopulationParams Params1
     {
+        Model::ChromosomeType::Normal,
         2, // population size
         10, // The minimum tree size of newly (randomly) created S-expressions
         0.7, // crossover probability
@@ -19,6 +20,7 @@ namespace
 
     const Model::PopulationParams Params2
     {
+        Model::ChromosomeType::Normal,
         4, // population size
         10, // The minimum tree size of newly (randomly) created S-expressions
         0.7, // crossover probability

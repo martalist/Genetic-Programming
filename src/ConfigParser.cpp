@@ -10,6 +10,27 @@
 
 #include "model/FunctionFactory.h"
 
+namespace
+{
+    /**
+     * Returns a valid ChromosomeType from a string
+     * @param str the string to convert
+     */
+    Model::ChromosomeType ProgramTypeFromString(const std::string& str)
+    {
+        if (str == "Normal")
+        {
+            return Model::ChromosomeType::Normal;
+        }
+        else if (str  == "Time Series")
+        {
+            return Model::ChromosomeType::TimeSeries;
+        }
+
+        throw std::invalid_argument(str + " is not a valid Chromosome Type.");
+    }
+}
+
 namespace Model
 {
     Config ConfigParser::s_config{};
@@ -22,6 +43,7 @@ namespace Model
 
             pt::ptree tree;
             pt::read_xml(filename, tree);
+            s_config.Params.Type = ProgramTypeFromString(tree.get("Config.ProgramType", "Normal"));
             s_config.Iterations = tree.get("Config.Iterations", 1);
             s_config.NumGenerations = tree.get("Config.Generations", 20);
             if (tree.get_child_optional("Config.StoppingCriteria"))
@@ -53,7 +75,9 @@ namespace Model
             }
 
             auto fitnessCasesFile = tree.get("Config.FitnessCases.<xmlattr>.file", std::string("pythagorean_theorem.csv"));
-            s_config.Params.NumberOfTerminals = LoadFitnessCases(fitnessCasesFile);
+            int numberOfTerminals = LoadFitnessCases(fitnessCasesFile);
+            s_config.Params.NumberOfTerminals = (s_config.Params.Type == ChromosomeType::TimeSeries) ?
+                tree.get("Config.ProgramType.<xmlattr>.lag", 1) : numberOfTerminals;
 
             std::cout << "Configuration loaded:" << std::endl;
         }

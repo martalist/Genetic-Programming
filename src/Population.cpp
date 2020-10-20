@@ -70,7 +70,7 @@ namespace Model
         }
 
         // TODO: change the type by config
-        ChromosomeFactory::Initialise(ChromosomeType::Normal, m_params.MinInitialTreeSize, 
+        ChromosomeFactory::Initialise(m_params.Type, m_params.MinInitialTreeSize, 
                 m_params.AllowedFunctions, m_allowedTerminals, m_fitnessCases, m_terminals);
     }
 

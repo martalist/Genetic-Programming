@@ -3,19 +3,11 @@
 
 #include <memory>
 #include <string>
+#include "ChromosomeType.h"
 #include "IChromosome.h"
 
 namespace Model
 {
-    /**
-     * Types of Chromosome
-     */
-    enum class ChromosomeType
-    {
-        Normal = 0, ///< general purpose chromosomes for fitting 
-        TimeSeries  ///< auto-regressive, non-linear, with least-squares-fit coefficients
-    };
-
     /**
      * A singleton factory class to create new Chromosomes of a specified type.
      */

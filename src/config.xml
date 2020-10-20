@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Config>
+    <ProgramType>Normal</ProgramType>
+    <!-- <ProgramType lag="10">Time Series</ProgramType> -->
     <Iterations>10</Iterations>
     <Generations>20</Generations>
     <StoppingCriteria>0.0001</StoppingCriteria>
@@ -7,7 +9,6 @@
     <CrossoverProb>0.7</CrossoverProb>
     <MutationProb>0.1</MutationProb>
     <HoistMutationProb>0.1</HoistMutationProb>
-    <ProgramType>Normal</ProgramType> <!-- other value type is "Time Series" -->
     <!-- <Seed>0</Seed> -->
 
     <!-- delete or comment-out the Functions that you don't require -->
