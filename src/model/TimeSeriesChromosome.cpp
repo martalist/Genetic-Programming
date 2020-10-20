@@ -1,4 +1,4 @@
-#include "Chromosome.h"
+#include "TimeSeriesChromosome.h"
 
 #include <algorithm>
 #include <cmath>
@@ -9,7 +9,7 @@ namespace Model
 {
     using namespace ChromosomeUtil;
 
-    Chromosome::Chromosome(int targetSize, 
+    TimeSeriesChromosome::TimeSeriesChromosome(int targetSize, 
             const std::vector<FunctionType>& allowedFunctions, 
             const std::vector<double*>& variables,
             const std::vector<std::vector<double>>& fitnessCases, 
@@ -22,13 +22,13 @@ namespace Model
     {
     }
 
-    Chromosome::Chromosome(IChromosome::INodePtr tree)
+    TimeSeriesChromosome::TimeSeriesChromosome(IChromosome::INodePtr tree)
         : m_tree(std::move(tree)) 
         , m_size(m_tree->Size())
     {
     }
 
-    Chromosome::Chromosome(IChromosome::INodePtr tree, const std::vector<std::vector<double>>& fitnessCases, 
+    TimeSeriesChromosome::TimeSeriesChromosome(IChromosome::INodePtr tree, const std::vector<std::vector<double>>& fitnessCases, 
             std::vector<double>& terminals, double parsimonyCoefficient)
         : m_tree(std::move(tree)) 
         , m_size(m_tree->Size())
@@ -37,7 +37,7 @@ namespace Model
     {
     } 
 
-    Chromosome::Chromosome(IChromosome::INodePtr& tree, double fitness, double parsimonyCoefficient)
+    TimeSeriesChromosome::TimeSeriesChromosome(IChromosome::INodePtr tree, double fitness, double parsimonyCoefficient)
         : m_tree(std::move(tree)) 
         , m_size(m_tree->Size())
         , m_fitness(fitness)
@@ -45,13 +45,26 @@ namespace Model
     {
     } 
 
-    bool Chromosome::operator<(const IChromosome& right) const
+    std::unique_ptr<IChromosome> TimeSeriesChromosome::Clone() const
     {
-        const auto rhs = dynamic_cast<const Chromosome*>(&right);
+        return std::make_unique<TimeSeriesChromosome>(*this); 
+    }
+
+    TimeSeriesChromosome::TimeSeriesChromosome(const TimeSeriesChromosome& other)
+    {
+        m_tree = other.m_tree->Clone();
+        m_size = other.m_size;
+        m_fitness = other.m_fitness;
+        m_weightedFitness = other.m_weightedFitness;
+    }
+
+    bool TimeSeriesChromosome::operator<(const IChromosome& right) const
+    {
+        const auto rhs = dynamic_cast<const TimeSeriesChromosome*>(&right);
         return m_weightedFitness < rhs->m_weightedFitness;
     }
 
-    double Chromosome::CalculateFitness(const std::vector<std::vector<double>>& fitnessCases, std::vector<double>& terminals) const
+    double TimeSeriesChromosome::CalculateFitness(const std::vector<std::vector<double>>& fitnessCases, std::vector<double>& terminals) const
     {
         double sumOfErrors = 0.0;
         for (const auto& fCase : fitnessCases) // FitnessCases are the training set
@@ -68,35 +81,22 @@ namespace Model
         return sumOfErrors / fitnessCases.size(); // mean absolute error
     }
 
-    double Chromosome::CalculateWeightedFitness(double parsimonyCoefficient) const
+    double TimeSeriesChromosome::CalculateWeightedFitness(double parsimonyCoefficient) const
     {
         return m_fitness + parsimonyCoefficient * m_size;
     }
 
-    int Chromosome::Size() const
+    int TimeSeriesChromosome::Size() const
     {
         return m_size;
     }
 
-    double Chromosome::Fitness() const
+    double TimeSeriesChromosome::Fitness() const
     {
         return m_fitness;
     }
 
-    std::unique_ptr<IChromosome> Chromosome::Clone() const
-    {
-        return std::make_unique<Chromosome>(*this);
-    }
-
-    Chromosome::Chromosome(const Chromosome& other)
-    {
-        m_tree = other.m_tree->Clone();
-        m_size = other.m_size;
-        m_fitness = other.m_fitness;
-        m_weightedFitness = other.m_weightedFitness;
-    }
-
-    void Chromosome::Mutate(const std::vector<FunctionType>& allowedFunctions, const std::vector<double*>& variables)
+    void TimeSeriesChromosome::Mutate(const std::vector<FunctionType>& allowedFunctions, const std::vector<double*>& variables)
     {
         auto randomTerminalMutation = [&](std::unique_ptr<INode>& gene) -> void
         {
@@ -170,7 +170,7 @@ namespace Model
         SetSize(m_tree->Size());
     }
 
-    void Chromosome::HoistMutate()
+    void TimeSeriesChromosome::HoistMutate()
     {
         // get the target gene from within chromosome
         if (Size() == 1) 
@@ -197,9 +197,9 @@ namespace Model
         SetSize(m_tree->Size());
     }
 
-    void Chromosome::Crossover(IChromosome& right)
+    void TimeSeriesChromosome::Crossover(IChromosome& right)
     {
-        auto rhs = dynamic_cast<Chromosome*>(&right);
+        auto rhs = dynamic_cast<TimeSeriesChromosome*>(&right);
         if (Size() == 1 && rhs->Size() == 1)
         {
             // do nothing; swapping at the base yields two S-expressions the same
@@ -227,22 +227,22 @@ namespace Model
         rhs->SetSize(rhs->GetTree()->Size());
     }
 
-    void Chromosome::SetSize(int size)
+    void TimeSeriesChromosome::SetSize(int size)
     {
         m_size = size;
     }
 
-    IChromosome::INodePtr& Chromosome::GetTree()
+    IChromosome::INodePtr& TimeSeriesChromosome::GetTree()
     {
         return m_tree;
     }
 
-    const IChromosome::INodePtr& Chromosome::GetTree() const
+    const IChromosome::INodePtr& TimeSeriesChromosome::GetTree() const
     {
         return m_tree;
     }
 
-    std::unique_ptr<INode> Chromosome::CreateRandomChromosome(int targetSize, const std::vector<FunctionType>& allowedFunctions, const std::vector<double*>& variables)
+    std::unique_ptr<INode> TimeSeriesChromosome::CreateRandomChromosome(int targetSize, const std::vector<FunctionType>& allowedFunctions, const std::vector<double*>& variables)
     {
         // start with a randomly selected function
         int index = RandomIndex(allowedFunctions.size());

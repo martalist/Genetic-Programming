@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "INode.h"
+#include "../utils/UniformRandomGenerator.h"
 
 namespace Model
 {
@@ -74,18 +75,7 @@ namespace Model
         virtual INodePtr& GetTree() = 0;
         virtual const INodePtr& GetTree() const = 0;
 
-        static void SetSeed(int seed);
-
     protected:
-        /**
-         * @param gene The S-expression gene to inspect
-         * @return true if the gene is a Terminal (not a Function)
-         */
-        static bool IsTerminal(const std::unique_ptr<Model::INode>& gene)
-        {
-            return gene->MaxChildren() == 0;
-        }
-
         /**
          * Calculate the fitness for one chromosome.
          * @param chromosome The chromosome to evaluate
@@ -104,7 +94,6 @@ namespace Model
          */
         virtual void SetSize(int size) = 0;
     };
-
 }
 
 #endif

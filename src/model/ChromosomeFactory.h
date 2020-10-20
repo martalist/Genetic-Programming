@@ -48,7 +48,7 @@ namespace Model
          * @param parsimonyCoefficient The coefficient used to penalise long chromosomes
          * @return the new Chromosome
          */
-        std::unique_ptr<IChromosome> CopyAndEvaluate(std::unique_ptr<INode>& tree, double parsimonyCoefficient) const;
+        std::unique_ptr<IChromosome> CopyAndEvaluate(std::unique_ptr<INode> tree, double parsimonyCoefficient) const;
 
     private:
         

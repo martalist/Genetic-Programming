@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include "model/FunctionFactory.h"
 #include "model/ChromosomeFactory.h"
+#include "model/ChromosomeUtil.h"
 #include "utils/Math.h"
 #include "utils/Raffle.h"
 #include "utils/Tournament.h"
@@ -59,7 +60,7 @@ namespace Model
     {
         if (params.Seed.has_value())
         {
-            IChromosome::SetSeed(params.Seed.value());
+            ChromosomeUtil::SetSeed(params.Seed.value());
             m_randomProbability.SetSeed(params.Seed.value());
             m_selector->SetSeed(params.Seed.value());
         }
@@ -175,8 +176,8 @@ namespace Model
 
         return 
         {
-            ChromosomeFactory::Inst().CopyAndEvaluate(son->GetTree(), parsimonyCoefficient),
-            ChromosomeFactory::Inst().CopyAndEvaluate(daughter->GetTree(), parsimonyCoefficient),
+            ChromosomeFactory::Inst().CopyAndEvaluate(std::move(son->GetTree()), parsimonyCoefficient),
+            ChromosomeFactory::Inst().CopyAndEvaluate(std::move(daughter->GetTree()), parsimonyCoefficient),
         };
     }
 

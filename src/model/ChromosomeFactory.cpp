@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "Chromosome.h"
+#include "TimeSeriesChromosome.h"
 
 namespace Model
 {
@@ -50,6 +51,10 @@ namespace Model
     {
         switch (m_type)
         {
+        case ChromosomeType::TimeSeries:
+            return std::make_unique<TimeSeriesChromosome>(m_targetSize, m_allowedFunctions, m_variables, 
+                    m_fitnessCases, m_terminals, parsimonyCoefficient);
+
         case ChromosomeType::Normal:
         default:
             return std::make_unique<Chromosome>(m_targetSize, m_allowedFunctions, m_variables, 
@@ -57,13 +62,16 @@ namespace Model
         }
     }
 
-    std::unique_ptr<IChromosome> ChromosomeFactory::CopyAndEvaluate(std::unique_ptr<INode>& tree, double parsimonyCoefficient) const
+    std::unique_ptr<IChromosome> ChromosomeFactory::CopyAndEvaluate(std::unique_ptr<INode> tree, double parsimonyCoefficient) const
     {
         switch (m_type)
         {
+        case ChromosomeType::TimeSeries:
+            return std::make_unique<TimeSeriesChromosome>(std::move(tree), m_fitnessCases, m_terminals, parsimonyCoefficient);
+
         case ChromosomeType::Normal:
         default:
-            return std::make_unique<Chromosome>(tree, m_fitnessCases, m_terminals, parsimonyCoefficient);
+            return std::make_unique<Chromosome>(std::move(tree), m_fitnessCases, m_terminals, parsimonyCoefficient);
         }
     }
 }
