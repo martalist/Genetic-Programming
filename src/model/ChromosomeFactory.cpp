@@ -48,12 +48,22 @@ namespace Model
 
     std::unique_ptr<IChromosome> ChromosomeFactory::CreateRandom(double parsimonyCoefficient) const
     {
-        return std::make_unique<Chromosome>(m_targetSize, m_allowedFunctions, m_variables, 
-                m_fitnessCases, m_terminals, parsimonyCoefficient);
+        switch (m_type)
+        {
+        case ChromosomeType::Normal:
+        default:
+            return std::make_unique<Chromosome>(m_targetSize, m_allowedFunctions, m_variables, 
+                    m_fitnessCases, m_terminals, parsimonyCoefficient);
+        }
     }
 
     std::unique_ptr<IChromosome> ChromosomeFactory::CopyAndEvaluate(std::unique_ptr<INode>& tree, double parsimonyCoefficient) const
     {
-        return std::make_unique<Chromosome>(tree, m_fitnessCases, m_terminals, parsimonyCoefficient);
+        switch (m_type)
+        {
+        case ChromosomeType::Normal:
+        default:
+            return std::make_unique<Chromosome>(tree, m_fitnessCases, m_terminals, parsimonyCoefficient);
+        }
     }
 }

@@ -23,15 +23,6 @@ namespace
     }
 
     /**
-     * @param gene The S-expression gene to inspect
-     * @return true if the gene is a Terminal (not a Function)
-     */
-    auto isTerminal = [](const std::unique_ptr<Model::INode>& gene)
-    {
-        return gene->MaxChildren() == 0;
-    };
-
-    /**
      * Adds terminals to a function to ensure it has a valid number of children.
      * @pre This should only be called on Function objects.
      * @param func The function to fill.
@@ -201,7 +192,7 @@ namespace Model
         int index = RandInt.GetInRange(0, m_size-1);
         auto& gene = m_tree->Get(index, m_tree);
 
-        if (isTerminal(gene))
+        if (IsTerminal(gene))
         {
             randomTerminalMutation(gene);
         }
@@ -321,7 +312,7 @@ namespace Model
             {
                 insertIndex = RandInt.GetInRange(0, root->Size()-1);
             } 
-            while (insertIndex != 0 && isTerminal(root->Get(insertIndex, root)) );
+            while (insertIndex != 0 && IsTerminal(root->Get(insertIndex, root)) );
 
             // add the new node to the random position in the tree
             if (!root->Get(insertIndex, root)->AddChild(std::move(newNode)) && isFunction)

@@ -2,6 +2,7 @@
 <Config>
     <ProgramType>Normal</ProgramType>
     <!-- <ProgramType lag="10">Time Series</ProgramType> -->
+
     <Iterations>10</Iterations>
     <Generations>20</Generations>
     <StoppingCriteria>0.0001</StoppingCriteria>
@@ -10,6 +11,7 @@
     <MutationProb>0.1</MutationProb>
     <HoistMutationProb>0.1</HoistMutationProb>
     <!-- <Seed>0</Seed> -->
+    <!-- <SelectorType sample="20">Tourmament</SelectorType> -->
 
     <!-- delete or comment-out the Functions that you don't require -->
     <AllowedFunctions>

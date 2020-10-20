@@ -78,6 +78,15 @@ namespace Model
 
     protected:
         /**
+         * @param gene The S-expression gene to inspect
+         * @return true if the gene is a Terminal (not a Function)
+         */
+        static bool IsTerminal(const std::unique_ptr<Model::INode>& gene)
+        {
+            return gene->MaxChildren() == 0;
+        }
+
+        /**
          * Calculate the fitness for one chromosome.
          * @param chromosome The chromosome to evaluate
          * @return the chromosome fitness as a positive, real number
@@ -95,6 +104,7 @@ namespace Model
          */
         virtual void SetSize(int size) = 0;
     };
+
 }
 
 #endif
