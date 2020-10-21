@@ -16,34 +16,38 @@ namespace Model
             std::vector<double>& terminals, 
             double parsimonyCoefficient)
         : m_tree(CreateRandomChromosome(targetSize, allowedFunctions, variables))
+        , m_coefficients(m_tree->NumberOfChildren(), 1.0)
         , m_size(m_tree->Size())
         , m_fitness(CalculateFitness(fitnessCases, terminals))
         , m_weightedFitness(CalculateWeightedFitness(parsimonyCoefficient))
     {
     }
 
-    TimeSeriesChromosome::TimeSeriesChromosome(IChromosome::INodePtr tree)
-        : m_tree(std::move(tree)) 
-        , m_size(m_tree->Size())
-    {
-    }
+    // TimeSeriesChromosome::TimeSeriesChromosome(IChromosome::INodePtr tree)
+        // : m_tree(std::move(tree)) 
+        // , m_coefficients(m_tree->NumberOfChildren(), 1.0)
+        // , m_size(m_tree->Size())
+    // {
+    // }
 
     TimeSeriesChromosome::TimeSeriesChromosome(IChromosome::INodePtr tree, const std::vector<double>& fitnessCases, 
             std::vector<double>& terminals, double parsimonyCoefficient)
         : m_tree(std::move(tree)) 
+        , m_coefficients(m_tree->NumberOfChildren(), 1.0)
         , m_size(m_tree->Size())
         , m_fitness(CalculateFitness(fitnessCases, terminals))
         , m_weightedFitness(CalculateWeightedFitness(parsimonyCoefficient))
     {
     } 
 
-    TimeSeriesChromosome::TimeSeriesChromosome(IChromosome::INodePtr tree, double fitness, double parsimonyCoefficient)
-        : m_tree(std::move(tree)) 
-        , m_size(m_tree->Size())
-        , m_fitness(fitness)
-        , m_weightedFitness(CalculateWeightedFitness(parsimonyCoefficient))
-    {
-    } 
+    // TimeSeriesChromosome::TimeSeriesChromosome(IChromosome::INodePtr tree, double fitness, double parsimonyCoefficient)
+        // : m_tree(std::move(tree)) 
+        // , m_coefficients(m_tree->NumberOfChildren(), 1.0)
+        // , m_size(m_tree->Size())
+        // , m_fitness(fitness)
+        // , m_weightedFitness(CalculateWeightedFitness(parsimonyCoefficient))
+    // {
+    // } 
 
     std::unique_ptr<IChromosome> TimeSeriesChromosome::Clone() const
     {
@@ -53,6 +57,7 @@ namespace Model
     TimeSeriesChromosome::TimeSeriesChromosome(const TimeSeriesChromosome& other)
     {
         m_tree = other.m_tree->Clone();
+        m_coefficients = other.m_coefficients;
         m_size = other.m_size;
         m_fitness = other.m_fitness;
         m_weightedFitness = other.m_weightedFitness;
@@ -247,9 +252,8 @@ namespace Model
 
     std::unique_ptr<INode> TimeSeriesChromosome::CreateRandomChromosome(int targetSize, const std::vector<FunctionType>& allowedFunctions, const std::vector<double*>& variables)
     {
-        // start with a randomly selected function
-        int index = RandomIndex(allowedFunctions.size());
-        auto root = FunctionFactory::Create(allowedFunctions[index]);
+        // start with an addition function, since this forms the basis of the autoregressive model
+        auto root = FunctionFactory::Create(FunctionType::Addition);
 
         // keep a local list of function nodes, for easy reference
         std::vector<INode*> functions;
@@ -258,19 +262,19 @@ namespace Model
         for (int count = 1; count < targetSize; ++count)
         {
             // Randomly choose a new function/variable
-            auto isFunction = RandInt().GetInRange(0, 1) == 0;
+            auto isFunction = ( RandInt().GetInRange(0, 1) == 0 );
             std::unique_ptr<INode> newNode;
             if (isFunction)
             {
                 // randomly select a function type
-                index = RandomIndex(allowedFunctions.size());
+                int index = RandomIndex(allowedFunctions.size());
                 newNode = FunctionFactory::Create(allowedFunctions[index]); 
                 functions.push_back(newNode.get());
             }
             else 
             {
                 // randomly select a variable
-                index = RandomIndex(variables.size());
+                int index = RandomIndex(variables.size());
                 newNode = FunctionFactory::Create(variables[index]);
             }
             

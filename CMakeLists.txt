@@ -63,6 +63,7 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/src)
 # copy the config file to the binary dir
 configure_file(${PROJECT_SOURCE_DIR}/src/config.xml config.xml COPYONLY)
 configure_file(${PROJECT_SOURCE_DIR}/src/pythagorean_theorem.csv pythagorean_theorem.csv COPYONLY)
+configure_file(${PROJECT_SOURCE_DIR}/src/HotelRooms.csv HotelRooms.csv COPYONLY)
 
 # Must be defined in top-most CMakeLists.txt
 enable_testing() 

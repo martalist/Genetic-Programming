@@ -37,7 +37,7 @@ namespace Model
          * Constructor - Does no fitness calculations upon construction
          * @param tree The underlying S-expression
          */
-        TimeSeriesChromosome(IChromosome::INodePtr tree);
+        // TimeSeriesChromosome(IChromosome::INodePtr tree);
 
         /**
          * Constructor - Calculates fitness and weighted fitness upon construction.
@@ -48,7 +48,7 @@ namespace Model
         /**
          * Constructor - Calculates only the weighted fitness upon construction.
          */
-        TimeSeriesChromosome(IChromosome::INodePtr tree, double fitness, double parsimonyCoefficient);
+        // TimeSeriesChromosome(IChromosome::INodePtr tree, double fitness, double parsimonyCoefficient);
 
         /**
          * Less-than operator. Used for sorting collections of Chromosomes.
@@ -117,6 +117,7 @@ namespace Model
         void SetSize() override;
 
         IChromosome::INodePtr m_tree; ///< the S-expression
+        std::vector<double> m_coefficients; ///< Coefficients of the terms in the autoregressive model
         int m_size; ///< the length (nodes in the tree)
         double m_fitness = std::numeric_limits<double>::max(); ///< raw fitness of the chromosome.
         double m_weightedFitness = std::numeric_limits<double>::max(); ///< weighted fitness, with penalty for length/size
