@@ -92,7 +92,7 @@ namespace Model
         /**
          * Set the cached size of the Chromosome
          */
-        virtual void SetSize(int size) = 0;
+        virtual void SetSize() = 0;
     };
 }
 

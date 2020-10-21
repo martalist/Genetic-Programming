@@ -114,7 +114,7 @@ namespace Model
         /**
          * @see IChromosome::SetSize
          */
-        void SetSize(int size) override;
+        void SetSize() override;
 
         IChromosome::INodePtr m_tree; ///< the S-expression
         int m_size; ///< the length (nodes in the tree)

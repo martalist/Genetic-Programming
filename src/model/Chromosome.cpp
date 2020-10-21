@@ -172,7 +172,7 @@ namespace Model
         }
 
         // update the cached size of the chromosome
-        SetSize(m_tree->Size());
+        SetSize();
     }
 
     void Chromosome::HoistMutate()
@@ -199,7 +199,7 @@ namespace Model
         target = std::move(toHoist);
 
         // update the cached size of the chromosome
-        SetSize(m_tree->Size());
+        SetSize();
     }
 
     void Chromosome::Crossover(IChromosome& right)
@@ -228,13 +228,13 @@ namespace Model
             leftSubtree.swap(rhs->GetTree()->Get(rhsIndex, rhs->GetTree()));
         }
 
-        SetSize(m_tree->Size());
-        rhs->SetSize(rhs->GetTree()->Size());
+        SetSize();
+        rhs->SetSize();
     }
 
-    void Chromosome::SetSize(int size)
+    void Chromosome::SetSize()
     {
-        m_size = size;
+        m_size = m_tree->Size();
     }
 
     IChromosome::INodePtr& Chromosome::GetTree()
