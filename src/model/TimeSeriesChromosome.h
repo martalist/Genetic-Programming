@@ -102,6 +102,11 @@ namespace Model
          */
         static std::unique_ptr<INode> CreateRandomChromosome(int targetSize, const std::vector<FunctionType>& allowedFunctions, const std::vector<double*>& variables);
 
+        /**
+         * @see IChromosome::ToString
+         */
+        std::string ToString() const override;
+
     private:
         /**
          * Calculate the fitness for one chromosome. Currently uses MAE (mean absolute error)

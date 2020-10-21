@@ -104,7 +104,8 @@ namespace Model
         }
 
         // @see https://eigen.tuxfamily.org/dox-devel/group__LeastSquares.html
-        m_coefficients = W.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(Y);
+        // m_coefficients = W.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(Y);
+        m_coefficients = W.colPivHouseholderQr().solve(Y);
 
         auto errors = Y - (W*m_coefficients); // \hat{Y} = W*beta
         sumOfSqErrors = errors.transpose().dot(errors);
@@ -323,5 +324,26 @@ namespace Model
             FillFunction(func, variables);
         }
         return root;
+    }
+
+    std::string TimeSeriesChromosome::ToString() const
+    {
+        std::stringstream output;
+        output << m_coefficients(0) << " + ";
+        if (m_size != 1) // not a terminal
+        {
+            const auto& terms = m_tree->GetChildren();
+            int i = 0;
+            for (const auto& term : terms)
+            {
+                output << "(" << m_coefficients(++i) << " * " << term->ToString() << ")";
+                output << ((i < terms.size()) ? " + " : "");
+            }
+        }
+        else
+        {
+            output << m_tree->ToString();
+        }
+        return output.str();
     }
 }

@@ -299,4 +299,9 @@ namespace Model
         }
         return root;
     }
+
+    std::string Chromosome::ToString() const
+    {
+        return m_tree->ToString();
+    }
 }

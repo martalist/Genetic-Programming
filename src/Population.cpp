@@ -256,12 +256,12 @@ namespace Model
 
     std::string Population::BestAsString() const
     {
-        return m_sortedByFitness[0]->GetTree()->ToString();
+        return m_sortedByFitness[0]->ToString();
     }
 
     double Population::UpdateParsimonyCoefficient()
     {
-        return DefaultParsimonyCoefficient; 
+        return DefaultParsimonyCoefficient;  // TODO: disabling this is a good idea for TS
 
         // TODO: This implementation of dynamic parsimony coefficient calculation does not yield
         // the desired result. So for now we're returning the default value above.

@@ -75,6 +75,11 @@ namespace Model
         virtual INodePtr& GetTree() = 0;
         virtual const INodePtr& GetTree() const = 0;
 
+        /**
+         * @return the string representation of the Chromosome
+         */
+        virtual std::string ToString() const = 0;
+
     protected:
         /**
          * Calculate the fitness for one chromosome.
