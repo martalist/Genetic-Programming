@@ -16,7 +16,7 @@ namespace Model
         int NumGenerations = 20; ///< Number of generations to evolve through to find a solution
         std::optional<double> StoppingCriteria;
         PopulationParams Params{}; ///< Parameters for the population
-        std::vector<std::vector<double>> FitnessCases; ///< Training cases
+        std::vector<double> FitnessCases; ///< Training cases
     };
 
     /**

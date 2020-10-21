@@ -12,7 +12,7 @@ namespace Model
     TimeSeriesChromosome::TimeSeriesChromosome(int targetSize, 
             const std::vector<FunctionType>& allowedFunctions, 
             const std::vector<double*>& variables,
-            const std::vector<std::vector<double>>& fitnessCases, 
+            const std::vector<double>& fitnessCases, 
             std::vector<double>& terminals, 
             double parsimonyCoefficient)
         : m_tree(CreateRandomChromosome(targetSize, allowedFunctions, variables))
@@ -28,7 +28,7 @@ namespace Model
     {
     }
 
-    TimeSeriesChromosome::TimeSeriesChromosome(IChromosome::INodePtr tree, const std::vector<std::vector<double>>& fitnessCases, 
+    TimeSeriesChromosome::TimeSeriesChromosome(IChromosome::INodePtr tree, const std::vector<double>& fitnessCases, 
             std::vector<double>& terminals, double parsimonyCoefficient)
         : m_tree(std::move(tree)) 
         , m_size(m_tree->Size())
@@ -64,21 +64,24 @@ namespace Model
         return m_weightedFitness < rhs->m_weightedFitness;
     }
 
-    double TimeSeriesChromosome::CalculateFitness(const std::vector<std::vector<double>>& fitnessCases, std::vector<double>& terminals) const
+    double TimeSeriesChromosome::CalculateFitness(const std::vector<double>& fitnessCases, std::vector<double>& terminals) const
     {
-        double sumOfErrors = 0.0;
-        for (const auto& fCase : fitnessCases) // FitnessCases are the training set
+        double sumOfSq = 0.0;
+        int lag = terminals.size();
+        int totalCases = fitnessCases.size() - lag;
+
+        for (int i = 0; i < totalCases; ++i)
         {
             // load up the terminals for this fitness case
-            std::copy(fCase.begin(), fCase.end()-1, terminals.begin());
+            for (size_t j = 0; j < lag; ++j)
+            {
+                terminals[j] = fitnessCases[i+j];
+            }
 
-            // calculate the fitness (absolute error) for this fitness case
             auto returnVal = m_tree->Evaluate();
-
-            // add to the tally
-            sumOfErrors += std::abs(returnVal - fCase.back());
+            sumOfSq += std::pow(returnVal - fitnessCases[i+lag], 2);
         }
-        return sumOfErrors / fitnessCases.size(); // mean absolute error
+        return std::sqrt(sumOfSq/(totalCases-1)); // Standard Error
     }
 
     double TimeSeriesChromosome::CalculateWeightedFitness(double parsimonyCoefficient) const

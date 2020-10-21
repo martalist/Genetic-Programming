@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Config>
     <ProgramType>Normal</ProgramType>
+    <FitnessCases file="pythagorean_theorem.csv" />
     <!-- <ProgramType lag="10">Time Series</ProgramType> -->
+    <!-- <FitnessCases file="HotelRooms.csv" /> -->
 
     <Iterations>10</Iterations>
     <Generations>20</Generations>
     <StoppingCriteria>0.0001</StoppingCriteria>
-    <FitnessCases file="pythagorean_theorem.csv" />
     <CrossoverProb>0.7</CrossoverProb>
     <MutationProb>0.1</MutationProb>
     <HoistMutationProb>0.1</HoistMutationProb>

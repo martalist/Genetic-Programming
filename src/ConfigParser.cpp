@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <stdexcept>
+#include <boost/algorithm/string.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/tokenizer.hpp>
@@ -141,12 +142,12 @@ namespace Model
                 continue;
             }
 
-            std::vector<double> row;
             for (Tokenizer::iterator itr = tok.begin(); itr != tok.end(); ++itr)
             {
-                row.push_back(boost::lexical_cast<double>(*itr));
+                std::string str = *itr;
+                boost::trim(str);
+                s_config.FitnessCases.push_back(boost::lexical_cast<double>(str));
             }
-            s_config.FitnessCases.push_back(row);
         }
         in.close();
         return columns - 1; // last column is the expected value, not a terminal

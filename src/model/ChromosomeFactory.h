@@ -27,7 +27,7 @@ namespace Model
         static void Initialise(ChromosomeType type, int targetSize, 
                 const std::vector<FunctionType>& allowedFunctions, 
                 const std::vector<double*>& variables,  // TODO: this is probably unecessary
-                const std::vector<std::vector<double>>& fitnessCases, 
+                const std::vector<double>& fitnessCases, 
                 std::vector<double>& terminals);
 
         /**
@@ -56,7 +56,7 @@ namespace Model
          * Constructor
          */
         ChromosomeFactory(ChromosomeType type, int targetSize, const std::vector<FunctionType>& allowedFunctions, 
-                    const std::vector<double*>& variables, const std::vector<std::vector<double>>& fitnessCases, 
+                    const std::vector<double*>& variables, const std::vector<double>& fitnessCases, 
                     std::vector<double>& terminals);
 
         // TODO: can these be const?
@@ -64,7 +64,7 @@ namespace Model
         const int m_targetSize;
         const std::vector<FunctionType> m_allowedFunctions;
         const std::vector<double*>& m_variables;
-        const std::vector<std::vector<double>>& m_fitnessCases;
+        const std::vector<double>& m_fitnessCases;
         std::vector<double>& m_terminals;
 
         static std::unique_ptr<ChromosomeFactory> s_instance;
