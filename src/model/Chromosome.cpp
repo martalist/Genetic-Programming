@@ -51,7 +51,7 @@ namespace Model
         return m_weightedFitness < rhs->m_weightedFitness;
     }
 
-    double Chromosome::CalculateFitness(const std::vector<double>& fitnessCases, std::vector<double>& terminals) const
+    double Chromosome::CalculateFitness(const std::vector<double>& fitnessCases, std::vector<double>& terminals)
     {
         double sumOfErrors = 0.0;
         int columns = static_cast<int>(terminals.size()) + 1; // columns in csv file, incl dependent variable

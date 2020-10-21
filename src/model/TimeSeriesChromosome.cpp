@@ -1,7 +1,9 @@
 #include "TimeSeriesChromosome.h"
 
 #include <algorithm>
+#include <cassert>
 #include <cmath>
+#include <iostream>
 #include "FunctionFactory.h"
 #include "ChromosomeUtil.h"
 
@@ -16,7 +18,7 @@ namespace Model
             std::vector<double>& terminals, 
             double parsimonyCoefficient)
         : m_tree(CreateRandomChromosome(targetSize, allowedFunctions, variables))
-        , m_coefficients(m_tree->NumberOfChildren(), 1.0)
+        , m_coefficients(m_tree->NumberOfChildren()+1)
         , m_size(m_tree->Size())
         , m_fitness(CalculateFitness(fitnessCases, terminals))
         , m_weightedFitness(CalculateWeightedFitness(parsimonyCoefficient))
@@ -25,7 +27,7 @@ namespace Model
 
     // TimeSeriesChromosome::TimeSeriesChromosome(IChromosome::INodePtr tree)
         // : m_tree(std::move(tree)) 
-        // , m_coefficients(m_tree->NumberOfChildren(), 1.0)
+        // , m_coefficients(m_tree->NumberOfChildren()+1)
         // , m_size(m_tree->Size())
     // {
     // }
@@ -33,7 +35,7 @@ namespace Model
     TimeSeriesChromosome::TimeSeriesChromosome(IChromosome::INodePtr tree, const std::vector<double>& fitnessCases, 
             std::vector<double>& terminals, double parsimonyCoefficient)
         : m_tree(std::move(tree)) 
-        , m_coefficients(m_tree->NumberOfChildren(), 1.0)
+        , m_coefficients(m_tree->NumberOfChildren()+1)
         , m_size(m_tree->Size())
         , m_fitness(CalculateFitness(fitnessCases, terminals))
         , m_weightedFitness(CalculateWeightedFitness(parsimonyCoefficient))
@@ -42,7 +44,7 @@ namespace Model
 
     // TimeSeriesChromosome::TimeSeriesChromosome(IChromosome::INodePtr tree, double fitness, double parsimonyCoefficient)
         // : m_tree(std::move(tree)) 
-        // , m_coefficients(m_tree->NumberOfChildren(), 1.0)
+        // , m_coefficients(m_tree->NumberOfChildren()+1)
         // , m_size(m_tree->Size())
         // , m_fitness(fitness)
         // , m_weightedFitness(CalculateWeightedFitness(parsimonyCoefficient))
@@ -69,12 +71,16 @@ namespace Model
         return m_weightedFitness < rhs->m_weightedFitness;
     }
 
-    double TimeSeriesChromosome::CalculateFitness(const std::vector<double>& fitnessCases, std::vector<double>& terminals) const
+    double TimeSeriesChromosome::CalculateFitness(const std::vector<double>& fitnessCases, std::vector<double>& terminals)
     {
-        double sumOfSq = 0.0;
+        double sumOfSqErrors = 0.0;
         int lag = terminals.size();
         int totalCases = fitnessCases.size() - lag;
 
+        Eigen::MatrixXd W(totalCases, m_coefficients.size());
+        Eigen::VectorXd Y(totalCases);
+
+        // Iterate over the fitnessCases vector to build the W matrix and Y vector.
         for (int i = 0; i < totalCases; ++i)
         {
             // load up the terminals for this fitness case
@@ -83,10 +89,26 @@ namespace Model
                 terminals[j] = fitnessCases[i+j];
             }
 
-            auto returnVal = m_tree->Evaluate();
-            sumOfSq += std::pow(returnVal - fitnessCases[i+lag], 2);
+            Y(i) = fitnessCases[i+lag]; // add to Y vector
+            W(i,0) = 1.0; // first column is always 1
+            if (m_size != 1) // check that this isn't just a terminal
+            {
+                const auto& modelTerms = m_tree->GetChildren();
+                assert(m_coefficients.size()-1 == modelTerms.size()); // sanity check
+
+                for (size_t j = 0; j < modelTerms.size(); ++j)
+                {
+                    W(i,j+1) = modelTerms[j]->Evaluate();
+                }
+            }
         }
-        return std::sqrt(sumOfSq/(totalCases-1)); // Standard Error
+
+        // @see https://eigen.tuxfamily.org/dox-devel/group__LeastSquares.html
+        m_coefficients = W.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(Y);
+
+        auto errors = Y - (W*m_coefficients); // \hat{Y} = W*beta
+        sumOfSqErrors = errors.transpose().dot(errors);
+        return std::sqrt(sumOfSqErrors/(totalCases-1)); // Standard Error
     }
 
     double TimeSeriesChromosome::CalculateWeightedFitness(double parsimonyCoefficient) const
@@ -238,6 +260,7 @@ namespace Model
     void TimeSeriesChromosome::SetSize()
     {
         m_size = m_tree->Size();
+        m_coefficients.resize(m_tree->NumberOfChildren()+1);
     }
 
     IChromosome::INodePtr& TimeSeriesChromosome::GetTree()

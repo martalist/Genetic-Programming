@@ -47,6 +47,11 @@ namespace Model
         virtual int NumberOfChildren() const = 0;
 
         /**
+         * @return a reference to the direct descendents of this INode
+         */
+        virtual const std::vector<std::unique_ptr<INode>>& GetChildren() const = 0;
+
+        /**
          * @return The maximum allowed immediate children of this node
          */
         virtual int MaxChildren() const = 0;

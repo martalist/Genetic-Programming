@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <vector>
+#include <Eigen/Dense>
 #include "IChromosome.h"
 
 namespace Model
@@ -107,7 +108,7 @@ namespace Model
          * @param chromosome The chromosome to evaluate
          * @return the chromosome fitness as a positive, real number
          */
-        double CalculateFitness(const std::vector<double>& fitnessCases, std::vector<double>& terminals) const override;
+        double CalculateFitness(const std::vector<double>& fitnessCases, std::vector<double>& terminals) override;
 
         double CalculateWeightedFitness(double parsimonyCoefficient) const override;
 
@@ -117,7 +118,7 @@ namespace Model
         void SetSize() override;
 
         IChromosome::INodePtr m_tree; ///< the S-expression
-        std::vector<double> m_coefficients; ///< Coefficients of the terms in the autoregressive model
+        Eigen::VectorXd m_coefficients; ///< Coefficients of the terms in the autoregressive model
         int m_size; ///< the length (nodes in the tree)
         double m_fitness = std::numeric_limits<double>::max(); ///< raw fitness of the chromosome.
         double m_weightedFitness = std::numeric_limits<double>::max(); ///< weighted fitness, with penalty for length/size

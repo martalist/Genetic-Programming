@@ -81,7 +81,7 @@ namespace Model
          * @param chromosome The chromosome to evaluate
          * @return the chromosome fitness as a positive, real number
          */
-        virtual double CalculateFitness(const std::vector<double>& fitnessCases, std::vector<double>& terminals) const = 0;
+        virtual double CalculateFitness(const std::vector<double>& fitnessCases, std::vector<double>& terminals) = 0;
 
         /**
          * Calculate the weighted fitness of the chromosome, where longer chromosomes are penalized.

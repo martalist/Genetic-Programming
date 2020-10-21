@@ -111,7 +111,7 @@ namespace Model
          * @param chromosome The chromosome to evaluate
          * @return the chromosome fitness as a positive, real number
          */
-        double CalculateFitness(const std::vector<double>& fitnessCases, std::vector<double>& terminals) const override;
+        double CalculateFitness(const std::vector<double>& fitnessCases, std::vector<double>& terminals) override;
 
         double CalculateWeightedFitness(double parsimonyCoefficient) const override;
 

@@ -52,6 +52,11 @@ namespace Model
         return 0;
     }
 
+    const std::vector<std::unique_ptr<INode>>& Terminal::GetChildren() const
+    {
+        throw std::logic_error("Terminals do not have anly children.");
+    }
+
     int Terminal::MaxChildren() const
     {
         return 0;

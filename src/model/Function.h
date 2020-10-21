@@ -56,6 +56,11 @@ namespace Model
         int NumberOfChildren() const override;
 
         /**
+         * @see INode::GetChildren
+         */
+        const std::vector<std::unique_ptr<INode>>& GetChildren() const override;
+
+        /**
          * @see INode::MaxChildren()
          */
         int MaxChildren() const override;

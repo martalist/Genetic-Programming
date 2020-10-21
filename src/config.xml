@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Config>
-    <ProgramType>Normal</ProgramType>
-    <FitnessCases file="pythagorean_theorem.csv" />
-    <!-- <ProgramType lag="10">Time Series</ProgramType> -->
-    <!-- <FitnessCases file="HotelRooms.csv" /> -->
+    <!-- <ProgramType>Normal</ProgramType> -->
+    <!-- <FitnessCases file="pythagorean_theorem.csv" /> -->
+    <ProgramType lag="3">Time Series</ProgramType>
+    <FitnessCases file="HotelRooms2.csv" />
 
     <Iterations>10</Iterations>
     <Generations>20</Generations>

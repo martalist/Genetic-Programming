@@ -25,6 +25,10 @@ else()
   message(FATAL_ERROR "Could not find Boost")
 endif()
 
+# Eigen for matrix algebra
+find_package(Eigen3 3.3 REQUIRED)
+include_directories(${EIGEN3_INCLUDE_DIR})
+
 # Download and unpack googletest at configure time
 configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
 execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
