@@ -1,6 +1,7 @@
 #ifndef ChromosomeUtil_H
 #define ChromosomeUtil_H
 
+#include <memory>
 #include <vector>
 #include "../utils/UniformRandomGenerator.h"
 
