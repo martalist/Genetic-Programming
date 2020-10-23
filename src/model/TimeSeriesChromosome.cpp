@@ -346,4 +346,35 @@ namespace Model
         }
         return output.str();
     }
+
+    void TimeSeriesChromosome::Predict(const std::vector<double>& fitnessCases, std::vector<double>& terminals, std::vector<double>& predictionCases) const
+    {
+        int lag = terminals.size();
+        int totalCases = predictionCases.size() - lag;
+
+        // Iterate over the fitnessCases vector to build the W matrix and Y vector.
+        for (int i = 0; i < totalCases; ++i)
+        {
+            // load up the terminals for this fitness case
+            for (size_t j = 0; j < lag; ++j)
+            {
+                terminals[j] = i+j < fitnessCases.size() ? fitnessCases[i+j] : predictionCases[i+j-lag];
+            }
+
+            predictionCases[i+lag] = m_coefficients[0];
+            if (m_size != 1) // check that this isn't just a terminal
+            {
+                const auto& modelTerms = m_tree->GetChildren();
+
+                for (size_t j = 0; j < modelTerms.size(); ++j)
+                {
+                    predictionCases[i+lag] += m_coefficients[j+1] * modelTerms[j]->Evaluate();
+                }
+            }
+            else 
+            {
+                predictionCases[i+lag] += m_tree->Evaluate();
+            }
+        }
+    }
 }

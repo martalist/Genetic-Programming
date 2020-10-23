@@ -80,6 +80,13 @@ namespace Model
          */
         virtual std::string ToString() const = 0;
 
+        /**
+         * Allows for prediction of new values.
+         * @param fitnessCases The original training data.
+         * @param predictionCases The independent variables to predict data for, including room for predicted values.
+         */
+        virtual void Predict(const std::vector<double>& fitnessCases, std::vector<double>& terminals, std::vector<double>& predictionCases) const {}
+
     protected:
         /**
          * Calculate the fitness for one chromosome.

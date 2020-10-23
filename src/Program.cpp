@@ -20,10 +20,19 @@ namespace Model
         }
 
         // Create random/initial population from params
-        m_population = std::make_unique<Population>(m_params, config.FitnessCases);
+        m_population = std::make_unique<Population>(config.Params, config.FitnessCases);
     }
 
-    void Program::Start()
+    Program::Program(const Config& config)
+        : m_params(config.Params)
+        , m_population(std::make_unique<Population>(config.Params, config.FitnessCases))
+        , m_numGenerations(config.NumGenerations)
+        , m_iterations(config.Iterations)
+        , m_stoppingCriteria(config.StoppingCriteria)
+    {
+    }
+
+    void Program::Start(bool logResults)
     {
         // Run the experiment m_iterations times
         for (int iteration = 0; iteration < m_iterations; ++iteration)
@@ -33,15 +42,16 @@ namespace Model
 
             m_population->Reset(); // start with a fresh population
             auto [ min, firstQtr, median, thirdQtr, max ] = m_population->GetRangeStatistics();
-            m_logger.AddLine(min, firstQtr, median, thirdQtr, max, "\"" + m_population->BestAsString() + "\"");
+            m_logger.AddLine(min, firstQtr, median, thirdQtr, max, "\"" + m_population->GetBestFit()->ToString() + "\"");
 
             // evolve over m_numGenerations
             for (auto i = 0; i < m_numGenerations; ++i)
             {
                 m_population->Evolve();
                 auto [ minimum, firstQtr, median, thirdQtr, max ] = m_population->GetRangeStatistics();
-                m_logger.AddLine(minimum, firstQtr, median, thirdQtr, max, "\"" + m_population->BestAsString() + "\"");
                 min = minimum;
+
+                m_logger.AddLine(minimum, firstQtr, median, thirdQtr, max, "\"" + m_population->GetBestFit()->ToString() + "\"");
 
                 if (m_stoppingCriteria.has_value() && minimum < m_stoppingCriteria.value())
                 {
@@ -49,13 +59,26 @@ namespace Model
                 }
             }
 
-            m_logger.Write();
-
             // print best result
             std::cout << std::fixed << "Best S-expression in iteration " << iteration+1
                 << " has fitness: " << min << std::endl
-                << "\t" << m_population->BestAsString() << std::endl << std::endl;
+                << "\t" << m_population->GetBestFit()->ToString() << std::endl << std::endl;
         }
-        std::cout << "Results written to " << m_logger.GetOutputDir() << std::endl << std::endl;
+
+        if (logResults)
+        {
+            std::cout << "Results written to " << m_logger.GetOutputDir() << std::endl << std::endl;
+        }
+    }
+
+    double Program::Predict(double* predictions, int length)
+    {
+        if (m_params.Type != ChromosomeType::TimeSeries)
+        {
+            throw std::invalid_argument("Forecasting can only be performed on time series data.");
+        }
+
+        m_population->Predict(predictions, length);
+        return m_population->GetBestFit()->Fitness();
     }
 }

@@ -107,6 +107,13 @@ namespace Model
          */
         std::string ToString() const override;
 
+        /**
+         * @see IChromosome::Predict
+         * @param predictionCases A vector of zeroed data, whose size is the size of the
+         *     fitnessCases + the number of steps to predict into the future
+         */
+        void Predict(const std::vector<double>& fitnessCases, std::vector<double>& terminals, std::vector<double>& predictionCases) const override;
+
     private:
         /**
          * Calculate the fitness for one chromosome. Currently uses MAE (mean absolute error)

@@ -57,7 +57,17 @@ namespace Model
         /**
          * @return The best S-expression (by fitness) as a string
          */
-        std::string BestAsString() const;
+        ChromoPtr GetBestFit() const;
+
+        /**
+         * Provides forecast data based on the best fit Program/Chromosome.
+         * @param predictions The double array to write forecasts into.
+         * @param length The length of the data array (and therefore the number of predictions to make)
+         * @return The standard error of the fit chromosome.
+         * @pre Start must be called prior to Forecast.
+         * @pre The ChromosomeType for this Program must be TimeSeries.
+         */
+        void Predict(double* predictions, int length);
 
     private:
         /**

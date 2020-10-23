@@ -254,14 +254,14 @@ namespace Model
         return Util::Average<ConstItr>(m_population.begin(), m_population.end(), getFitness);
     }
 
-    std::string Population::BestAsString() const
+    Population::ChromoPtr Population::GetBestFit() const
     {
-        return m_sortedByFitness[0]->ToString();
+        return m_sortedByFitness[0]->Clone();
     }
 
     double Population::UpdateParsimonyCoefficient()
     {
-        return DefaultParsimonyCoefficient;  // TODO: disabling this is a good idea for TS
+        // return DefaultParsimonyCoefficient;  // TODO: disabling this is a good idea for TS
 
         // TODO: This implementation of dynamic parsimony coefficient calculation does not yield
         // the desired result. So for now we're returning the default value above.
@@ -286,5 +286,12 @@ namespace Model
             return 1.0; // approaching infty
         }
         return covar / varSize;
+    }
+
+    void Population::Predict(double* predictions, int length)
+    {
+        std::vector<double> result(m_fitnessCases.size() + length, 0.0);
+        m_population[0]->Predict(m_fitnessCases, m_terminals, result);
+        std::copy(result.begin() + m_fitnessCases.size(), result.end(), predictions);
     }
 }

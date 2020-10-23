@@ -30,6 +30,19 @@ namespace Model
         std::optional<int> Seed; ///< The seed, if set, to yield deterministic results
         bool AlwaysReplaceParents = false; ///< If true, the parents are always replaced by the 1st two children birthed.
     };
+
+    /**
+     * All configuration required to run Integenetics.
+     * Made available through XML to allow changing parameters without re-compilation.
+     */
+    struct Config
+    {
+        int Iterations = 1; ///< Number of times to run the experiment
+        int NumGenerations = 20; ///< Number of generations to evolve through to find a solution
+        std::optional<double> StoppingCriteria;
+        PopulationParams Params{}; ///< Parameters for the population
+        std::vector<double> FitnessCases; ///< Training cases
+    };
 }
 
 #endif

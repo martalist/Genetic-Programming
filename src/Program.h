@@ -23,9 +23,25 @@ namespace Model
         Program(/* TODO: CLI args */);
 
         /**
+         * Constructor (skips fetching config from XML)
+         * @param config - The config for the program 
+         */
+        Program(const Config& config);
+
+        /**
          * Runs the genetic program for the specified number of generations
          */
-        void Start();
+        void Start(bool logResults = true);
+
+        /**
+         * Provides forecast data based on the best fit Program/Chromosome.
+         * @param predictions The double array to write forecasts into.
+         * @param length The length of the data array (and therefore the number of predictions to make)
+         * @return The standard error of the fit chromosome.
+         * @pre Start must be called prior to Forecast.
+         * @pre The ChromosomeType for this Program must be TimeSeries.
+         */
+        double Predict(double* predictions, int length);
 
     private:
         PopulationParams m_params{}; ///< parameters for the population
