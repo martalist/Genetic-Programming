@@ -2,8 +2,9 @@
 
 int main() 
 {
+    const bool enableLogging = true;
     Model::Program p;
-    p.Start();
+    p.Start(enableLogging);
     
     return 0;
 }
