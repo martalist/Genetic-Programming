@@ -7,7 +7,7 @@
 
     <Iterations>1</Iterations>
     <Generations>20</Generations>
-    <StoppingCriteria>14.5</StoppingCriteria>
+    <StoppingCriteria>15.0</StoppingCriteria>
     <CrossoverProb>0.7</CrossoverProb>
     <MutationProb>0.1</MutationProb>
     <HoistMutationProb>0.1</HoistMutationProb>
@@ -28,7 +28,7 @@
     </AllowedFunctions>
 
     <Population>
-        <Size>1000</Size>
+        <Size>500</Size>
         <MinInitTreeSize>20</MinInitTreeSize>
 
         <!-- If AlwaysReplaceParents is uncommented parents are always replaced by children, even if they are less fit. -->

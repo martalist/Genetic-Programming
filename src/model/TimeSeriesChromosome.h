@@ -108,11 +108,14 @@ namespace Model
         std::string ToString() const override;
 
         /**
-         * @see IChromosome::Predict
-         * @param predictionCases A vector of zeroed data, whose size is the size of the
-         *     fitnessCases + the number of steps to predict into the future
+         * @see IChromosome::Forecast
          */
-        void Predict(const std::vector<double>& fitnessCases, std::vector<double>& terminals, std::vector<double>& predictionCases) const override;
+        void Forecast(const std::vector<double>& fitnessCases, std::vector<double>& terminals, double* predictions, int length) const override;
+
+        /**
+         * @see IChromosome::Predict
+         */
+        void Predict(std::vector<double>& predictionCases, std::vector<double>& terminals, int cutoff = 0) const override;
 
     private:
         /**

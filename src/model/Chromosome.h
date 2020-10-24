@@ -109,6 +109,16 @@ namespace Model
          */
         std::string ToString() const override;
 
+        /**
+         * @see IChromosome::Forecast
+         */
+        void Forecast(const std::vector<double>& fitnessCases, std::vector<double>& terminals, double* predictions, int length) const override;
+
+        /**
+         * @see IChromosome::Predict
+         */
+        void Predict(std::vector<double>& predictionCases, std::vector<double>& terminals, int cutoff = 0) const override;
+
     private:
 
         /**

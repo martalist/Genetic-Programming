@@ -83,9 +83,20 @@ namespace Model
         /**
          * Allows for prediction of new values.
          * @param fitnessCases The original training data.
-         * @param predictionCases The independent variables to predict data for, including room for predicted values.
+         * @param terminals A reference to the Terminals pointed to by each Chromosome (for evaluation).
+         * @param prediction A double array that predictions should be written to.
+         * @param length The length of the prediction array.
          */
-        virtual void Predict(const std::vector<double>& fitnessCases, std::vector<double>& terminals, std::vector<double>& predictionCases) const {}
+        virtual void Forecast(const std::vector<double>& fitnessCases, std::vector<double>& terminals, double* predictions, int length) const {}
+
+        /**
+         * Returns the result of evaluating the best-fitting Chromesome for a set of prediction cases.
+         * @param predictionCases The data to evaluate against
+         * @param terminals A reference to the Terminals pointed to by each Chromosome (for evaluation).
+         * @param cutoff Used for TimeSeries data to specify where known values end. For example, cutoff=128
+         * indicates there are 128 know values, and we want to predict (predictionCases-cutoff) steps ahead.
+         */
+        virtual void Predict(std::vector<double>& predictionCases, std::vector<double>& terminals, int cutoff = 0) const {}
 
     protected:
         /**

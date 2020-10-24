@@ -288,10 +288,15 @@ namespace Model
         return covar / varSize;
     }
 
-    void Population::Predict(double* predictions, int length)
+    double Population::Forecast(double* predictions, int length)
     {
-        std::vector<double> result(m_fitnessCases.size() + length, 0.0);
-        m_population[0]->Predict(m_fitnessCases, m_terminals, result);
-        std::copy(result.begin() + m_fitnessCases.size(), result.end(), predictions);
+        m_population[0]->Forecast(m_fitnessCases, m_terminals, &predictions[0], length);
+        return m_population[0]->Fitness();
+    }
+
+    double Population::Predict(std::vector<double>& fitted, int cutoff)
+    {
+        m_population[0]->Predict(fitted, m_terminals, cutoff);
+        return m_population[0]->Fitness();
     }
 }

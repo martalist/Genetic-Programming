@@ -65,9 +65,19 @@ namespace Model
          * @param length The length of the data array (and therefore the number of predictions to make)
          * @return The standard error of the fit chromosome.
          * @pre Start must be called prior to Forecast.
-         * @pre The ChromosomeType for this Program must be TimeSeries.
          */
-        void Predict(double* predictions, int length);
+        double Forecast(double* predictions, int length);
+
+        /**
+         * Returns the result of the data for all fitness cases provided in fitted.
+         * If fitted is the original training data (FitnessCases), it (over)writes the model's 
+         * dependent value to the vector.
+         * In the case of time series data, if the known series length is exceeded forecasts will 
+         * be written to fitted.
+         * @param fitted The data to fit the model to.
+         * @pre Start must be called prior to Forecast.
+         */
+        double Predict(std::vector<double>& fitted, int cutoff = 0);
 
     private:
         /**

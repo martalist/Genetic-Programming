@@ -304,4 +304,14 @@ namespace Model
     {
         return m_tree->ToString();
     }
+
+    void Chromosome::Forecast(const std::vector<double>& fitnessCases, std::vector<double>& terminals, double* predictions, int length) const
+    {
+        throw std::invalid_argument("Prediction is not yet implemented for ChromosomeType::Normal.");
+    }
+
+    void Chromosome::Predict(std::vector<double>& predictionCases, std::vector<double>& terminals, int cutoff) const
+    {
+        throw std::invalid_argument("Prediction is not yet implemented for ChromosomeType::Normal.");
+    }
 }

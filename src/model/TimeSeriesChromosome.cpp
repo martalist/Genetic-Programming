@@ -347,9 +347,52 @@ namespace Model
         return output.str();
     }
 
-    void TimeSeriesChromosome::Predict(const std::vector<double>& fitnessCases, std::vector<double>& terminals, std::vector<double>& predictionCases) const
+    void TimeSeriesChromosome::Forecast(const std::vector<double>& fitnessCases, std::vector<double>& terminals, double* predictions, int length) const
     {
         int lag = terminals.size();
+
+        // Iterate over the fitnessCases vector to build the W matrix and Y vector.
+        for (int i = 0; i < length; ++i)
+        {
+            // load up the terminals for this fitness case
+            for (size_t j = 0; j < lag; ++j)
+            {
+                auto targetIndex = fitnessCases.size() + i + j - lag;
+                // terminals[j] = targetIndex < fitnessCases.size() 
+                    // ? fitnessCases[targetIndex] 
+                    // : predictions[i+j-lag];
+                if (targetIndex < fitnessCases.size())
+                {
+                    terminals[j] = fitnessCases[targetIndex] ;
+                }
+                else
+                {
+                    terminals[j] = predictions[i+j-lag];
+                }
+            }
+
+            predictions[i] = m_coefficients[0];
+            if (m_size != 1) // check that this isn't just a terminal
+            {
+                const auto& modelTerms = m_tree->GetChildren();
+
+                for (size_t j = 0; j < modelTerms.size(); ++j)
+                {
+                    predictions[i] += m_coefficients[j+1] * modelTerms[j]->Evaluate();
+                }
+            }
+            else 
+            {
+                predictions[i] += m_tree->Evaluate();
+            }
+        }
+    }
+
+
+    void TimeSeriesChromosome::Predict(std::vector<double>& predictionCases, std::vector<double>& terminals, int cutoff) const
+    {
+        int lag = terminals.size();
+        std::vector<double> fitnessCases(predictionCases.begin(), predictionCases.end() - cutoff);
         int totalCases = predictionCases.size() - lag;
 
         // Iterate over the fitnessCases vector to build the W matrix and Y vector.
@@ -358,7 +401,7 @@ namespace Model
             // load up the terminals for this fitness case
             for (size_t j = 0; j < lag; ++j)
             {
-                terminals[j] = i+j < fitnessCases.size() ? fitnessCases[i+j] : predictionCases[i+j-lag];
+                terminals[j] = i+j < fitnessCases.size() ? fitnessCases[i+j] : predictionCases[i+j];
             }
 
             predictionCases[i+lag] = m_coefficients[0];
