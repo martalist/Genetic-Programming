@@ -261,10 +261,11 @@ namespace Model
 
     double Population::UpdateParsimonyCoefficient()
     {
-        // return DefaultParsimonyCoefficient;  // TODO: disabling this is a good idea for TS
+        if  (m_params.Type == ChromosomeType::Normal)
+        {
+            return DefaultParsimonyCoefficient;  // TODO: this should be configurable
+        }
 
-        // TODO: This implementation of dynamic parsimony coefficient calculation does not yield
-        // the desired result. So for now we're returning the default value above.
         using Itr = std::vector<Population::ChromoPtr>::iterator;
         const double DenominatorThreshold = 1e-06;
 
@@ -276,7 +277,7 @@ namespace Model
                                             m_population.begin(), m_population.end(), getFitness);
 
         // TODO: Revisit the paper documenting this method. It may be affected by allowing > 2 children
-        // per node.
+        // per node, or the type of fitness error/value being evaluated.
         if (covar < DenominatorThreshold)
         {
             if (varSize < DenominatorThreshold)

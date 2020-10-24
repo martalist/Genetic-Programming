@@ -50,10 +50,12 @@ namespace Model
          * In the case of time series data, if the known series length is exceeded forecasts will 
          * be written to fitted.
          * @param fitted The data to fit the model to.
+         * @param cutoff Used for TimeSeries data to specify where known values end. For example, cutoff=128
+         * indicates there are 128 know values, and we want to predict (predictionCases-cutoff) steps ahead.
          * @pre Start must be called prior to Forecast.
          * @return the standard error of the residuals for the best Chromosome
          */
-        double Predict(std::vector<double>& fitted);
+        double Predict(std::vector<double>& fitted, int cutoff = 0);
 
     private:
         Config m_config{}; ///< parameters for the population

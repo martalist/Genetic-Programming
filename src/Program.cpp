@@ -104,7 +104,7 @@ namespace Model
         return m_population->GetBestFit()->Fitness();
     }
 
-    double Program::Predict(std::vector<double>& fitted)
+    double Program::Predict(std::vector<double>& fitted, int cutoff)
     {
         m_population->Predict(fitted);
         return m_population->GetBestFit()->Fitness();
