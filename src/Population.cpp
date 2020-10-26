@@ -16,9 +16,6 @@ namespace
     // The size of the tournament for individual parent selection
     const int TournamentSize = 20; 
 
-    // The default parsimony coefficient
-    const double DefaultParsimonyCoefficient = 0.025;
-
     // Utility function for ordering the population
     const auto ChromoPtrOrder = [] (const Model::Population::ChromoPtr& a, const Model::Population::ChromoPtr& b) 
     { 
@@ -267,10 +264,9 @@ namespace Model
 
     double Population::UpdateParsimonyCoefficient()
     {
-        return 0.005;  // TODO: this should be configurable
-        if  (m_params.Type == ChromosomeType::Normal)
+        if (m_params.ParsimonyCoefficient.has_value())
         {
-            return DefaultParsimonyCoefficient;  // TODO: this should be configurable
+            return m_params.ParsimonyCoefficient.value();
         }
 
         using Itr = std::vector<Population::ChromoPtr>::iterator;

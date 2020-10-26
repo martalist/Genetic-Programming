@@ -16,7 +16,8 @@ namespace
         1, // The number of terminals
         0, // random seed
         3, // twins per parent
-        0.0 // carry over
+        0.0, // carry over
+        0.0 // parsimony
     };
 
     const Model::PopulationParams Params2
@@ -31,7 +32,8 @@ namespace
         2, // The number of terminals
         0, // random seed
         3, // twins per parent
-        0.0 // carry over
+        0.0, // carry over
+        0.0 // parsimony
     };
 
     const std::vector<double> FitnessCases1

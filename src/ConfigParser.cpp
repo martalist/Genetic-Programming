@@ -56,12 +56,19 @@ namespace Model
 
             s_config.Params.TwinsPerMatingPair = tree.get("Config.Population.TwinsPerMatingPair", 1);
             s_config.Params.CarryOverProportion = tree.get("Config.Population.CarryOverProportion", 0.0);
+
+            auto parsimony = tree.get_optional<double>("Config.Population.ParsimonyCoefficient");
+            if (parsimony)
+            {
+                s_config.Params.ParsimonyCoefficient = *parsimony;
+            }
             
             auto optSeed = tree.get_optional<int>("Config.Seed");
             if (optSeed)
             {
                 s_config.Params.Seed = *optSeed;
             }
+
             for (const auto& child : tree.get_child("Config.AllowedFunctions"))
             {
                 if (child.first == "Function")

@@ -41,6 +41,13 @@ namespace Model
          * Used to ensure the "best" fitness never gets worse from one generation to the next.
          */
         double CarryOverProportion = 0.0;
+
+        /**
+         * The coefficient used to penalize long S-expressions.
+         * If set to 0.0, it will have no effect.
+         * If set to std::nullopt, the coefficient will be approximated dynamically.
+         */
+        std::optional<double> ParsimonyCoefficient; ///< 
     };
 
     /**

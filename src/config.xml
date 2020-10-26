@@ -32,5 +32,6 @@
         <MinInitTreeSize>20</MinInitTreeSize>
         <TwinsPerMatingPair>3</TwinsPerMatingPair>
         <CarryOverProportion>0.05</CarryOverProportion>
+        <ParsimonyCoefficient>0.025</ParsimonyCoefficient>
     </Population>
 </Config>
