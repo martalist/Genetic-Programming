@@ -31,7 +31,7 @@ namespace Model
         /**
          * Constructor
          */
-        Population(const PopulationParams& params, const std::vector<std::vector<double>>& fitnessCases);
+        Population(const PopulationParams& params, const std::vector<double>& fitnessCases);
         
         /**
          * Resets the population to a new, randomly created state
@@ -57,7 +57,27 @@ namespace Model
         /**
          * @return The best S-expression (by fitness) as a string
          */
-        std::string BestAsString() const;
+        ChromoPtr GetBestFit() const;
+
+        /**
+         * Provides forecast data based on the best fit Program/Chromosome.
+         * @param predictions The double array to write forecasts into.
+         * @param length The length of the data array (and therefore the number of predictions to make)
+         * @return The standard error of the fit chromosome.
+         * @pre Start must be called prior to Forecast.
+         */
+        double Forecast(double* predictions, int length);
+
+        /**
+         * Returns the result of the data for all fitness cases provided in fitted.
+         * If fitted is the original training data (FitnessCases), it (over)writes the model's 
+         * dependent value to the vector.
+         * In the case of time series data, if the known series length is exceeded forecasts will 
+         * be written to fitted.
+         * @param fitted The data to fit the model to.
+         * @pre Start must be called prior to Forecast.
+         */
+        double Predict(std::vector<double>& fitted, int cutoff = 0);
 
     private:
         /**
@@ -92,7 +112,7 @@ namespace Model
          * @return Two offsprint S-expressions
          */
         std::tuple<ChromoPtr, ChromoPtr> GetNewOffspring(const IChromosome& mum, const IChromosome& dad,
-                const std::vector<std::vector<double>>& fitnessCases, std::vector<double>& terminals, 
+                const std::vector<double>& fitnessCases, std::vector<double>& terminals, 
                 double parsimonyCoefficient) const;
 
         /**
@@ -108,7 +128,7 @@ namespace Model
         std::unique_ptr<Util::ISelector<double>> m_selector; ///< Ticketing system used to select parents
 
         std::vector<double> m_terminals; ///< The terminal values to evaluate
-        std::vector<std::vector<double>> m_fitnessCases; ///< Training cases
+        std::vector<double> m_fitnessCases; ///< Training cases
         double m_parsimonyCoefficient = 0.0; ///< The coefficient used to penalize long S-expressions.
     };
 }

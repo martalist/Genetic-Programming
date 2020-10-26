@@ -3,19 +3,11 @@
 
 #include <memory>
 #include <string>
+#include "ChromosomeType.h"
 #include "IChromosome.h"
 
 namespace Model
 {
-    /**
-     * Types of Chromosome
-     */
-    enum class ChromosomeType
-    {
-        Normal = 0, ///< general purpose chromosomes for fitting 
-        TimeSeries  ///< auto-regressive, non-linear, with least-squares-fit coefficients
-    };
-
     /**
      * A singleton factory class to create new Chromosomes of a specified type.
      */
@@ -35,7 +27,7 @@ namespace Model
         static void Initialise(ChromosomeType type, int targetSize, 
                 const std::vector<FunctionType>& allowedFunctions, 
                 const std::vector<double*>& variables,  // TODO: this is probably unecessary
-                const std::vector<std::vector<double>>& fitnessCases, 
+                const std::vector<double>& fitnessCases, 
                 std::vector<double>& terminals);
 
         /**
@@ -56,7 +48,7 @@ namespace Model
          * @param parsimonyCoefficient The coefficient used to penalise long chromosomes
          * @return the new Chromosome
          */
-        std::unique_ptr<IChromosome> CopyAndEvaluate(std::unique_ptr<INode>& tree, double parsimonyCoefficient) const;
+        std::unique_ptr<IChromosome> CopyAndEvaluate(std::unique_ptr<INode> tree, double parsimonyCoefficient) const;
 
     private:
         
@@ -64,7 +56,7 @@ namespace Model
          * Constructor
          */
         ChromosomeFactory(ChromosomeType type, int targetSize, const std::vector<FunctionType>& allowedFunctions, 
-                    const std::vector<double*>& variables, const std::vector<std::vector<double>>& fitnessCases, 
+                    const std::vector<double*>& variables, const std::vector<double>& fitnessCases, 
                     std::vector<double>& terminals);
 
         // TODO: can these be const?
@@ -72,7 +64,7 @@ namespace Model
         const int m_targetSize;
         const std::vector<FunctionType> m_allowedFunctions;
         const std::vector<double*>& m_variables;
-        const std::vector<std::vector<double>>& m_fitnessCases;
+        const std::vector<double>& m_fitnessCases;
         std::vector<double>& m_terminals;
 
         static std::unique_ptr<ChromosomeFactory> s_instance;

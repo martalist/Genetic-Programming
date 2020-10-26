@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include "model/FunctionFactory.h"
 #include "model/ChromosomeFactory.h"
+#include "model/ChromosomeUtil.h"
 #include "utils/Math.h"
 #include "utils/Raffle.h"
 #include "utils/Tournament.h"
@@ -14,13 +15,6 @@ namespace
 {
     // The size of the tournament for individual parent selection
     const int TournamentSize = 20; 
-
-    // The default parsimony coefficient
-    const double DefaultParsimonyCoefficient = 0.025;
-
-    // The number of twins to produce from each mating pair. Only 2 children will survive
-    // so the mortality rate is impied.
-    const int TwinsPerMatingPair = 3;
 
     // Utility function for ordering the population
     const auto ChromoPtrOrder = [] (const Model::Population::ChromoPtr& a, const Model::Population::ChromoPtr& b) 
@@ -47,7 +41,7 @@ namespace
 
 namespace Model
 {
-    Population::Population(const PopulationParams& params, const std::vector<std::vector<double>>& fitnessCases)
+    Population::Population(const PopulationParams& params, const std::vector<double>& fitnessCases)
         : m_params(params)
         , m_randomProbability(.0, 1.)
         // TODO: allow config to select between raffle and tournament style selection
@@ -59,18 +53,21 @@ namespace Model
     {
         if (params.Seed.has_value())
         {
-            IChromosome::SetSeed(params.Seed.value());
+            ChromosomeUtil::SetSeed(params.Seed.value());
             m_randomProbability.SetSeed(params.Seed.value());
             m_selector->SetSeed(params.Seed.value());
         }
+
+        // make sure user input params are valid
+        m_params.CarryOverProportion = std::clamp(m_params.CarryOverProportion, 0.0, 1.0);
+        m_params.TwinsPerMatingPair = std::max(1, m_params.TwinsPerMatingPair);
 
         for (auto& terminal : m_terminals)
         {
             m_allowedTerminals.push_back(&terminal);
         }
 
-        // TODO: change the type by config
-        ChromosomeFactory::Initialise(ChromosomeType::Normal, m_params.MinInitialTreeSize, 
+        ChromosomeFactory::Initialise(m_params.Type, m_params.MinInitialTreeSize, 
                 m_params.AllowedFunctions, m_allowedTerminals, m_fitnessCases, m_terminals);
     }
 
@@ -91,6 +88,22 @@ namespace Model
     {
         // Create a new population
         std::vector<Population::ChromoPtr> newPopulation;
+
+        // copy the best proportion
+        if (m_params.CarryOverProportion > 0.0)
+        {
+            auto numToClone = static_cast<int>(m_params.CarryOverProportion * m_population.size());
+            if (numToClone % 2 == 1)
+            {
+                ++numToClone; // needs to be an even number
+            }
+
+            for (int i = 0; i < numToClone; ++i)
+            {
+                newPopulation.push_back(m_sortedByFitness[i]->Clone());
+            }
+        }
+
         while (newPopulation.size() < m_population.size())
         {
             // select a breeding pair
@@ -114,32 +127,22 @@ namespace Model
 
     void Population::Reproduce(const IChromosome& mum, const IChromosome& dad, std::vector<Population::ChromoPtr>& nextGeneration)
     {
-        // TODO: this is no longer useful. Would be better to specify the number twins/pairs per set of parents.
-        if (m_params.AlwaysReplaceParents)
+        std::vector<Population::ChromoPtr> family;
+        for (int i = 0; i < m_params.TwinsPerMatingPair; ++i)
         {
             auto [son, daughter] = GetNewOffspring(mum, dad, m_fitnessCases, m_terminals, m_parsimonyCoefficient);
-            nextGeneration.push_back(std::move(son));
-            nextGeneration.push_back(std::move(daughter));
+            family.push_back(std::move(son));
+            family.push_back(std::move(daughter));
         }
-        else
-        {
-            std::vector<Population::ChromoPtr> family;
-            for (int i = 0; i < TwinsPerMatingPair; ++i)
-            {
-                auto [son, daughter] = GetNewOffspring(mum, dad, m_fitnessCases, m_terminals, m_parsimonyCoefficient);
-                family.push_back(std::move(son));
-                family.push_back(std::move(daughter));
-            }
-            std::sort(family.begin(), family.end(), ChromoPtrOrder);
+        std::sort(family.begin(), family.end(), ChromoPtrOrder);
 
-            auto inOrder = family.begin();
-            nextGeneration.push_back(std::move(*inOrder));
-            ++inOrder;
-            nextGeneration.push_back(std::move(*inOrder));
-        }
+        auto inOrder = family.begin();
+        nextGeneration.push_back(std::move(*inOrder));
+        ++inOrder;
+        nextGeneration.push_back(std::move(*inOrder));
     }
 
-    std::tuple<Population::ChromoPtr, Population::ChromoPtr> Population::GetNewOffspring(const IChromosome& mum, const IChromosome& dad, const std::vector<std::vector<double>>& fitnessCases, std::vector<double>& terminals, double parsimonyCoefficient) const
+    std::tuple<Population::ChromoPtr, Population::ChromoPtr> Population::GetNewOffspring(const IChromosome& mum, const IChromosome& dad, const std::vector<double>& fitnessCases, std::vector<double>& terminals, double parsimonyCoefficient) const
     {
         // Deep copy mum & dad
         auto son = dad.Clone();
@@ -175,8 +178,8 @@ namespace Model
 
         return 
         {
-            ChromosomeFactory::Inst().CopyAndEvaluate(son->GetTree(), parsimonyCoefficient),
-            ChromosomeFactory::Inst().CopyAndEvaluate(daughter->GetTree(), parsimonyCoefficient),
+            ChromosomeFactory::Inst().CopyAndEvaluate(std::move(son->GetTree()), parsimonyCoefficient),
+            ChromosomeFactory::Inst().CopyAndEvaluate(std::move(daughter->GetTree()), parsimonyCoefficient),
         };
     }
 
@@ -254,17 +257,18 @@ namespace Model
         return Util::Average<ConstItr>(m_population.begin(), m_population.end(), getFitness);
     }
 
-    std::string Population::BestAsString() const
+    Population::ChromoPtr Population::GetBestFit() const
     {
-        return m_sortedByFitness[0]->GetTree()->ToString();
+        return m_sortedByFitness[0]->Clone();
     }
 
     double Population::UpdateParsimonyCoefficient()
     {
-        return DefaultParsimonyCoefficient; 
+        if (m_params.ParsimonyCoefficient.has_value())
+        {
+            return m_params.ParsimonyCoefficient.value();
+        }
 
-        // TODO: This implementation of dynamic parsimony coefficient calculation does not yield
-        // the desired result. So for now we're returning the default value above.
         using Itr = std::vector<Population::ChromoPtr>::iterator;
         const double DenominatorThreshold = 1e-06;
 
@@ -276,7 +280,7 @@ namespace Model
                                             m_population.begin(), m_population.end(), getFitness);
 
         // TODO: Revisit the paper documenting this method. It may be affected by allowing > 2 children
-        // per node.
+        // per node, or the type of fitness error/value being evaluated.
         if (covar < DenominatorThreshold)
         {
             if (varSize < DenominatorThreshold)
@@ -286,5 +290,17 @@ namespace Model
             return 1.0; // approaching infty
         }
         return covar / varSize;
+    }
+
+    double Population::Forecast(double* predictions, int length)
+    {
+        m_population[0]->Forecast(m_fitnessCases, m_terminals, &predictions[0], length);
+        return m_population[0]->Fitness();
+    }
+
+    double Population::Predict(std::vector<double>& fitted, int cutoff)
+    {
+        m_population[0]->Predict(fitted, m_terminals, cutoff);
+        return m_population[0]->Fitness();
     }
 }

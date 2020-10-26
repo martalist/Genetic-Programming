@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "INode.h"
+#include "../utils/UniformRandomGenerator.h"
 
 namespace Model
 {
@@ -74,7 +75,28 @@ namespace Model
         virtual INodePtr& GetTree() = 0;
         virtual const INodePtr& GetTree() const = 0;
 
-        static void SetSeed(int seed);
+        /**
+         * @return the string representation of the Chromosome
+         */
+        virtual std::string ToString() const = 0;
+
+        /**
+         * Allows for prediction of new values.
+         * @param fitnessCases The original training data.
+         * @param terminals A reference to the Terminals pointed to by each Chromosome (for evaluation).
+         * @param prediction A double array that predictions should be written to.
+         * @param length The length of the prediction array.
+         */
+        virtual void Forecast(const std::vector<double>& fitnessCases, std::vector<double>& terminals, double* predictions, int length) const {}
+
+        /**
+         * Returns the result of evaluating the best-fitting Chromesome for a set of prediction cases.
+         * @param predictionCases The data to evaluate against
+         * @param terminals A reference to the Terminals pointed to by each Chromosome (for evaluation).
+         * @param cutoff Used for TimeSeries data to specify where known values end. For example, cutoff=128
+         * indicates there are 128 know values, and we want to predict (predictionCases-cutoff) steps ahead.
+         */
+        virtual void Predict(std::vector<double>& predictionCases, std::vector<double>& terminals, int cutoff = 0) const {}
 
     protected:
         /**
@@ -82,7 +104,7 @@ namespace Model
          * @param chromosome The chromosome to evaluate
          * @return the chromosome fitness as a positive, real number
          */
-        virtual double CalculateFitness(const std::vector<std::vector<double>>& fitnessCases, std::vector<double>& terminals) const = 0;
+        virtual double CalculateFitness(const std::vector<double>& fitnessCases, std::vector<double>& terminals) = 0;
 
         /**
          * Calculate the weighted fitness of the chromosome, where longer chromosomes are penalized.
@@ -93,7 +115,7 @@ namespace Model
         /**
          * Set the cached size of the Chromosome
          */
-        virtual void SetSize(int size) = 0;
+        virtual void SetSize() = 0;
     };
 }
 

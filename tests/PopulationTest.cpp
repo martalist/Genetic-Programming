@@ -6,6 +6,7 @@ namespace
 {
     const Model::PopulationParams Params1
     {
+        Model::ChromosomeType::Normal,
         2, // population size
         10, // The minimum tree size of newly (randomly) created S-expressions
         0.7, // crossover probability
@@ -14,11 +15,14 @@ namespace
         { Model::FunctionType::SquareRoot }, // allowed functions
         1, // The number of terminals
         0, // random seed
-        false // always replace parents?
+        3, // twins per parent
+        0.0, // carry over
+        0.0 // parsimony
     };
 
     const Model::PopulationParams Params2
     {
+        Model::ChromosomeType::Normal,
         4, // population size
         10, // The minimum tree size of newly (randomly) created S-expressions
         0.7, // crossover probability
@@ -27,35 +31,37 @@ namespace
         { Model::FunctionType::Addition, Model::FunctionType::Multiplication, Model::FunctionType::SquareRoot }, // allowed functions
         2, // The number of terminals
         0, // random seed
-        false // always replace parents?
+        3, // twins per parent
+        0.0, // carry over
+        0.0 // parsimony
     };
 
-    const std::vector<std::vector<double>> FitnessCases1
+    const std::vector<double> FitnessCases1
     {
-        { 3.0,  5.830952 },
-        { 8.0,  16.124515 },
-        { 18.0, 18.11077 },
-        { 32.0, 33.837849 },
-        { 4.0,  5.0 },
-        { 12.0, 15.620499 },
-        { 21.0, 21.84033 },
-        { 7.0,  8.062258 },
-        { 16.0, 28.84441 },
-        { 2.0,  9.219545 }
+        3.0,  5.830952,
+        8.0,  16.124515 ,
+        18.0, 18.11077,
+        32.0, 33.837849,
+        4.0,  5.0,
+        12.0, 15.620499,
+        21.0, 21.84033,
+        7.0,  8.062258,
+        16.0, 28.84441,
+        2.0,  9.219545
     };
 
-    const std::vector<std::vector<double>> FitnessCases2
+    const std::vector<double> FitnessCases2
     {
-        { 3.0,  5.0,  5.830952 },
-        { 8.0,  14.0, 16.124515 },
-        { 18.0, 2.0,  18.11077 },
-        { 32.0, 11.0, 33.837849 },
-        { 4.0,  3.0,  5.0 },
-        { 12.0, 10.0, 15.620499 },
-        { 21.0, 6.0,  21.84033 },
-        { 7.0,  4.0,  8.062258 },
-        { 16.0, 24.0, 28.84441 },
-        { 2.0,  9.0,  9.219545 }
+        3.0,  5.0,  5.830952,
+        8.0,  14.0, 16.124515,
+        18.0, 2.0,  18.11077,
+        32.0, 11.0, 33.837849,
+        4.0,  3.0,  5.0,
+        12.0, 10.0, 15.620499,
+        21.0, 6.0,  21.84033,
+        7.0,  4.0,  8.062258,
+        16.0, 24.0, 28.84441,
+        2.0,  9.0,  9.219545
     };
 }
 

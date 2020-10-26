@@ -1,33 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Config>
-    <Iterations>10</Iterations>
-    <Generations>20</Generations>
-    <StoppingCriteria>0.0001</StoppingCriteria>
-    <FitnessCases file="pythagorean_theorem.csv" />
+    <!-- <ProgramType>Normal</ProgramType> -->
+    <!-- <FitnessCases file="pythagorean_theorem.csv" /> -->
+    <ProgramType lag="24" forecast="24">Time Series</ProgramType>
+    <FitnessCases file="HotelRooms.csv" />
+
+    <Iterations>1</Iterations>
+    <Generations>10</Generations>
+    <!-- <StoppingCriteria>15.0</StoppingCriteria> -->
     <CrossoverProb>0.7</CrossoverProb>
     <MutationProb>0.1</MutationProb>
     <HoistMutationProb>0.1</HoistMutationProb>
-    <ProgramType>Normal</ProgramType> <!-- other value type is "Time Series" -->
     <!-- <Seed>0</Seed> -->
+    <!-- <SelectorType sample="20">Tourmament</SelectorType> -->
 
     <!-- delete or comment-out the Functions that you don't require -->
     <AllowedFunctions>
-        <Function>Addition</Function>
+        <!-- <Function>Addition</Function> -->
         <Function>Subtraction</Function>
         <Function>Multiplication</Function>
         <Function>Division</Function>
-        <Function>Square Root</Function>
-        <!-- <Function>Sine</Function> -->
-        <!-- <Function>Cosine</Function> -->
+        <!-- <Function>Square Root</Function> -->
+        <Function>Sine</Function>
+        <Function>Cosine</Function>
         <!-- <Function>Exponential</Function> -->
-        <!-- <Function>Logarithm</Function> -->
+        <Function>Logarithm</Function>
     </AllowedFunctions>
 
     <Population>
         <Size>500</Size>
-        <MinInitTreeSize>15</MinInitTreeSize>
-
-        <!-- If AlwaysReplaceParents is uncommented parents are always replaced by children, even if they are less fit. -->
-        <!-- <AlwaysReplaceParents /> -->
+        <MinInitTreeSize>20</MinInitTreeSize>
+        <TwinsPerMatingPair>3</TwinsPerMatingPair>
+        <CarryOverProportion>0.05</CarryOverProportion>
+        <ParsimonyCoefficient>0.025</ParsimonyCoefficient>
     </Population>
 </Config>

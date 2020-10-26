@@ -72,6 +72,11 @@ namespace Model
         return static_cast<int>(m_children.size());
     }
 
+    const std::vector<std::unique_ptr<INode>>& Function::GetChildren() const
+    {
+        return m_children;
+    }
+
     int Function::MaxChildren() const
     {
         return MaxAllowedChildren;

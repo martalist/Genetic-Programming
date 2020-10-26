@@ -25,6 +25,10 @@ else()
   message(FATAL_ERROR "Could not find Boost")
 endif()
 
+# Eigen for matrix algebra
+find_package(Eigen3 3.3 REQUIRED)
+include_directories(${EIGEN3_INCLUDE_DIR})
+
 # Download and unpack googletest at configure time
 configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
 execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
@@ -63,6 +67,7 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/src)
 # copy the config file to the binary dir
 configure_file(${PROJECT_SOURCE_DIR}/src/config.xml config.xml COPYONLY)
 configure_file(${PROJECT_SOURCE_DIR}/src/pythagorean_theorem.csv pythagorean_theorem.csv COPYONLY)
+configure_file(${PROJECT_SOURCE_DIR}/src/HotelRooms.csv HotelRooms.csv COPYONLY)
 
 # Must be defined in top-most CMakeLists.txt
 enable_testing() 

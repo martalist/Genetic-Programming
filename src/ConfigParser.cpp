@@ -3,12 +3,34 @@
 #include <iostream>
 #include <fstream>
 #include <stdexcept>
+#include <boost/algorithm/string.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/lexical_cast.hpp>
 
 #include "model/FunctionFactory.h"
+
+namespace
+{
+    /**
+     * Returns a valid ChromosomeType from a string
+     * @param str the string to convert
+     */
+    Model::ChromosomeType ProgramTypeFromString(const std::string& str)
+    {
+        if (str == "Normal")
+        {
+            return Model::ChromosomeType::Normal;
+        }
+        else if (str  == "Time Series")
+        {
+            return Model::ChromosomeType::TimeSeries;
+        }
+
+        throw std::invalid_argument(str + " is not a valid Chromosome Type.");
+    }
+}
 
 namespace Model
 {
@@ -22,27 +44,31 @@ namespace Model
 
             pt::ptree tree;
             pt::read_xml(filename, tree);
+            s_config.Params.Type = ProgramTypeFromString(tree.get("Config.ProgramType", "Normal"));
             s_config.Iterations = tree.get("Config.Iterations", 1);
             s_config.NumGenerations = tree.get("Config.Generations", 20);
-            if (tree.get_child_optional("Config.StoppingCriteria"))
-            {
-                s_config.StoppingCriteria = tree.get<double>("Config.StoppingCriteria", 0.0);
-            }
+            s_config.StoppingCriteria = tree.get("Config.StoppingCriteria", 0.0);
             s_config.Params.PopulationSize = tree.get("Config.Population.Size", 1000);
             s_config.Params.CrossoverProb = tree.get<double>("Config.CrossoverProb", 0.7);
             s_config.Params.MutationProb = tree.get<double>("Config.MutationProb", 0.01);
             s_config.Params.HoistMutationProb = tree.get<double>("Config.HoistMutationProb", 0.01);
             s_config.Params.MinInitialTreeSize = tree.get("Config.Population.MinInitTreeSize", 10);
-            auto replaceParents = tree.get_child_optional("Config.Population.AlwaysReplaceParents");
-            if (replaceParents)
+
+            s_config.Params.TwinsPerMatingPair = tree.get("Config.Population.TwinsPerMatingPair", 1);
+            s_config.Params.CarryOverProportion = tree.get("Config.Population.CarryOverProportion", 0.0);
+
+            auto parsimony = tree.get_optional<double>("Config.Population.ParsimonyCoefficient");
+            if (parsimony)
             {
-                s_config.Params.AlwaysReplaceParents = true;
+                s_config.Params.ParsimonyCoefficient = *parsimony;
             }
+            
             auto optSeed = tree.get_optional<int>("Config.Seed");
             if (optSeed)
             {
                 s_config.Params.Seed = *optSeed;
             }
+
             for (const auto& child : tree.get_child("Config.AllowedFunctions"))
             {
                 if (child.first == "Function")
@@ -53,9 +79,13 @@ namespace Model
             }
 
             auto fitnessCasesFile = tree.get("Config.FitnessCases.<xmlattr>.file", std::string("pythagorean_theorem.csv"));
-            s_config.Params.NumberOfTerminals = LoadFitnessCases(fitnessCasesFile);
+            int numberOfTerminals = LoadFitnessCases(fitnessCasesFile);
+            s_config.Params.NumberOfTerminals = (s_config.Params.Type == ChromosomeType::TimeSeries) ?
+                tree.get("Config.ProgramType.<xmlattr>.lag", 1) : numberOfTerminals;
+            s_config.ForecastSteps = tree.get("Config.ProgramType.<xmlattr>.forecast", 0);
 
-            std::cout << "Configuration loaded:" << std::endl;
+            std::cout << "Configuration loaded." << std::endl;
+            std::cout << "Fitness cases from " << fitnessCasesFile << std::endl;
         }
         catch (std::exception& e)
         {
@@ -71,12 +101,15 @@ namespace Model
     {
         std::cout << "\tIterations: " << s_config.Iterations << std::endl;
         std::cout << "\tGenerations: " << s_config.NumGenerations << std::endl;
-        std::cout << "\tPopulation Size: " << s_config.Params.PopulationSize << std::endl;
+        std::cout << "\tStopping criteria: " << s_config.StoppingCriteria << std::endl;
+        std::cout << "\tPopulation size: " << s_config.Params.PopulationSize << std::endl;
         std::cout << "\tMinimum initial S-expressions size: " << s_config.Params.MinInitialTreeSize << std::endl;
         std::cout << "\tCrossover probability: " << s_config.Params.CrossoverProb << std::endl;
         std::cout << "\tMutation probability: " << s_config.Params.MutationProb << std::endl;
         std::cout << "\tHoistMutation probability: " << s_config.Params.HoistMutationProb << std::endl;
         std::cout << "\tNumber of terminals: " << s_config.Params.NumberOfTerminals << std::endl;
+        std::cout << "\tChildren per mating pair: " << s_config.Params.TwinsPerMatingPair*2 << std::endl;
+        std::cout << "\tProportion of population cloned per generation: " << s_config.Params.CarryOverProportion << std::endl;
 
         std::cout << "\tAllowed functions: ";
         int i = 0;
@@ -117,12 +150,12 @@ namespace Model
                 continue;
             }
 
-            std::vector<double> row;
             for (Tokenizer::iterator itr = tok.begin(); itr != tok.end(); ++itr)
             {
-                row.push_back(boost::lexical_cast<double>(*itr));
+                std::string str = *itr;
+                boost::trim(str);
+                s_config.FitnessCases.push_back(boost::lexical_cast<double>(str));
             }
-            s_config.FitnessCases.push_back(row);
         }
         in.close();
         return columns - 1; // last column is the expected value, not a terminal

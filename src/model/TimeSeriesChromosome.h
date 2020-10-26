@@ -1,30 +1,28 @@
-#ifndef Chromosome_H
-#define Chromosome_H
+#ifndef TimeSeriesChromosome_H
+#define TimeSeriesChromosome_H
 
 #include <memory>
 #include <vector>
+#include <Eigen/Dense>
 #include "IChromosome.h"
-
-namespace Tests
-{
-    class PopulationTest;
-}
 
 namespace Model
 {
     /**
      * Represents an individual chromosome (S-expression) in the population,
-     * together with it's fitness
+     * together with it's fitness.
+     * In this case the S-expression is a non-linear, autoregressive (recursive) function
+     * for a single time series. Coefficients of the base terms are calculated by least-squares
+     * estimation.
      */
-    class Chromosome : public IChromosome
+    class TimeSeriesChromosome : public IChromosome
     {
     public:
-        friend Tests::PopulationTest;
 
         /**
-         * Constructor - Creates a random Chromosome
+         * Constructor - Creates a random TimeSeriesChromosome
          */
-        Chromosome(int targetSize, 
+        TimeSeriesChromosome(int targetSize, 
                     const std::vector<FunctionType>& allowedFunctions, 
                     const std::vector<double*>& variables,
                     const std::vector<double>& fitnessCases, 
@@ -32,26 +30,26 @@ namespace Model
                     double parsimonyCoefficient);
 
         /**
+         * Copy Constructor
+         */
+        TimeSeriesChromosome(const TimeSeriesChromosome& other);
+
+        /**
          * Constructor - Does no fitness calculations upon construction
          * @param tree The underlying S-expression
          */
-        Chromosome(IChromosome::INodePtr tree);
-
-        /**
-         * Copy Constructor
-         */
-        Chromosome(const Chromosome& other);
+        // TimeSeriesChromosome(IChromosome::INodePtr tree);
 
         /**
          * Constructor - Calculates fitness and weighted fitness upon construction.
          */
-        Chromosome(IChromosome::INodePtr tree, const std::vector<double>& fitnessCases, 
+        TimeSeriesChromosome(IChromosome::INodePtr tree, const std::vector<double>& fitnessCases, 
                 std::vector<double>& terminals, double parsimonyCoefficient);
 
         /**
          * Constructor - Calculates only the weighted fitness upon construction.
          */
-        Chromosome(IChromosome::INodePtr& tree, double fitness, double parsimonyCoefficient);
+        // TimeSeriesChromosome(IChromosome::INodePtr tree, double fitness, double parsimonyCoefficient);
 
         /**
          * Less-than operator. Used for sorting collections of Chromosomes.
@@ -120,7 +118,6 @@ namespace Model
         void Predict(std::vector<double>& predictionCases, std::vector<double>& terminals, int cutoff = 0) const override;
 
     private:
-
         /**
          * Calculate the fitness for one chromosome. Currently uses MAE (mean absolute error)
          * @param chromosome The chromosome to evaluate
@@ -136,8 +133,9 @@ namespace Model
         void SetSize() override;
 
         IChromosome::INodePtr m_tree; ///< the S-expression
+        Eigen::VectorXd m_coefficients; ///< Coefficients of the terms in the autoregressive model
         int m_size; ///< the length (nodes in the tree)
-        double m_fitness = std::numeric_limits<double>::max(); ///< raw fitness of the chromosome
+        double m_fitness = std::numeric_limits<double>::max(); ///< raw fitness of the chromosome.
         double m_weightedFitness = std::numeric_limits<double>::max(); ///< weighted fitness, with penalty for length/size
     };
 }

@@ -2,7 +2,6 @@
 #define Program_H
 
 #include <memory>
-#include <optional>
 #include <vector>
 #include "PopulationParams.h"
 #include "Population.h"
@@ -23,16 +22,53 @@ namespace Model
         Program(/* TODO: CLI args */);
 
         /**
+         * Constructor (skips fetching config from XML)
+         * @param config - The config for the program 
+         */
+        Program(const Config& config);
+
+        /**
          * Runs the genetic program for the specified number of generations
          */
-        void Start();
+        void Start(bool logResults = true);
+
+        /**
+         * Provides forecast data based on the best fit Program/Chromosome.
+         * @param predictions The double array to write forecasts into.
+         * @param length The length of the data array (and therefore the number of predictions to make)
+         * @return The standard error of the fit chromosome.
+         * @pre Start must be called prior to Forecast.
+         * @return the standard error of the residuals for the best Chromosome
+         */
+        double Forecast(double* predictions, int length);
+
+        /**
+         * Returns the result of the data for all fitness cases provided in fitted.
+         * If fitted is the original training data (FitnessCases), it (over)writes the model's 
+         * dependent value to the vector.
+         * In the case of time series data, if the known series length is exceeded forecasts will 
+         * be written to fitted.
+         * @param fitted The data to fit the model to.
+         * @param cutoff Used for TimeSeries data to specify where known values end. For example, cutoff=128
+         * indicates there are 128 know values, and we want to predict (predictionCases-cutoff) steps ahead.
+         * @pre Start must be called prior to Forecast.
+         * @return the standard error of the residuals for the best Chromosome
+         */
+        double Predict(std::vector<double>& fitted, int cutoff = 0);
+
+        /**
+         * Overload of Predict that writes results of the prediction to a csv file.
+         * @param filename The file to write to.
+         * @pre Start must be called prior to Forecast.
+         * @return the standard error of the residuals for the best Chromosome
+         */
+        double Predict(const std::string& filename = "Predictions.csv");
 
     private:
-        PopulationParams m_params{}; ///< parameters for the population
+        Config m_config{}; ///< parameters for the population
         std::unique_ptr<Population> m_population; ///< The chromosome population
         int m_numGenerations = 20; ///< Number of generations to evolve through to find a solution
         int m_iterations = 1; ///< Number of times to run the experiment
-        std::optional<double> m_stoppingCriteria;
         Util::Logger<double, double, double, double, double, std::string> m_logger{""};
     };
 }

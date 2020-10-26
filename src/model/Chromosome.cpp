@@ -3,60 +3,16 @@
 #include <algorithm>
 #include <cmath>
 #include "FunctionFactory.h"
-#include "../utils/UniformRandomGenerator.h"
-
-namespace
-{
-    /**
-     * A random integer generator for reuse in the methods below
-     */
-    Util::UniformRandomGenerator<int, std::uniform_int_distribution<int>> RandInt(0, 1);
-
-    /**
-     * Gets a random index into a collection of the specified size
-     * @param size The size of the collection
-     */
-    int RandomIndex(size_t size)
-    {
-        int maxIndex = static_cast<int>(size-1);
-        return RandInt.GetInRange(0, maxIndex);
-    }
-
-    /**
-     * @param gene The S-expression gene to inspect
-     * @return true if the gene is a Terminal (not a Function)
-     */
-    auto isTerminal = [](const std::unique_ptr<Model::INode>& gene)
-    {
-        return gene->MaxChildren() == 0;
-    };
-
-    /**
-     * Adds terminals to a function to ensure it has a valid number of children.
-     * @pre This should only be called on Function objects.
-     * @param func The function to fill.
-     */
-    void FillFunction(Model::INode* func, const std::vector<double*>& variables)
-    {
-        while (func->LacksBreadth())
-        {
-            auto index = RandomIndex(variables.size());
-            func->AddChild(Model::FunctionFactory::Create(variables[index]));
-        }
-    }
-}
+#include "ChromosomeUtil.h"
 
 namespace Model
 {
-    void IChromosome::SetSeed(int seed)
-    {
-        RandInt.SetSeed(seed);
-    }
+    using namespace ChromosomeUtil;
 
     Chromosome::Chromosome(int targetSize, 
             const std::vector<FunctionType>& allowedFunctions, 
             const std::vector<double*>& variables,
-            const std::vector<std::vector<double>>& fitnessCases, 
+            const std::vector<double>& fitnessCases, 
             std::vector<double>& terminals, 
             double parsimonyCoefficient)
         : m_tree(CreateRandomChromosome(targetSize, allowedFunctions, variables))
@@ -72,7 +28,7 @@ namespace Model
     {
     }
 
-    Chromosome::Chromosome(IChromosome::INodePtr& tree, const std::vector<std::vector<double>>& fitnessCases, 
+    Chromosome::Chromosome(IChromosome::INodePtr tree, const std::vector<double>& fitnessCases, 
             std::vector<double>& terminals, double parsimonyCoefficient)
         : m_tree(std::move(tree)) 
         , m_size(m_tree->Size())
@@ -95,21 +51,26 @@ namespace Model
         return m_weightedFitness < rhs->m_weightedFitness;
     }
 
-    double Chromosome::CalculateFitness(const std::vector<std::vector<double>>& fitnessCases, std::vector<double>& terminals) const
+    double Chromosome::CalculateFitness(const std::vector<double>& fitnessCases, std::vector<double>& terminals)
     {
         double sumOfErrors = 0.0;
-        for (const auto& fCase : fitnessCases) // FitnessCases are the training set
+        int columns = static_cast<int>(terminals.size()) + 1; // columns in csv file, incl dependent variable
+        int totalCases = fitnessCases.size() / columns;       // rows in the csv file
+
+        for (int i = 0; i < totalCases; ++i)
         {
             // load up the terminals for this fitness case
-            std::copy(fCase.begin(), fCase.end()-1, terminals.begin());
+            auto begin = fitnessCases.begin() + i*columns;
+            auto end = begin + columns - 1;
+            std::copy(begin, end, terminals.begin());
 
             // calculate the fitness (absolute error) for this fitness case
             auto returnVal = m_tree->Evaluate();
 
             // add to the tally
-            sumOfErrors += std::abs(returnVal - fCase.back());
+            sumOfErrors += std::abs(returnVal - *end);
         }
-        return sumOfErrors / fitnessCases.size(); // mean absolute error
+        return sumOfErrors / totalCases; // mean absolute error
     }
 
     double Chromosome::CalculateWeightedFitness(double parsimonyCoefficient) const
@@ -144,7 +105,7 @@ namespace Model
     {
         auto randomTerminalMutation = [&](std::unique_ptr<INode>& gene) -> void
         {
-            if (RandInt.GetInRange(0,1) && !allowedFunctions.empty()) // mutate to a function
+            if (RandInt().GetInRange(0,1) && !allowedFunctions.empty()) // mutate to a function
             {
                 int i = RandomIndex(allowedFunctions.size());
                 auto func = FunctionFactory::Create(allowedFunctions[i]);
@@ -198,10 +159,10 @@ namespace Model
         };
         
         // Randomly select a node in the chromosome tree 
-        int index = RandInt.GetInRange(0, m_size-1);
+        int index = RandInt().GetInRange(0, m_size-1);
         auto& gene = m_tree->Get(index, m_tree);
 
-        if (isTerminal(gene))
+        if (IsTerminal(gene))
         {
             randomTerminalMutation(gene);
         }
@@ -211,7 +172,7 @@ namespace Model
         }
 
         // update the cached size of the chromosome
-        SetSize(m_tree->Size());
+        SetSize();
     }
 
     void Chromosome::HoistMutate()
@@ -223,7 +184,7 @@ namespace Model
         }
 
         // get the target gene (that we'll hoist into)
-        auto index = RandInt.GetInRange(0, Size()-1);
+        auto index = RandInt().GetInRange(0, Size()-1);
         auto& target = index == 0 ? m_tree : m_tree->Get(index, m_tree);
 
         int targetSize = target->Size();
@@ -233,12 +194,12 @@ namespace Model
         }
 
         // get the subtree to hoist, and swap them
-        index = RandInt.GetInRange(0, targetSize-1);
+        index = RandInt().GetInRange(0, targetSize-1);
         auto& toHoist = index == 0 ? target : target->Get(index, target);
         target = std::move(toHoist);
 
         // update the cached size of the chromosome
-        SetSize(m_tree->Size());
+        SetSize();
     }
 
     void Chromosome::Crossover(IChromosome& right)
@@ -253,27 +214,27 @@ namespace Model
         // Pick a random node in left
         if (Size() == 1)
         {
-            m_tree.swap(rhs->GetTree()->Get(RandInt.GetInRange(1, rhs->Size()-1), rhs->GetTree()));
+            m_tree.swap(rhs->GetTree()->Get(RandInt().GetInRange(1, rhs->Size()-1), rhs->GetTree()));
         }
         else if (rhs->Size() == 1)
         {
-            rhs->GetTree().swap(m_tree->Get(RandInt.GetInRange(1, Size()-1), m_tree));
+            rhs->GetTree().swap(m_tree->Get(RandInt().GetInRange(1, Size()-1), m_tree));
         }
         else
         {
-            int leftIndex = RandInt.GetInRange(1, Size()-1);
-            int rhsIndex = RandInt.GetInRange(1, rhs->Size()-1);
+            int leftIndex = RandInt().GetInRange(1, Size()-1);
+            int rhsIndex = RandInt().GetInRange(1, rhs->Size()-1);
             auto& leftSubtree = m_tree->Get(leftIndex, m_tree);
             leftSubtree.swap(rhs->GetTree()->Get(rhsIndex, rhs->GetTree()));
         }
 
-        SetSize(m_tree->Size());
-        rhs->SetSize(rhs->GetTree()->Size());
+        SetSize();
+        rhs->SetSize();
     }
 
-    void Chromosome::SetSize(int size)
+    void Chromosome::SetSize()
     {
-        m_size = size;
+        m_size = m_tree->Size();
     }
 
     IChromosome::INodePtr& Chromosome::GetTree()
@@ -299,7 +260,7 @@ namespace Model
         for (int count = 1; count < targetSize; ++count)
         {
             // Randomly choose a new function/variable
-            auto isFunction = RandInt.GetInRange(0, 1) == 0;
+            auto isFunction = RandInt().GetInRange(0, 1) == 0;
             std::unique_ptr<INode> newNode;
             if (isFunction)
             {
@@ -319,9 +280,9 @@ namespace Model
             int insertIndex = -1;
             do
             {
-                insertIndex = RandInt.GetInRange(0, root->Size()-1);
+                insertIndex = RandInt().GetInRange(0, root->Size()-1);
             } 
-            while (insertIndex != 0 && isTerminal(root->Get(insertIndex, root)) );
+            while (insertIndex != 0 && IsTerminal(root->Get(insertIndex, root)) );
 
             // add the new node to the random position in the tree
             if (!root->Get(insertIndex, root)->AddChild(std::move(newNode)) && isFunction)
@@ -337,5 +298,20 @@ namespace Model
             FillFunction(func, variables);
         }
         return root;
+    }
+
+    std::string Chromosome::ToString() const
+    {
+        return m_tree->ToString();
+    }
+
+    void Chromosome::Forecast(const std::vector<double>& fitnessCases, std::vector<double>& terminals, double* predictions, int length) const
+    {
+        throw std::invalid_argument("Prediction is not yet implemented for ChromosomeType::Normal.");
+    }
+
+    void Chromosome::Predict(std::vector<double>& predictionCases, std::vector<double>& terminals, int cutoff) const
+    {
+        throw std::invalid_argument("Prediction is not yet implemented for ChromosomeType::Normal.");
     }
 }

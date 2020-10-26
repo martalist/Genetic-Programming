@@ -15,5 +15,6 @@ target_link_libraries(integenetics # allows integenetics to know about the libra
     prog
     # utils
     model
+    Eigen3::Eigen
     ${Boost_LIBRARIES}
 )
