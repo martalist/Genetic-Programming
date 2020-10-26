@@ -47,10 +47,7 @@ namespace Model
             s_config.Params.Type = ProgramTypeFromString(tree.get("Config.ProgramType", "Normal"));
             s_config.Iterations = tree.get("Config.Iterations", 1);
             s_config.NumGenerations = tree.get("Config.Generations", 20);
-            if (tree.get_child_optional("Config.StoppingCriteria"))
-            {
-                s_config.StoppingCriteria = tree.get<double>("Config.StoppingCriteria", 0.0);
-            }
+            s_config.StoppingCriteria = tree.get("Config.StoppingCriteria", 0.0);
             s_config.Params.PopulationSize = tree.get("Config.Population.Size", 1000);
             s_config.Params.CrossoverProb = tree.get<double>("Config.CrossoverProb", 0.7);
             s_config.Params.MutationProb = tree.get<double>("Config.MutationProb", 0.01);
@@ -95,10 +92,7 @@ namespace Model
     {
         std::cout << "\tIterations: " << s_config.Iterations << std::endl;
         std::cout << "\tGenerations: " << s_config.NumGenerations << std::endl;
-        if (s_config.StoppingCriteria.has_value())
-        {
-            std::cout << "\tStopping criteria: " << s_config.StoppingCriteria.value() << std::endl;
-        }
+        std::cout << "\tStopping criteria: " << s_config.StoppingCriteria << std::endl;
         std::cout << "\tPopulation size: " << s_config.Params.PopulationSize << std::endl;
         std::cout << "\tMinimum initial S-expressions size: " << s_config.Params.MinInitialTreeSize << std::endl;
         std::cout << "\tCrossover probability: " << s_config.Params.CrossoverProb << std::endl;

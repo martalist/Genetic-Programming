@@ -51,7 +51,8 @@ namespace Model
     {
         int Iterations = 1; ///< Number of times to run the experiment
         int NumGenerations = 20; ///< Number of generations to evolve through to find a solution
-        std::optional<double> StoppingCriteria;
+        double StoppingCriteria = 0.0; ///< The threshold that the errors must fall under to stop execution early
+        double ParsimonyCoefficient = 0.0; ///< The coefficient used to penalize long S-expressions.
         PopulationParams Params{}; ///< Parameters for the population
         std::vector<double> FitnessCases; ///< Training cases
     };

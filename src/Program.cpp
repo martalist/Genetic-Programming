@@ -14,10 +14,6 @@ namespace Model
         m_config = ConfigParser::Load("config.xml");
         m_iterations = m_config.Iterations;
         m_numGenerations = m_config.NumGenerations;
-        if (m_config.StoppingCriteria.has_value())
-        {
-            m_stoppingCriteria = m_config.StoppingCriteria.value();
-        }
 
         // Create random/initial population from params
         m_population = std::make_unique<Population>(m_config.Params, m_config.FitnessCases);
@@ -28,7 +24,6 @@ namespace Model
         , m_population(std::make_unique<Population>(config.Params, config.FitnessCases))
         , m_numGenerations(config.NumGenerations)
         , m_iterations(config.Iterations)
-        , m_stoppingCriteria(config.StoppingCriteria)
     {
     }
 
@@ -66,7 +61,7 @@ namespace Model
                     minimum = m_population->GetBestFit()->Fitness();
                 }
 
-                if (m_stoppingCriteria.has_value() && minimum < m_stoppingCriteria.value())
+                if (minimum < m_config.StoppingCriteria)
                 {
                     break;
                 }
