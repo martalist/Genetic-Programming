@@ -62,6 +62,7 @@ namespace Model
         double ParsimonyCoefficient = 0.0; ///< The coefficient used to penalize long S-expressions.
         PopulationParams Params{}; ///< Parameters for the population
         std::vector<double> FitnessCases; ///< Training cases
+        int ForecastSteps = 0; ///< used for time series forcasting. Determines the number of steps forward to forecast.
     };
 }
 

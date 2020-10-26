@@ -77,38 +77,6 @@ namespace Model
         {
             m_logger.Write();
             std::cout << "Results written to " << m_logger.GetOutputDir() << std::endl << std::endl;
-
-            if (m_config.Params.Type == ChromosomeType::TimeSeries)
-            {
-                //////////// TODO: this is temporary ////////////////////////////////////////
-                // Predict
-                const int NumForecasts = 12;
-                std::vector<double> result(m_config.FitnessCases);
-                result.resize(m_config.FitnessCases.size() + NumForecasts, 0.0); // append zeros
-                double stdErr = Predict(result, NumForecasts);
-
-                // Forecast
-                // double forecast[NumForecasts] = {0};
-                // Forecast(&forecast[0], NumForecasts);
-
-                std::ofstream out("PredictionResult.csv");
-                out << "actual,lower95,lower80,prediction,";
-                // out << "forecast,";
-                out << "upper80,upper95" << std::endl;
-                for (auto i = 0u; i < result.size(); ++i)
-                {
-                    auto rooth = std::sqrt(i + 1 - m_config.FitnessCases.size());
-                    out << (i < m_config.FitnessCases.size() ? std::to_string(m_config.FitnessCases[i]) : "") << ",";
-                    out << (i >= m_config.FitnessCases.size() ? std::to_string(result[i]-1.96*stdErr*rooth) : "") << ","; 
-                    out << (i >= m_config.FitnessCases.size() ? std::to_string(result[i]-1.28*stdErr*rooth) : "") << ","; 
-                    out << (i >= m_config.Params.NumberOfTerminals ? std::to_string(result[i]) : "") << ",";
-                    // out << (i >= m_config.FitnessCases.size() ? std::to_string(forecast[i-m_config.FitnessCases.size()]) : "") << ",";
-                    out << (i >= m_config.FitnessCases.size() ? std::to_string(result[i]+1.28*stdErr*rooth) : "") << ","; 
-                    out << (i >= m_config.FitnessCases.size() ? std::to_string(result[i]+1.96*stdErr*rooth) : "") << std::endl;
-                }
-                out.close();
-                ////////////////////////////////////////////////////////////////////////////////
-            }
         }
     }
 
@@ -122,5 +90,27 @@ namespace Model
     {
         m_population->Predict(fitted, cutoff);
         return m_population->GetBestFit()->Fitness();
+    }
+
+    double Program::Predict(const std::string& filename)
+    {
+        std::vector<double> result(m_config.FitnessCases);
+        result.resize(m_config.FitnessCases.size() + m_config.ForecastSteps, 0.0); // append zeros
+        double stdErr = Predict(result, m_config.ForecastSteps);
+
+        std::ofstream out(filename);
+        out << "actual,lower95,lower80,prediction,upper80,upper95" << std::endl;
+        for (auto i = 0u; i < result.size(); ++i)
+        {
+            auto rooth = std::sqrt(i + 1 - m_config.FitnessCases.size());
+            out << (i < m_config.FitnessCases.size() ? std::to_string(m_config.FitnessCases[i]) : "") << ",";
+            out << (i >= m_config.FitnessCases.size() ? std::to_string(result[i]-1.96*stdErr*rooth) : "") << ","; 
+            out << (i >= m_config.FitnessCases.size() ? std::to_string(result[i]-1.28*stdErr*rooth) : "") << ","; 
+            out << (i >= m_config.Params.NumberOfTerminals ? std::to_string(result[i]) : "") << ",";
+            out << (i >= m_config.FitnessCases.size() ? std::to_string(result[i]+1.28*stdErr*rooth) : "") << ","; 
+            out << (i >= m_config.FitnessCases.size() ? std::to_string(result[i]+1.96*stdErr*rooth) : "") << std::endl;
+        }
+        out.close();
+        return stdErr;
     }
 }

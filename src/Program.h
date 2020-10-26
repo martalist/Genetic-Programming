@@ -56,6 +56,14 @@ namespace Model
          */
         double Predict(std::vector<double>& fitted, int cutoff = 0);
 
+        /**
+         * Overload of Predict that writes results of the prediction to a csv file.
+         * @param filename The file to write to.
+         * @pre Start must be called prior to Forecast.
+         * @return the standard error of the residuals for the best Chromosome
+         */
+        double Predict(const std::string& filename = "Predictions.csv");
+
     private:
         Config m_config{}; ///< parameters for the population
         std::unique_ptr<Population> m_population; ///< The chromosome population

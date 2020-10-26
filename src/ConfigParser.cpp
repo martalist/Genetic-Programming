@@ -82,8 +82,10 @@ namespace Model
             int numberOfTerminals = LoadFitnessCases(fitnessCasesFile);
             s_config.Params.NumberOfTerminals = (s_config.Params.Type == ChromosomeType::TimeSeries) ?
                 tree.get("Config.ProgramType.<xmlattr>.lag", 1) : numberOfTerminals;
+            s_config.ForecastSteps = tree.get("Config.ProgramType.<xmlattr>.forecast", 0);
 
-            std::cout << "Configuration loaded:" << std::endl;
+            std::cout << "Configuration loaded." << std::endl;
+            std::cout << "Fitness cases from " << fitnessCasesFile << std::endl;
         }
         catch (std::exception& e)
         {

@@ -2,7 +2,7 @@
 <Config>
     <!-- <ProgramType>Normal</ProgramType> -->
     <!-- <FitnessCases file="pythagorean_theorem.csv" /> -->
-    <ProgramType lag="24">Time Series</ProgramType>
+    <ProgramType lag="24" forecast="24">Time Series</ProgramType>
     <FitnessCases file="HotelRooms.csv" />
 
     <Iterations>1</Iterations>
