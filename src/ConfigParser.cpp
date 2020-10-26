@@ -56,11 +56,10 @@ namespace Model
             s_config.Params.MutationProb = tree.get<double>("Config.MutationProb", 0.01);
             s_config.Params.HoistMutationProb = tree.get<double>("Config.HoistMutationProb", 0.01);
             s_config.Params.MinInitialTreeSize = tree.get("Config.Population.MinInitTreeSize", 10);
-            auto replaceParents = tree.get_child_optional("Config.Population.AlwaysReplaceParents");
-            if (replaceParents)
-            {
-                s_config.Params.AlwaysReplaceParents = true;
-            }
+
+            s_config.Params.TwinsPerMatingPair = tree.get("Config.Population.TwinsPerMatingPair", 1);
+            s_config.Params.CarryOverProportion = tree.get("Config.Population.CarryOverProportion", 0.0);
+            
             auto optSeed = tree.get_optional<int>("Config.Seed");
             if (optSeed)
             {
@@ -96,12 +95,18 @@ namespace Model
     {
         std::cout << "\tIterations: " << s_config.Iterations << std::endl;
         std::cout << "\tGenerations: " << s_config.NumGenerations << std::endl;
-        std::cout << "\tPopulation Size: " << s_config.Params.PopulationSize << std::endl;
+        if (s_config.StoppingCriteria.has_value())
+        {
+            std::cout << "\tStopping criteria: " << s_config.StoppingCriteria.value() << std::endl;
+        }
+        std::cout << "\tPopulation size: " << s_config.Params.PopulationSize << std::endl;
         std::cout << "\tMinimum initial S-expressions size: " << s_config.Params.MinInitialTreeSize << std::endl;
         std::cout << "\tCrossover probability: " << s_config.Params.CrossoverProb << std::endl;
         std::cout << "\tMutation probability: " << s_config.Params.MutationProb << std::endl;
         std::cout << "\tHoistMutation probability: " << s_config.Params.HoistMutationProb << std::endl;
         std::cout << "\tNumber of terminals: " << s_config.Params.NumberOfTerminals << std::endl;
+        std::cout << "\tChildren per mating pair: " << s_config.Params.TwinsPerMatingPair*2 << std::endl;
+        std::cout << "\tProportion of population cloned per generation: " << s_config.Params.CarryOverProportion << std::endl;
 
         std::cout << "\tAllowed functions: ";
         int i = 0;

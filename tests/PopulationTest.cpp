@@ -15,7 +15,8 @@ namespace
         { Model::FunctionType::SquareRoot }, // allowed functions
         1, // The number of terminals
         0, // random seed
-        false // always replace parents?
+        3, // twins per parent
+        0.0 // carry over
     };
 
     const Model::PopulationParams Params2
@@ -29,7 +30,8 @@ namespace
         { Model::FunctionType::Addition, Model::FunctionType::Multiplication, Model::FunctionType::SquareRoot }, // allowed functions
         2, // The number of terminals
         0, // random seed
-        false // always replace parents?
+        3, // twins per parent
+        0.0 // carry over
     };
 
     const std::vector<double> FitnessCases1

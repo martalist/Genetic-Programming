@@ -6,8 +6,8 @@
     <FitnessCases file="HotelRooms.csv" />
 
     <Iterations>1</Iterations>
-    <Generations>20</Generations>
-    <StoppingCriteria>15.0</StoppingCriteria>
+    <Generations>10</Generations>
+    <!-- <StoppingCriteria>15.0</StoppingCriteria> -->
     <CrossoverProb>0.7</CrossoverProb>
     <MutationProb>0.1</MutationProb>
     <HoistMutationProb>0.1</HoistMutationProb>
@@ -30,8 +30,7 @@
     <Population>
         <Size>500</Size>
         <MinInitTreeSize>20</MinInitTreeSize>
-
-        <!-- If AlwaysReplaceParents is uncommented parents are always replaced by children, even if they are less fit. -->
-        <!-- <AlwaysReplaceParents /> -->
+        <TwinsPerMatingPair>3</TwinsPerMatingPair>
+        <CarryOverProportion>0.05</CarryOverProportion>
     </Population>
 </Config>

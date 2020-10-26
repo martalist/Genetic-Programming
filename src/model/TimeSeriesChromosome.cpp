@@ -108,8 +108,8 @@ namespace Model
         m_coefficients = W.colPivHouseholderQr().solve(Y);
 
         auto errors = Y - (W*m_coefficients); // \hat{Y} = W*beta
-        sumOfSqErrors = errors.transpose().dot(errors);
-        return std::sqrt(sumOfSqErrors/(totalCases-1)); // Standard Error
+        sumOfSqErrors = errors.dot(errors);
+        return std::sqrt(sumOfSqErrors/(totalCases)); // Standard Error
     }
 
     double TimeSeriesChromosome::CalculateWeightedFitness(double parsimonyCoefficient) const

@@ -15,7 +15,7 @@ namespace Model
     struct PopulationParams
     {
         ChromosomeType Type = ChromosomeType::Normal; ///< The type of Chromosome (and therefore underlying Program Type)
-        int PopulationSize = 5000; ///< Number of chromosomes in the population
+        int PopulationSize = 1000; ///< Number of chromosomes in the population
         int MinInitialTreeSize = 10; ///< The minimum tree size of newly (randomly) created S-expressions
         double CrossoverProb = 0.7; ///< The probability that two child genes cross over
         double MutationProb = 0.001; ///< The probability that a child gene mutates
@@ -28,7 +28,19 @@ namespace Model
          */
         int NumberOfTerminals = 1;
         std::optional<int> Seed; ///< The seed, if set, to yield deterministic results
-        bool AlwaysReplaceParents = false; ///< If true, the parents are always replaced by the 1st two children birthed.
+        
+        /**
+         * The number of pairs of offspring to produce from each set of parents. i.e. Setting this to 3 will 
+         * mean 6 children are created per pair of parents, from which the best 2 will be placed into the next
+         * generation. (i.e. only two survive beyond birth).
+         */
+        int TwinsPerMatingPair = 3;
+
+        /**
+         * The proportion of the population to carry into the next generation, in order of fitness.
+         * Used to ensure the "best" fitness never gets worse from one generation to the next.
+         */
+        double CarryOverProportion = 0.0;
     };
 
     /**

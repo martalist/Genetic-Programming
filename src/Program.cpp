@@ -87,17 +87,19 @@ namespace Model
             {
                 //////////// TODO: this is temporary ////////////////////////////////////////
                 // Predict
-                const int NumForecasts = 50;
+                const int NumForecasts = 12;
                 std::vector<double> result(m_config.FitnessCases);
                 result.resize(m_config.FitnessCases.size() + NumForecasts, 0.0); // append zeros
                 double stdErr = Predict(result, NumForecasts);
 
                 // Forecast
-                double forecast[NumForecasts] = {0};
-                Forecast(&forecast[0], NumForecasts);
+                // double forecast[NumForecasts] = {0};
+                // Forecast(&forecast[0], NumForecasts);
 
                 std::ofstream out("PredictionResult.csv");
-                out << "actual,lower95,lower80,prediction,forecast,upper80,upper95" << std::endl;
+                out << "actual,lower95,lower80,prediction,";
+                // out << "forecast,";
+                out << "upper80,upper95" << std::endl;
                 for (auto i = 0u; i < result.size(); ++i)
                 {
                     auto rooth = std::sqrt(i + 1 - m_config.FitnessCases.size());
@@ -105,7 +107,7 @@ namespace Model
                     out << (i >= m_config.FitnessCases.size() ? std::to_string(result[i]-1.96*stdErr*rooth) : "") << ","; 
                     out << (i >= m_config.FitnessCases.size() ? std::to_string(result[i]-1.28*stdErr*rooth) : "") << ","; 
                     out << (i >= m_config.Params.NumberOfTerminals ? std::to_string(result[i]) : "") << ",";
-                    out << (i >= m_config.FitnessCases.size() ? std::to_string(forecast[i-m_config.FitnessCases.size()]) : "") << ",";
+                    // out << (i >= m_config.FitnessCases.size() ? std::to_string(forecast[i-m_config.FitnessCases.size()]) : "") << ",";
                     out << (i >= m_config.FitnessCases.size() ? std::to_string(result[i]+1.28*stdErr*rooth) : "") << ","; 
                     out << (i >= m_config.FitnessCases.size() ? std::to_string(result[i]+1.96*stdErr*rooth) : "") << std::endl;
                 }
