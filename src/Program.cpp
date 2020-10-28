@@ -67,10 +67,13 @@ namespace Model
                 }
             }
 
-            // print best result
-            std::cout << std::fixed << "Best S-expression in iteration " << iteration+1
-                << " has fitness: " << minimum << std::endl
-                << "\t" << m_population->GetBestFit()->ToString() << std::endl << std::endl;
+            if (logResults)
+            {
+                // print best result
+                std::cout << std::fixed << "Best S-expression in iteration " << iteration+1
+                    << " has fitness: " << minimum << std::endl
+                    << "\t" << m_population->GetBestFit()->ToString() << std::endl << std::endl;
+            }
         }
 
         if (logResults)
