@@ -1,15 +1,21 @@
 # This is the base CMakeLists file
 
 # give the project a name
-project(Integenetics)
+cmake_policy(SET CMP0048 NEW)
 cmake_minimum_required(VERSION 3.0) # and a version
-SET(CMAKE_CPP_COMPILER /usr/bin/g++) # specify the compiler
+project(gpforecast VERSION 1.0.0 LANGUAGES CXX)
+set(CMAKE_CPP_COMPILER /usr/bin/g++) # specify the compiler
+include(GNUInstallDirs)
 
 if (APPLE)
-SET(CMAKE_CXX_FLAGS "-Wall")
-SET(CMAKE_CXX_STANDARD 17)
+    set(CMAKE_CXX_FLAGS "-Wall")
+    set(CMAKE_CXX_STANDARD 17)
 else()
-SET(CMAKE_CXX_FLAGS "--std=c++17 -Wall")
+    set(CMAKE_CXX_FLAGS "--std=c++17 -Wall")
+endif()
+
+if (NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
 endif()
 
 # Boost libraries
@@ -68,6 +74,30 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/src)
 configure_file(${PROJECT_SOURCE_DIR}/src/config.xml config.xml COPYONLY)
 configure_file(${PROJECT_SOURCE_DIR}/src/pythagorean_theorem.csv pythagorean_theorem.csv COPYONLY)
 configure_file(${PROJECT_SOURCE_DIR}/src/HotelRooms.csv HotelRooms.csv COPYONLY)
+
+# create a shared library
+# based on https://stackoverflow.com/a/45843676/5200859
+add_library(${PROJECT_NAME} SHARED src/${PROJECT_NAME}.cpp)
+target_link_libraries(${PROJECT_NAME}
+    prog
+    model
+    Eigen3::Eigen
+    ${Boost_LIBRARIES}
+)
+
+set_target_properties(${PROJECT_NAME} PROPERTIES 
+    VERSION ${PROJECT_VERSION}
+    SOVERSION 1
+    PUBLIC_HEADER include/${PROJECT_NAME}.h)
+
+target_include_directories(${PROJECT_NAME} PRIVATE include)
+
+configure_file(${PROJECT_NAME}.pc.in ${PROJECT_NAME}.pc @ONLY)
+install(TARGETS ${PROJECT_NAME}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(FILES ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.pc
+    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig)
 
 # Must be defined in top-most CMakeLists.txt
 enable_testing() 

@@ -9,12 +9,13 @@ add_library(prog
     ConfigParser.cpp
 )
 
-add_executable(integenetics main.cpp) # builds an executable called ./integenetics from main.cpp
+# add_executable(${PROJECT_NAME} main.cpp) # builds an executable called ./${PROJECT_NAME} from main.cpp
 
-target_link_libraries(integenetics # allows integenetics to know about the libraries 
-    prog
-    # utils
-    model
-    Eigen3::Eigen
-    ${Boost_LIBRARIES}
-)
+# target_link_libraries(${PROJECT_NAME} # allows executable to know about the libraries 
+    # prog
+    # # utils
+    # model
+    # Eigen3::Eigen
+    # ${Boost_LIBRARIES}
+# )
+
