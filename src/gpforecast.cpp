@@ -39,13 +39,8 @@ double PredictTimeSeries(Settings* settings, TimeSeriesData* history, TimeSeries
     {
         config.Params.Seed = settings->seed;
     }
-
-    // copy the fitness cases
-    // TODO: this is not efficient. Consider refactoring so that copying is not required.
-    for (int i = 0; i < history->length; ++i)
-    {
-        config.FitnessCases.push_back(*(history->data + i));
-    }
+    config.FitnessCases.Cases = history->data;
+    config.FitnessCases.Len = history->length;
 
     Model::Program p(config);
 
