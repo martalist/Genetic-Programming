@@ -2,6 +2,7 @@
 #define CONFIGPARSER_H
 
 #include <optional>
+#include <vector>
 #include "PopulationParams.h"
 
 namespace Model
@@ -33,6 +34,8 @@ namespace Model
         static int LoadFitnessCases(const std::string& filename);
 
         static Config s_config; ///< the loaded/default config
+
+        static std::vector<double> s_fitnessCases;
     };
 }
 #endif 

@@ -97,21 +97,22 @@ namespace Model
 
     double Program::Predict(const std::string& filename)
     {
-        std::vector<double> result(m_config.FitnessCases);
-        result.resize(m_config.FitnessCases.size() + m_config.ForecastSteps, 0.0); // append zeros
+        std::vector<double> result(m_config.FitnessCases.Cases, 
+                m_config.FitnessCases.Cases + m_config.FitnessCases.Len);
+        result.resize(m_config.FitnessCases.Len + m_config.ForecastSteps, 0.0); // append zeros
         double stdErr = Predict(result, m_config.ForecastSteps);
 
         std::ofstream out(filename);
         out << "actual,lower95,lower80,prediction,upper80,upper95" << std::endl;
         for (auto i = 0u; i < result.size(); ++i)
         {
-            auto rooth = std::sqrt(i + 1 - m_config.FitnessCases.size());
-            out << (i < m_config.FitnessCases.size() ? std::to_string(m_config.FitnessCases[i]) : "") << ",";
-            out << (i >= m_config.FitnessCases.size() ? std::to_string(result[i]-1.96*stdErr*rooth) : "") << ","; 
-            out << (i >= m_config.FitnessCases.size() ? std::to_string(result[i]-1.28*stdErr*rooth) : "") << ","; 
+            auto rooth = std::sqrt(i + 1 - m_config.FitnessCases.Len);
+            out << (i < m_config.FitnessCases.Len ? std::to_string(m_config.FitnessCases.Cases[i]) : "") << ",";
+            out << (i >= m_config.FitnessCases.Len ? std::to_string(result[i]-1.96*stdErr*rooth) : "") << ","; 
+            out << (i >= m_config.FitnessCases.Len ? std::to_string(result[i]-1.28*stdErr*rooth) : "") << ","; 
             out << (i >= m_config.Params.NumberOfTerminals ? std::to_string(result[i]) : "") << ",";
-            out << (i >= m_config.FitnessCases.size() ? std::to_string(result[i]+1.28*stdErr*rooth) : "") << ","; 
-            out << (i >= m_config.FitnessCases.size() ? std::to_string(result[i]+1.96*stdErr*rooth) : "") << std::endl;
+            out << (i >= m_config.FitnessCases.Len ? std::to_string(result[i]+1.28*stdErr*rooth) : "") << ","; 
+            out << (i >= m_config.FitnessCases.Len ? std::to_string(result[i]+1.96*stdErr*rooth) : "") << std::endl;
         }
         out.close();
         return stdErr;

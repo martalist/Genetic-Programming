@@ -4,6 +4,7 @@
 #include <cassert>
 #include <cmath>
 #include <iostream>
+#include "../PopulationParams.h"
 #include "FunctionFactory.h"
 #include "ChromosomeUtil.h"
 
@@ -14,7 +15,7 @@ namespace Model
     TimeSeriesChromosome::TimeSeriesChromosome(int targetSize, 
             const std::vector<FunctionType>& allowedFunctions, 
             const std::vector<double*>& variables,
-            const std::vector<double>& fitnessCases, 
+            const TrainingData& fitnessCases, 
             std::vector<double>& terminals, 
             double parsimonyCoefficient)
         : m_tree(CreateRandomChromosome(targetSize, allowedFunctions, variables))
@@ -32,7 +33,7 @@ namespace Model
     // {
     // }
 
-    TimeSeriesChromosome::TimeSeriesChromosome(IChromosome::INodePtr tree, const std::vector<double>& fitnessCases, 
+    TimeSeriesChromosome::TimeSeriesChromosome(IChromosome::INodePtr tree, const TrainingData& fitnessCases, 
             std::vector<double>& terminals, double parsimonyCoefficient)
         : m_tree(std::move(tree)) 
         , m_coefficients(m_tree->NumberOfChildren()+1)
@@ -71,11 +72,11 @@ namespace Model
         return m_weightedFitness < rhs->m_weightedFitness;
     }
 
-    double TimeSeriesChromosome::CalculateFitness(const std::vector<double>& fitnessCases, std::vector<double>& terminals)
+    double TimeSeriesChromosome::CalculateFitness(const TrainingData& fitnessCases, std::vector<double>& terminals)
     {
         double sumOfSqErrors = 0.0;
         int lag = terminals.size();
-        int totalCases = fitnessCases.size() - lag;
+        int totalCases = fitnessCases.Len - lag;
 
         Eigen::MatrixXd W(totalCases, m_coefficients.size());
         Eigen::VectorXd Y(totalCases);
@@ -86,10 +87,10 @@ namespace Model
             // load up the terminals for this fitness case
             for (size_t j = 0; j < lag; ++j)
             {
-                terminals[j] = fitnessCases[i+j];
+                terminals[j] = fitnessCases.Cases[i+j];
             }
 
-            Y(i) = fitnessCases[i+lag]; // add to Y vector
+            Y(i) = fitnessCases.Cases[i+lag]; // add to Y vector
             W(i,0) = 1.0; // first column is always 1
             if (m_size != 1) // check that this isn't just a terminal
             {
@@ -347,7 +348,7 @@ namespace Model
         return output.str();
     }
 
-    void TimeSeriesChromosome::Forecast(const std::vector<double>& fitnessCases, std::vector<double>& terminals, double* predictions, int length) const
+    void TimeSeriesChromosome::Forecast(const TrainingData& fitnessCases, std::vector<double>& terminals, double* predictions, int length) const
     {
         int lag = terminals.size();
 
@@ -357,13 +358,13 @@ namespace Model
             // load up the terminals for this fitness case
             for (size_t j = 0; j < lag; ++j)
             {
-                auto targetIndex = fitnessCases.size() + i + j - lag;
+                auto targetIndex = fitnessCases.Len + i + j - lag;
                 // terminals[j] = targetIndex < fitnessCases.size() 
                     // ? fitnessCases[targetIndex] 
                     // : predictions[i+j-lag];
-                if (targetIndex < fitnessCases.size())
+                if (targetIndex < fitnessCases.Len)
                 {
-                    terminals[j] = fitnessCases[targetIndex] ;
+                    terminals[j] = fitnessCases.Cases[targetIndex] ;
                 }
                 else
                 {

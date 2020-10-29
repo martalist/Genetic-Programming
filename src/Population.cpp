@@ -41,7 +41,7 @@ namespace
 
 namespace Model
 {
-    Population::Population(const PopulationParams& params, const std::vector<double>& fitnessCases)
+    Population::Population(const PopulationParams& params, const TrainingData& fitnessCases)
         : m_params(params)
         , m_randomProbability(.0, 1.)
         // TODO: allow config to select between raffle and tournament style selection
@@ -142,7 +142,7 @@ namespace Model
         nextGeneration.push_back(std::move(*inOrder));
     }
 
-    std::tuple<Population::ChromoPtr, Population::ChromoPtr> Population::GetNewOffspring(const IChromosome& mum, const IChromosome& dad, const std::vector<double>& fitnessCases, std::vector<double>& terminals, double parsimonyCoefficient) const
+    std::tuple<Population::ChromoPtr, Population::ChromoPtr> Population::GetNewOffspring(const IChromosome& mum, const IChromosome& dad, const TrainingData& fitnessCases, std::vector<double>& terminals, double parsimonyCoefficient) const
     {
         // Deep copy mum & dad
         auto son = dad.Clone();

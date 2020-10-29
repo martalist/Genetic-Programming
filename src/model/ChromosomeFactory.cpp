@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+#include "../PopulationParams.h"
 #include "Chromosome.h"
 #include "TimeSeriesChromosome.h"
 
@@ -12,7 +13,7 @@ namespace Model
     void ChromosomeFactory::Initialise(ChromosomeType type, int targetSize, 
             const std::vector<FunctionType>& allowedFunctions, 
             const std::vector<double*>& variables, 
-            const std::vector<double>& fitnessCases, 
+            const TrainingData& fitnessCases, 
             std::vector<double>& terminals)
     {
         if (s_instance == nullptr)
@@ -30,7 +31,7 @@ namespace Model
     ChromosomeFactory::ChromosomeFactory(ChromosomeType type, int targetSize, 
             const std::vector<FunctionType>& allowedFunctions, 
             const std::vector<double*>& variables, 
-            const std::vector<double>& fitnessCases, 
+            const TrainingData& fitnessCases, 
             std::vector<double>& terminals)
         : m_type(type)
         , m_targetSize(targetSize)

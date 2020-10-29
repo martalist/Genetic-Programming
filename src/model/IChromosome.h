@@ -8,6 +8,7 @@
 namespace Model
 {
     enum class FunctionType;
+    struct TrainingData;
 
     /**
      * Represents an individual chromosome (S-expression) in the population,
@@ -87,7 +88,7 @@ namespace Model
          * @param prediction A double array that predictions should be written to.
          * @param length The length of the prediction array.
          */
-        virtual void Forecast(const std::vector<double>& fitnessCases, std::vector<double>& terminals, double* predictions, int length) const {}
+        virtual void Forecast(const TrainingData& fitnessCases, std::vector<double>& terminals, double* predictions, int length) const {}
 
         /**
          * Returns the result of evaluating the best-fitting Chromesome for a set of prediction cases.
@@ -104,7 +105,7 @@ namespace Model
          * @param chromosome The chromosome to evaluate
          * @return the chromosome fitness as a positive, real number
          */
-        virtual double CalculateFitness(const std::vector<double>& fitnessCases, std::vector<double>& terminals) = 0;
+        virtual double CalculateFitness(const TrainingData& fitnessCases, std::vector<double>& terminals) = 0;
 
         /**
          * Calculate the weighted fitness of the chromosome, where longer chromosomes are penalized.

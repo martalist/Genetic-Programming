@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include "../PopulationParams.h"
 #include "FunctionFactory.h"
 #include "ChromosomeUtil.h"
 
@@ -12,7 +13,7 @@ namespace Model
     Chromosome::Chromosome(int targetSize, 
             const std::vector<FunctionType>& allowedFunctions, 
             const std::vector<double*>& variables,
-            const std::vector<double>& fitnessCases, 
+            const TrainingData& fitnessCases, 
             std::vector<double>& terminals, 
             double parsimonyCoefficient)
         : m_tree(CreateRandomChromosome(targetSize, allowedFunctions, variables))
@@ -28,7 +29,7 @@ namespace Model
     {
     }
 
-    Chromosome::Chromosome(IChromosome::INodePtr tree, const std::vector<double>& fitnessCases, 
+    Chromosome::Chromosome(IChromosome::INodePtr tree, const TrainingData& fitnessCases, 
             std::vector<double>& terminals, double parsimonyCoefficient)
         : m_tree(std::move(tree)) 
         , m_size(m_tree->Size())
@@ -51,16 +52,16 @@ namespace Model
         return m_weightedFitness < rhs->m_weightedFitness;
     }
 
-    double Chromosome::CalculateFitness(const std::vector<double>& fitnessCases, std::vector<double>& terminals)
+    double Chromosome::CalculateFitness(const TrainingData& fitnessCases, std::vector<double>& terminals)
     {
         double sumOfErrors = 0.0;
         int columns = static_cast<int>(terminals.size()) + 1; // columns in csv file, incl dependent variable
-        int totalCases = fitnessCases.size() / columns;       // rows in the csv file
+        int totalCases = fitnessCases.Len / columns;       // rows in the csv file
 
         for (int i = 0; i < totalCases; ++i)
         {
             // load up the terminals for this fitness case
-            auto begin = fitnessCases.begin() + i*columns;
+            auto begin = fitnessCases.Cases + i*columns;
             auto end = begin + columns - 1;
             std::copy(begin, end, terminals.begin());
 
@@ -305,7 +306,7 @@ namespace Model
         return m_tree->ToString();
     }
 
-    void Chromosome::Forecast(const std::vector<double>& fitnessCases, std::vector<double>& terminals, double* predictions, int length) const
+    void Chromosome::Forecast(const TrainingData& fitnessCases, std::vector<double>& terminals, double* predictions, int length) const
     {
         throw std::invalid_argument("Prediction is not yet implemented for ChromosomeType::Normal.");
     }

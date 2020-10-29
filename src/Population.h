@@ -31,7 +31,7 @@ namespace Model
         /**
          * Constructor
          */
-        Population(const PopulationParams& params, const std::vector<double>& fitnessCases);
+        Population(const PopulationParams& params, const TrainingData& fitnessCases);
         
         /**
          * Resets the population to a new, randomly created state
@@ -112,7 +112,7 @@ namespace Model
          * @return Two offsprint S-expressions
          */
         std::tuple<ChromoPtr, ChromoPtr> GetNewOffspring(const IChromosome& mum, const IChromosome& dad,
-                const std::vector<double>& fitnessCases, std::vector<double>& terminals, 
+                const TrainingData& fitnessCases, std::vector<double>& terminals, 
                 double parsimonyCoefficient) const;
 
         /**
@@ -128,7 +128,7 @@ namespace Model
         std::unique_ptr<Util::ISelector<double>> m_selector; ///< Ticketing system used to select parents
 
         std::vector<double> m_terminals; ///< The terminal values to evaluate
-        std::vector<double> m_fitnessCases; ///< Training cases
+        TrainingData m_fitnessCases; ///< Training cases
         double m_parsimonyCoefficient = 0.0; ///< The coefficient used to penalize long S-expressions.
     };
 }

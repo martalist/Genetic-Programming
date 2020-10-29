@@ -51,6 +51,15 @@ namespace Model
     };
 
     /**
+     * Represents a set of fitness cases
+     */
+    struct TrainingData
+    {
+        double* Cases = nullptr; ///< An array of doubles
+        int Len = 0; ///< the length of the array
+    };
+
+    /**
      * All configuration required to run Integenetics.
      * Made available through XML to allow changing parameters without re-compilation.
      */
@@ -61,7 +70,7 @@ namespace Model
         double StoppingCriteria = 0.0; ///< The threshold that the errors must fall under to stop execution early
         double ParsimonyCoefficient = 0.0; ///< The coefficient used to penalize long S-expressions.
         PopulationParams Params{}; ///< Parameters for the population
-        std::vector<double> FitnessCases; ///< Training cases
+        TrainingData FitnessCases; ///< Training cases
         int ForecastSteps = 0; ///< used for time series forcasting. Determines the number of steps forward to forecast.
     };
 }

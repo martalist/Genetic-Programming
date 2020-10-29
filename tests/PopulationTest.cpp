@@ -36,7 +36,7 @@ namespace
         0.0 // parsimony
     };
 
-    const std::vector<double> FitnessCases1
+    std::vector<double> _FitnessCases1
     {
         3.0,  5.830952,
         8.0,  16.124515 ,
@@ -50,7 +50,7 @@ namespace
         2.0,  9.219545
     };
 
-    const std::vector<double> FitnessCases2
+    std::vector<double> _FitnessCases2
     {
         3.0,  5.0,  5.830952,
         8.0,  14.0, 16.124515,
@@ -63,6 +63,9 @@ namespace
         16.0, 24.0, 28.84441,
         2.0,  9.0,  9.219545
     };
+
+    const Model::TrainingData FitnessCases1{ _FitnessCases1.data(), static_cast<int>(_FitnessCases1.size()) };
+    const Model::TrainingData FitnessCases2{ _FitnessCases2.data(), static_cast<int>(_FitnessCases2.size()) };
 }
 
 namespace Tests

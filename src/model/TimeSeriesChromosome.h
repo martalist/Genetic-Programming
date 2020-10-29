@@ -25,7 +25,7 @@ namespace Model
         TimeSeriesChromosome(int targetSize, 
                     const std::vector<FunctionType>& allowedFunctions, 
                     const std::vector<double*>& variables,
-                    const std::vector<double>& fitnessCases, 
+                    const TrainingData& fitnessCases, 
                     std::vector<double>& terminals, 
                     double parsimonyCoefficient);
 
@@ -43,7 +43,7 @@ namespace Model
         /**
          * Constructor - Calculates fitness and weighted fitness upon construction.
          */
-        TimeSeriesChromosome(IChromosome::INodePtr tree, const std::vector<double>& fitnessCases, 
+        TimeSeriesChromosome(IChromosome::INodePtr tree, const TrainingData& fitnessCases, 
                 std::vector<double>& terminals, double parsimonyCoefficient);
 
         /**
@@ -110,7 +110,7 @@ namespace Model
         /**
          * @see IChromosome::Forecast
          */
-        void Forecast(const std::vector<double>& fitnessCases, std::vector<double>& terminals, double* predictions, int length) const override;
+        void Forecast(const TrainingData& fitnessCases, std::vector<double>& terminals, double* predictions, int length) const override;
 
         /**
          * @see IChromosome::Predict
@@ -123,7 +123,7 @@ namespace Model
          * @param chromosome The chromosome to evaluate
          * @return the chromosome fitness as a positive, real number
          */
-        double CalculateFitness(const std::vector<double>& fitnessCases, std::vector<double>& terminals) override;
+        double CalculateFitness(const TrainingData& fitnessCases, std::vector<double>& terminals) override;
 
         double CalculateWeightedFitness(double parsimonyCoefficient) const override;
 

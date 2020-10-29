@@ -35,6 +35,7 @@ namespace
 namespace Model
 {
     Config ConfigParser::s_config{};
+    std::vector<double> ConfigParser::s_fitnessCases{};
 
     Config ConfigParser::Load(const std::string& filename)
     {
@@ -154,10 +155,11 @@ namespace Model
             {
                 std::string str = *itr;
                 boost::trim(str);
-                s_config.FitnessCases.push_back(boost::lexical_cast<double>(str));
+                s_fitnessCases.push_back(boost::lexical_cast<double>(str));
             }
         }
         in.close();
+        s_config.FitnessCases = { s_fitnessCases.data(), static_cast<int>(s_fitnessCases.size()) };
         return columns - 1; // last column is the expected value, not a terminal
     }
 }
