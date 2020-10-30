@@ -105,8 +105,10 @@ namespace Model
         }
 
         // @see https://eigen.tuxfamily.org/dox-devel/group__LeastSquares.html
-        // m_coefficients = W.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(Y);
-        m_coefficients = W.colPivHouseholderQr().solve(Y);
+        // m_coefficients = W.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(Y); // slowest but most accurate
+        // m_coefficients = W.colPivHouseholderQr().solve(Y);
+        // m_coefficients = W.householderQr().solve(Y);  // fast but unstable
+        m_coefficients =  (W.transpose() * W).ldlt().solve(W.transpose() * Y);
 
         auto errors = Y - (W*m_coefficients); // \hat{Y} = W*beta
         sumOfSqErrors = errors.dot(errors);
