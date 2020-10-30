@@ -6,9 +6,15 @@
 #include "ConfigParser.h"
 #include "model/FunctionFactory.h"
 
+namespace
+{
+    const double MicrosecondsToSeconds = 1'000'000;
+}
+
 namespace Model
 {
     Program::Program()
+        : m_timer(std::chrono::high_resolution_clock::now())
     {
         // Get user configuration
         m_config = ConfigParser::Load("config.xml");
@@ -24,6 +30,7 @@ namespace Model
         , m_population(std::make_unique<Population>(config.Params, config.FitnessCases))
         , m_numGenerations(config.NumGenerations)
         , m_iterations(config.Iterations)
+        , m_timer(std::chrono::high_resolution_clock::now())
     {
     }
 
@@ -79,7 +86,11 @@ namespace Model
         if (logResults)
         {
             m_logger.Write();
-            std::cout << "Results written to " << m_logger.GetOutputDir() << std::endl << std::endl;
+            std::cout << "Results written to " << m_logger.GetOutputDir() << std::endl;
+
+            auto end = std::chrono::high_resolution_clock::now();
+            std::cout << "Total execution time: " << std::chrono::duration_cast<std::chrono::microseconds>(end - m_timer).count() / MicrosecondsToSeconds
+                << " seconds" << std::endl << std::endl;
         }
     }
 
