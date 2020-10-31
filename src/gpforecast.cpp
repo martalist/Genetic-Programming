@@ -11,11 +11,12 @@ namespace
 {
     const std::vector<Model::FunctionType> DefaultAllowedFunctions
     {
+        Model::FunctionType::Addition,
         Model::FunctionType::Subtraction,
         Model::FunctionType::Multiplication,
         Model::FunctionType::Division,
-        Model::FunctionType::Sine,
-        Model::FunctionType::Cosine,
+        // Model::FunctionType::Sine,
+        // Model::FunctionType::Cosine,
         Model::FunctionType::NaturalLogarithm
     };
 }
@@ -25,7 +26,7 @@ double PredictTimeSeries(Settings* settings, TimeSeriesData* history, TimeSeries
     // Set up the config
     Model::Config config;
     // config.Iterations = 1; // defaults to 1, which is what we want
-    config.NumGenerations = 10;
+    config.NumGenerations = 5;
     config.StoppingCriteria = settings->stopping_criteria;
     config.Params.Type = Model::ChromosomeType::TimeSeries;
     config.Params.PopulationSize = 500;
@@ -35,7 +36,9 @@ double PredictTimeSeries(Settings* settings, TimeSeriesData* history, TimeSeries
     config.Params.HoistMutationProb = 0.1;
     config.Params.AllowedFunctions = DefaultAllowedFunctions;
     config.Params.NumberOfTerminals = settings->lag;
-    if (settings->seed >=0)
+    config.Params.CarryOverProportion = 0.032;
+    config.Params.TwinsPerMatingPair = 3;
+    if (settings->seed >= 0)
     {
         config.Params.Seed = settings->seed;
     }
