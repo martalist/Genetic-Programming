@@ -6,6 +6,7 @@
 #include <vector>
 #include "model/IChromosome.h"
 #include "PopulationParams.h"
+#include "model/ChromosomeFactory.h"
 #include "utils/UniformRandomGenerator.h"
 #include "utils/ISelector.h"
 
@@ -130,6 +131,7 @@ namespace Model
         std::vector<double> m_terminals; ///< The terminal values to evaluate
         TrainingData m_fitnessCases; ///< Training cases
         double m_parsimonyCoefficient = 0.0; ///< The coefficient used to penalize long S-expressions.
+        ChromosomeFactory m_factory;
     };
 }
 

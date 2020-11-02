@@ -17,25 +17,13 @@ namespace Model
     {
     public:
         /**
-         * Initialises the factory/singleton
-         * @param type The type of Chromosome to be created by the factory
-         * @param targetSize The number of nodes in the chromosome tree we'd like. The
-         *        number created is not deterministic, so targetSize acts as a minimum.
-         * @param allowedFunctions The functions (types) allowed in the S-expressions
-         * @param variables A vector of pointers to the terminals
-         * @param fitnessCases The training data
-         * @param terminals A vector of the terminals of interest
+         * Constructor
          */
-        static void Initialise(ChromosomeType type, int targetSize, 
+        ChromosomeFactory(ChromosomeType type, int targetSize, 
                 const std::vector<FunctionType>& allowedFunctions, 
-                const std::vector<double*>& variables,  // TODO: this is probably unecessary
+                const std::vector<double*>& variables, 
                 const TrainingData& fitnessCases, 
                 std::vector<double>& terminals);
-
-        /**
-         * @return a reerence to the singleton instance
-         */
-        static const ChromosomeFactory& Inst();
 
         /**
          * Create a new, random Chromosome
@@ -53,13 +41,6 @@ namespace Model
         std::unique_ptr<IChromosome> CopyAndEvaluate(std::unique_ptr<INode> tree, double parsimonyCoefficient) const;
 
     private:
-        
-        /**
-         * Constructor
-         */
-        ChromosomeFactory(ChromosomeType type, int targetSize, const std::vector<FunctionType>& allowedFunctions, 
-                    const std::vector<double*>& variables, const TrainingData& fitnessCases, 
-                    std::vector<double>& terminals);
 
         // TODO: can these be const?
         const ChromosomeType m_type = ChromosomeType::Normal; //<
@@ -68,8 +49,6 @@ namespace Model
         const std::vector<double*>& m_variables;
         const TrainingData& m_fitnessCases;
         std::vector<double>& m_terminals;
-
-        static std::unique_ptr<ChromosomeFactory> s_instance;
     };
 }
 #endif

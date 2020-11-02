@@ -8,26 +8,6 @@
 
 namespace Model
 {
-    std::unique_ptr<ChromosomeFactory> ChromosomeFactory::s_instance = nullptr;
-
-    void ChromosomeFactory::Initialise(ChromosomeType type, int targetSize, 
-            const std::vector<FunctionType>& allowedFunctions, 
-            const std::vector<double*>& variables, 
-            const TrainingData& fitnessCases, 
-            std::vector<double>& terminals)
-    {
-        if (s_instance == nullptr)
-        {
-            auto temp = std::unique_ptr<ChromosomeFactory>(new ChromosomeFactory(type, targetSize, 
-                        allowedFunctions, variables, fitnessCases, terminals));
-            s_instance = std::move(temp);
-        }
-        else 
-        {
-            std::cout << "ChromosomeFactory should only be initialized once!" << std::endl;
-        }
-    }
-
     ChromosomeFactory::ChromosomeFactory(ChromosomeType type, int targetSize, 
             const std::vector<FunctionType>& allowedFunctions, 
             const std::vector<double*>& variables, 
@@ -41,12 +21,6 @@ namespace Model
         , m_terminals(terminals)
     {
     }
-
-    const ChromosomeFactory& ChromosomeFactory::Inst()
-    {
-        return *s_instance;
-    }
-
 
     std::unique_ptr<IChromosome> ChromosomeFactory::CreateRandom(double parsimonyCoefficient) const
     {

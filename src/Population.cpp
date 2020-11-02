@@ -5,7 +5,6 @@
 // #include <iostream>
 #include <stdexcept>
 #include "model/FunctionFactory.h"
-#include "model/ChromosomeFactory.h"
 #include "model/ChromosomeUtil.h"
 #include "utils/Math.h"
 #include "utils/Raffle.h"
@@ -50,6 +49,8 @@ namespace Model
         , m_selector(std::make_unique<Util::Tournament<double>>(m_params.PopulationSize, TournamentSize))
         , m_terminals(params.NumberOfTerminals)
         , m_fitnessCases(fitnessCases)
+        , m_factory(m_params.Type, m_params.MinInitialTreeSize, 
+                m_params.AllowedFunctions, m_allowedTerminals, m_fitnessCases, m_terminals)
     {
         if (params.Seed.has_value())
         {
@@ -66,9 +67,6 @@ namespace Model
         {
             m_allowedTerminals.push_back(&terminal);
         }
-
-        ChromosomeFactory::Initialise(m_params.Type, m_params.MinInitialTreeSize, 
-                m_params.AllowedFunctions, m_allowedTerminals, m_fitnessCases, m_terminals);
     }
 
     void Population::Reset()
@@ -79,7 +77,7 @@ namespace Model
         // generate an appropriately sized population
         for (auto i = 0; i < m_params.PopulationSize; ++i)
         {
-            m_population.push_back(ChromosomeFactory::Inst().CreateRandom(m_parsimonyCoefficient));
+            m_population.push_back(m_factory.CreateRandom(m_parsimonyCoefficient));
         }
         RecalibrateParentSelector(); // TODO
     }
@@ -178,8 +176,8 @@ namespace Model
 
         return 
         {
-            ChromosomeFactory::Inst().CopyAndEvaluate(std::move(son->GetTree()), parsimonyCoefficient),
-            ChromosomeFactory::Inst().CopyAndEvaluate(std::move(daughter->GetTree()), parsimonyCoefficient),
+            m_factory.CopyAndEvaluate(std::move(son->GetTree()), parsimonyCoefficient),
+            m_factory.CopyAndEvaluate(std::move(daughter->GetTree()), parsimonyCoefficient),
         };
     }
 
