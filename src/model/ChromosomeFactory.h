@@ -2,6 +2,7 @@
 #define ChromosomeFactory_H
 
 #include <memory>
+#include <optional>
 #include <string>
 #include "ChromosomeType.h"
 #include "IChromosome.h"
@@ -40,6 +41,11 @@ namespace Model
          */
         std::unique_ptr<IChromosome> CopyAndEvaluate(std::unique_ptr<INode> tree, double parsimonyCoefficient) const;
 
+        /**
+         * Sets the seed for all chromosomes
+         */
+        void SetSeed(int seed);
+
     private:
 
         // TODO: can these be const?
@@ -49,6 +55,11 @@ namespace Model
         const std::vector<double*>& m_variables;
         const TrainingData& m_fitnessCases;
         std::vector<double>& m_terminals;
+
+        /**
+         * The random number generator for all Chromosomes in the population
+         */
+        mutable Util::UniformRandomGenerator<int, std::uniform_int_distribution<int>> m_randInt;
     };
 }
 #endif

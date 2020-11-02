@@ -6,19 +6,18 @@
 #include <iostream>
 #include "../PopulationParams.h"
 #include "FunctionFactory.h"
-#include "ChromosomeUtil.h"
 
 namespace Model
 {
-    using namespace ChromosomeUtil;
-
     TimeSeriesChromosome::TimeSeriesChromosome(int targetSize, 
             const std::vector<FunctionType>& allowedFunctions, 
             const std::vector<double*>& variables,
             const TrainingData& fitnessCases, 
             std::vector<double>& terminals, 
-            double parsimonyCoefficient)
-        : m_tree(CreateRandomChromosome(targetSize, allowedFunctions, variables))
+            double parsimonyCoefficient,
+            Util::UniformRandomGenerator<int, std::uniform_int_distribution<int>>& rand)
+        : IChromosome::IChromosome(rand)
+        , m_tree(CreateRandomChromosome(targetSize, allowedFunctions, variables))
         , m_coefficients(m_tree->NumberOfChildren()+1)
         , m_size(m_tree->Size())
         , m_fitness(CalculateFitness(fitnessCases, terminals))
@@ -34,8 +33,10 @@ namespace Model
     // }
 
     TimeSeriesChromosome::TimeSeriesChromosome(IChromosome::INodePtr tree, const TrainingData& fitnessCases, 
-            std::vector<double>& terminals, double parsimonyCoefficient)
-        : m_tree(std::move(tree)) 
+            std::vector<double>& terminals, double parsimonyCoefficient,
+            Util::UniformRandomGenerator<int, std::uniform_int_distribution<int>>& rand)
+        : IChromosome::IChromosome(rand)
+        , m_tree(std::move(tree)) 
         , m_coefficients(m_tree->NumberOfChildren()+1)
         , m_size(m_tree->Size())
         , m_fitness(CalculateFitness(fitnessCases, terminals))
@@ -58,6 +59,7 @@ namespace Model
     }
 
     TimeSeriesChromosome::TimeSeriesChromosome(const TimeSeriesChromosome& other)
+        : IChromosome::IChromosome(other.m_randInt)
     {
         m_tree = other.m_tree->Clone();
         m_coefficients = other.m_coefficients;
@@ -134,7 +136,7 @@ namespace Model
     {
         auto randomTerminalMutation = [&](std::unique_ptr<INode>& gene) -> void
         {
-            if (RandInt().GetInRange(0,1) && !allowedFunctions.empty()) // mutate to a function
+            if (m_randInt.GetInRange(0,1) && !allowedFunctions.empty()) // mutate to a function
             {
                 int i = RandomIndex(allowedFunctions.size());
                 auto func = FunctionFactory::Create(allowedFunctions[i]);
@@ -188,7 +190,7 @@ namespace Model
         };
         
         // Randomly select a node in the chromosome tree 
-        int index = RandInt().GetInRange(0, m_size-1);
+        int index = m_randInt.GetInRange(0, m_size-1);
         auto& gene = m_tree->Get(index, m_tree);
 
         if (IsTerminal(gene))
@@ -213,7 +215,7 @@ namespace Model
         }
 
         // get the target gene (that we'll hoist into)
-        auto index = RandInt().GetInRange(0, Size()-1);
+        auto index = m_randInt.GetInRange(0, Size()-1);
         auto& target = index == 0 ? m_tree : m_tree->Get(index, m_tree);
 
         int targetSize = target->Size();
@@ -223,7 +225,7 @@ namespace Model
         }
 
         // get the subtree to hoist, and swap them
-        index = RandInt().GetInRange(0, targetSize-1);
+        index = m_randInt.GetInRange(0, targetSize-1);
         auto& toHoist = index == 0 ? target : target->Get(index, target);
         target = std::move(toHoist);
 
@@ -243,16 +245,16 @@ namespace Model
         // Pick a random node in left
         if (Size() == 1)
         {
-            m_tree.swap(rhs->GetTree()->Get(RandInt().GetInRange(1, rhs->Size()-1), rhs->GetTree()));
+            m_tree.swap(rhs->GetTree()->Get(m_randInt.GetInRange(1, rhs->Size()-1), rhs->GetTree()));
         }
         else if (rhs->Size() == 1)
         {
-            rhs->GetTree().swap(m_tree->Get(RandInt().GetInRange(1, Size()-1), m_tree));
+            rhs->GetTree().swap(m_tree->Get(m_randInt.GetInRange(1, Size()-1), m_tree));
         }
         else
         {
-            int leftIndex = RandInt().GetInRange(1, Size()-1);
-            int rhsIndex = RandInt().GetInRange(1, rhs->Size()-1);
+            int leftIndex = m_randInt.GetInRange(1, Size()-1);
+            int rhsIndex = m_randInt.GetInRange(1, rhs->Size()-1);
             auto& leftSubtree = m_tree->Get(leftIndex, m_tree);
             leftSubtree.swap(rhs->GetTree()->Get(rhsIndex, rhs->GetTree()));
         }
@@ -289,7 +291,7 @@ namespace Model
         for (int count = 1; count < targetSize; ++count)
         {
             // Randomly choose a new function/variable
-            auto isFunction = ( RandInt().GetInRange(0, 1) == 0 );
+            auto isFunction = ( m_randInt.GetInRange(0, 1) == 0 );
             std::unique_ptr<INode> newNode;
             if (isFunction)
             {
@@ -309,7 +311,7 @@ namespace Model
             int insertIndex = -1;
             do
             {
-                insertIndex = RandInt().GetInRange(0, root->Size()-1);
+                insertIndex = m_randInt.GetInRange(0, root->Size()-1);
             } 
             while (insertIndex != 0 && IsTerminal(root->Get(insertIndex, root)) );
 

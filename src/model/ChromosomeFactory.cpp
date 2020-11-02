@@ -3,7 +3,7 @@
 #include <iostream>
 
 #include "../PopulationParams.h"
-#include "Chromosome.h"
+#include "NormalChromosome.h"
 #include "TimeSeriesChromosome.h"
 
 namespace Model
@@ -19,6 +19,7 @@ namespace Model
         , m_variables(variables)
         , m_fitnessCases(fitnessCases)
         , m_terminals(terminals)
+        , m_randInt(0, 1)
     {
     }
 
@@ -28,12 +29,12 @@ namespace Model
         {
         case ChromosomeType::TimeSeries:
             return std::make_unique<TimeSeriesChromosome>(m_targetSize, m_allowedFunctions, m_variables, 
-                    m_fitnessCases, m_terminals, parsimonyCoefficient);
+                    m_fitnessCases, m_terminals, parsimonyCoefficient, m_randInt);
 
         case ChromosomeType::Normal:
         default:
-            return std::make_unique<Chromosome>(m_targetSize, m_allowedFunctions, m_variables, 
-                    m_fitnessCases, m_terminals, parsimonyCoefficient);
+            return std::make_unique<NormalChromosome>(m_targetSize, m_allowedFunctions, m_variables, 
+                    m_fitnessCases, m_terminals, parsimonyCoefficient, m_randInt);
         }
     }
 
@@ -42,11 +43,16 @@ namespace Model
         switch (m_type)
         {
         case ChromosomeType::TimeSeries:
-            return std::make_unique<TimeSeriesChromosome>(std::move(tree), m_fitnessCases, m_terminals, parsimonyCoefficient);
+            return std::make_unique<TimeSeriesChromosome>(std::move(tree), m_fitnessCases, m_terminals, parsimonyCoefficient, m_randInt);
 
         case ChromosomeType::Normal:
         default:
-            return std::make_unique<Chromosome>(std::move(tree), m_fitnessCases, m_terminals, parsimonyCoefficient);
+            return std::make_unique<NormalChromosome>(std::move(tree), m_fitnessCases, m_terminals, parsimonyCoefficient, m_randInt);
         }
+    }
+
+    void ChromosomeFactory::SetSeed(int seed)
+    {
+        m_randInt.SetSeed(seed);
     }
 }

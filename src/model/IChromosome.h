@@ -20,7 +20,7 @@ namespace Model
         using INodePtr = std::unique_ptr<INode>;
 
     public:
-        IChromosome() = default;
+        IChromosome(Util::UniformRandomGenerator<int, std::uniform_int_distribution<int>>& rand);
         virtual ~IChromosome() = default;
 
         /**
@@ -117,6 +117,30 @@ namespace Model
          * Set the cached size of the Chromosome
          */
         virtual void SetSize() = 0;
+
+        /**
+        * @param gene The S-expression gene to inspect
+        * @return true if the gene is a Terminal (not a Function)
+        */
+        static bool IsTerminal(const std::unique_ptr<INode>& gene);
+
+        /**
+         * Adds terminals to a function to ensure it has a valid number of children.
+         * @pre This should only be called on Function objects.
+         * @param func The function to fill.
+         */
+        void FillFunction(Model::INode* func, const std::vector<double*>& variables);
+
+        /**
+         * Gets a random index into a collection of the specified size
+         * @param size The size of the collection
+         */
+        int RandomIndex(size_t size);
+
+        /**
+         * A random integer generator for reuse in genetic operators in a single thread
+         */
+        Util::UniformRandomGenerator<int, std::uniform_int_distribution<int>>& m_randInt;
     };
 }
 

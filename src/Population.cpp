@@ -5,7 +5,6 @@
 // #include <iostream>
 #include <stdexcept>
 #include "model/FunctionFactory.h"
-#include "model/ChromosomeUtil.h"
 #include "utils/Math.h"
 #include "utils/Raffle.h"
 #include "utils/Tournament.h"
@@ -49,12 +48,12 @@ namespace Model
         , m_selector(std::make_unique<Util::Tournament<double>>(m_params.PopulationSize, TournamentSize))
         , m_terminals(params.NumberOfTerminals)
         , m_fitnessCases(fitnessCases)
-        , m_factory(m_params.Type, m_params.MinInitialTreeSize, 
-                m_params.AllowedFunctions, m_allowedTerminals, m_fitnessCases, m_terminals)
+        , m_factory(m_params.Type, m_params.MinInitialTreeSize, m_params.AllowedFunctions, 
+                m_allowedTerminals, m_fitnessCases, m_terminals)
     {
         if (params.Seed.has_value())
         {
-            ChromosomeUtil::SetSeed(params.Seed.value());
+            m_factory.SetSeed(params.Seed.value());
             m_randomProbability.SetSeed(params.Seed.value());
             m_selector->SetSeed(params.Seed.value());
         }
