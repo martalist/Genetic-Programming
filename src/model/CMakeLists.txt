@@ -1,5 +1,6 @@
 add_library(model 
     Terminal.cpp
+    TerminalSymbolManager.cpp
     Function.cpp
     FunctionFactory.cpp
     IChromosome.cpp

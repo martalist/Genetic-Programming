@@ -52,7 +52,8 @@ namespace Model
 
     std::unique_ptr<INode> FunctionFactory::Create(const double* variable)
     {
-        return std::make_unique<Terminal>(variable);
+        const auto symbol = m_symbolMgr.GetSymbolFor(variable);
+        return std::make_unique<Terminal>(variable, symbol);
     }
 
     std::string FunctionFactory::AsString(const FunctionType& type)

@@ -15,8 +15,9 @@ namespace Model
             const TrainingData& fitnessCases, 
             std::vector<double>& terminals, 
             double parsimonyCoefficient,
-            Util::UniformRandomGenerator<int, std::uniform_int_distribution<int>>& rand)
-        : IChromosome::IChromosome(rand)
+            Util::UniformRandomGenerator<int, std::uniform_int_distribution<int>>& rand,
+            FunctionFactory& funcFactory)
+        : IChromosome::IChromosome(rand, funcFactory)
         , m_tree(CreateRandomChromosome(targetSize, allowedFunctions, variables))
         , m_coefficients(m_tree->NumberOfChildren()+1)
         , m_size(m_tree->Size())
@@ -25,17 +26,11 @@ namespace Model
     {
     }
 
-    // TimeSeriesChromosome::TimeSeriesChromosome(IChromosome::INodePtr tree)
-        // : m_tree(std::move(tree)) 
-        // , m_coefficients(m_tree->NumberOfChildren()+1)
-        // , m_size(m_tree->Size())
-    // {
-    // }
-
     TimeSeriesChromosome::TimeSeriesChromosome(IChromosome::INodePtr tree, const TrainingData& fitnessCases, 
             std::vector<double>& terminals, double parsimonyCoefficient,
-            Util::UniformRandomGenerator<int, std::uniform_int_distribution<int>>& rand)
-        : IChromosome::IChromosome(rand)
+            Util::UniformRandomGenerator<int, std::uniform_int_distribution<int>>& rand,
+            FunctionFactory& funcFactory)
+        : IChromosome::IChromosome(rand, funcFactory)
         , m_tree(std::move(tree)) 
         , m_coefficients(m_tree->NumberOfChildren()+1)
         , m_size(m_tree->Size())
@@ -44,22 +39,13 @@ namespace Model
     {
     } 
 
-    // TimeSeriesChromosome::TimeSeriesChromosome(IChromosome::INodePtr tree, double fitness, double parsimonyCoefficient)
-        // : m_tree(std::move(tree)) 
-        // , m_coefficients(m_tree->NumberOfChildren()+1)
-        // , m_size(m_tree->Size())
-        // , m_fitness(fitness)
-        // , m_weightedFitness(CalculateWeightedFitness(parsimonyCoefficient))
-    // {
-    // } 
-
     std::unique_ptr<IChromosome> TimeSeriesChromosome::Clone() const
     {
         return std::make_unique<TimeSeriesChromosome>(*this); 
     }
 
     TimeSeriesChromosome::TimeSeriesChromosome(const TimeSeriesChromosome& other)
-        : IChromosome::IChromosome(other.m_randInt)
+        : IChromosome::IChromosome(other.m_randInt, other.m_funcFactory)
     {
         m_tree = other.m_tree->Clone();
         m_coefficients = other.m_coefficients;
@@ -139,7 +125,7 @@ namespace Model
             if (m_randInt.GetInRange(0,1) && !allowedFunctions.empty()) // mutate to a function
             {
                 int i = RandomIndex(allowedFunctions.size());
-                auto func = FunctionFactory::Create(allowedFunctions[i]);
+                auto func = m_funcFactory.Create(allowedFunctions[i]);
                 FillFunction(func.get(), variables);
                 gene.swap(func);
             }
@@ -151,7 +137,7 @@ namespace Model
                 while (!tTypes.empty())
                 {
                     int i = RandomIndex(tTypes.size());
-                    auto newTerminal = FunctionFactory::Create(tTypes[i]);
+                    auto newTerminal = m_funcFactory.Create(tTypes[i]);
                     if (!gene->IsEquivalent(*newTerminal))
                     {
                         gene.swap(newTerminal);
@@ -174,7 +160,7 @@ namespace Model
             while (!fTypes.empty())
             {
                 int i = RandomIndex(fTypes.size());
-                auto newFunction = FunctionFactory::Create(fTypes[i]);
+                auto newFunction = m_funcFactory.Create(fTypes[i]);
 
                 if (gene->NumberOfChildren() <= newFunction->MaxChildren()) // TODO: and children > MinChildren?
                 {
@@ -282,7 +268,7 @@ namespace Model
     std::unique_ptr<INode> TimeSeriesChromosome::CreateRandomChromosome(int targetSize, const std::vector<FunctionType>& allowedFunctions, const std::vector<double*>& variables)
     {
         // start with an addition function, since this forms the basis of the autoregressive model
-        auto root = FunctionFactory::Create(FunctionType::Addition);
+        auto root = m_funcFactory.Create(FunctionType::Addition);
 
         // keep a local list of function nodes, for easy reference
         std::vector<INode*> functions;
@@ -297,14 +283,14 @@ namespace Model
             {
                 // randomly select a function type
                 int index = RandomIndex(allowedFunctions.size());
-                newNode = FunctionFactory::Create(allowedFunctions[index]); 
+                newNode = m_funcFactory.Create(allowedFunctions[index]); 
                 functions.push_back(newNode.get());
             }
             else 
             {
                 // randomly select a variable
                 int index = RandomIndex(variables.size());
-                newNode = FunctionFactory::Create(variables[index]);
+                newNode = m_funcFactory.Create(variables[index]);
             }
             
             // get a random position to insert (must be a Function)

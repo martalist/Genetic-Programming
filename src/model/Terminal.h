@@ -21,7 +21,7 @@ namespace Model
          * Constructor
          * @param variable A reference to the variable.
          */
-        Terminal(const double* variable);
+        Terminal(const double* variable, const std::string& symbol);
 
         Terminal(const Terminal& other);
 
@@ -84,10 +84,7 @@ namespace Model
         std::string GetSymbol() const override;
 
         const double* m_variable; ///< A pointer to the terminal value
-        std::string m_symbol; ///< A symbolic representation of the terminal
-
-        static char letter; ///< The symbol for the next terminal
-        static std::map<const double*, char> s_symbols; ///< Maps symbols to the terminal pointer
+        const std::string m_symbol; ///< A symbolic representation of the terminal
     };
 }
 #endif

@@ -30,14 +30,16 @@ namespace Model
                     const TrainingData& fitnessCases, 
                     std::vector<double>& terminals, 
                     double parsimonyCoefficient,
-                    Util::UniformRandomGenerator<int, std::uniform_int_distribution<int>>& rand);
+                    Util::UniformRandomGenerator<int, std::uniform_int_distribution<int>>& rand,
+                    FunctionFactory& funcFactory);
 
         /**
          * Constructor - Does no fitness calculations upon construction
          * @param tree The underlying S-expression
          */
         NormalChromosome(IChromosome::INodePtr tree,
-                Util::UniformRandomGenerator<int, std::uniform_int_distribution<int>>& rand);
+                Util::UniformRandomGenerator<int, std::uniform_int_distribution<int>>& rand,
+                FunctionFactory& funcFactory);
 
         /**
          * Copy Constructor
@@ -49,13 +51,15 @@ namespace Model
          */
         NormalChromosome(IChromosome::INodePtr tree, const TrainingData& fitnessCases, 
                 std::vector<double>& terminals, double parsimonyCoefficient,
-                Util::UniformRandomGenerator<int, std::uniform_int_distribution<int>>& rand);
+                Util::UniformRandomGenerator<int, std::uniform_int_distribution<int>>& rand,
+                FunctionFactory& funcFactory);
 
         /**
          * Constructor - Calculates only the weighted fitness upon construction.
          */
         NormalChromosome(IChromosome::INodePtr& tree, double fitness, double parsimonyCoefficient,
-                Util::UniformRandomGenerator<int, std::uniform_int_distribution<int>>& rand);
+                Util::UniformRandomGenerator<int, std::uniform_int_distribution<int>>& rand,
+                FunctionFactory& funcFactory);
 
         /**
          * Less-than operator. Used for sorting collections of Chromosomes.

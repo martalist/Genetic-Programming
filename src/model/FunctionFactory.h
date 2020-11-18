@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 #include "INode.h"
+#include "TerminalSymbolManager.h"
 
 namespace Model
 {
@@ -28,19 +29,21 @@ namespace Model
     class FunctionFactory
     {
     public:
+        FunctionFactory() = default;
+
         /**
          * Create a function
          * @param type The type of function to create
          * @return the new INode
          */
-        static std::unique_ptr<INode> Create(const FunctionType& type);
+        std::unique_ptr<INode> Create(const FunctionType& type);
 
         /**
          * Create a variable
          * @param varaible A pointer to the variable
          * @return the new INode
          */
-        static std::unique_ptr<INode> Create(const double* variable);
+        std::unique_ptr<INode> Create(const double* variable);
 
         /**
          * @param type The enum represtionation of a function type
@@ -99,6 +102,8 @@ namespace Model
          * Create a natural (base e) logarithm function
          */
         static std::unique_ptr<INode> CreateLog();
+
+        TerminalSymbolManager m_symbolMgr; ///< Manages the terminal symbols for this instance
     };
 }
 #endif

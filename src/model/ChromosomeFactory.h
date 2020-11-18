@@ -6,6 +6,7 @@
 #include <string>
 #include "ChromosomeType.h"
 #include "IChromosome.h"
+#include "FunctionFactory.h"
 
 namespace Model
 {
@@ -48,7 +49,6 @@ namespace Model
 
     private:
 
-        // TODO: can these be const?
         const ChromosomeType m_type = ChromosomeType::Normal; //<
         const int m_targetSize;
         const std::vector<FunctionType> m_allowedFunctions;
@@ -60,6 +60,8 @@ namespace Model
          * The random number generator for all Chromosomes in the population
          */
         mutable Util::UniformRandomGenerator<int, std::uniform_int_distribution<int>> m_randInt;
+
+        mutable FunctionFactory m_funcFactory; ///< Factory used to create Functions and Terminals (INodes)
     };
 }
 #endif

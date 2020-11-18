@@ -4,8 +4,9 @@
 
 namespace Model
 {
-    IChromosome::IChromosome(Util::UniformRandomGenerator<int, std::uniform_int_distribution<int>>& rand)
+    IChromosome::IChromosome(Util::UniformRandomGenerator<int, std::uniform_int_distribution<int>>& rand, FunctionFactory& funcFactory)
         : m_randInt(rand)
+        , m_funcFactory(funcFactory)
     {
     }
     
@@ -25,7 +26,7 @@ namespace Model
         while (func->LacksBreadth())
         {
             auto index = RandomIndex(variables.size());
-            func->AddChild(FunctionFactory::Create(variables[index]));
+            func->AddChild(m_funcFactory.Create(variables[index]));
         }
     }
 }

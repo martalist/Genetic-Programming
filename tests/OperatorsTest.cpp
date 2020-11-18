@@ -19,21 +19,23 @@ namespace Tests
 
     TEST(OperatorsTest, MutationOneFunction)
     {
-        NormalChromosome func { FunctionFactory::Create(FunctionType::Addition), RandInt };
+        FunctionFactory factory;
+        NormalChromosome func { factory.Create(FunctionType::Addition), RandInt, factory};
         std::vector<FunctionType> allowedFunctions{ FunctionType::Subtraction };
         std::vector<double*> allowedTerminals{};
 
         // since there is only one node, and only one allowed function,
         // the mutation should change this to a sutraction
         func.Mutate(allowedFunctions, allowedTerminals);
-        func.GetTree()->AddChild(FunctionFactory::Create(&B));
-        func.GetTree()->AddChild(FunctionFactory::Create(&A));
+        func.GetTree()->AddChild(factory.Create(&B));
+        func.GetTree()->AddChild(factory.Create(&A));
         ASSERT_DOUBLE_EQ(B-A, func.GetTree()->Evaluate());
     }
 
     TEST(OperatorsTest, DontMutateWithOnlyOneTerminal)
     {
-        NormalChromosome var { FunctionFactory::Create(&A), RandInt };
+        FunctionFactory factory;
+        NormalChromosome var { factory.Create(&A), RandInt, factory };
         std::vector<FunctionType> allowedFunctions{};
         std::vector<double*> allowedTerminals{ &A };
 
@@ -45,7 +47,8 @@ namespace Tests
 
     TEST(OperatorsTest, MutationToOtherTerminal)
     {
-        NormalChromosome var { FunctionFactory::Create(&A), RandInt };
+        FunctionFactory factory;
+        NormalChromosome var { factory.Create(&A), RandInt, factory };
         std::vector<FunctionType> allowedFunctions{};
         std::vector<double*> allowedTerminals{ &A, &B };
 
@@ -59,8 +62,9 @@ namespace Tests
     {
         double two = 2.0;
         double four = 4.0;
-        NormalChromosome func { FunctionFactory::Create(FunctionType::Addition), RandInt };
-        func.GetTree()->AddChild(FunctionFactory::Create(&four));
+        FunctionFactory factory;
+        NormalChromosome func { factory.Create(FunctionType::Addition), RandInt, factory };
+        func.GetTree()->AddChild(factory.Create(&four));
         std::vector<FunctionType> allowedFunctions{ FunctionType::SquareRoot };
         std::vector<double*> allowedTerminals{ &two };
         func.Mutate(allowedFunctions, allowedTerminals);
@@ -77,9 +81,10 @@ namespace Tests
 
     TEST(OperatorsTest, HoistMutate)
     {
-        NormalChromosome root { FunctionFactory::Create(FunctionType::SquareRoot), RandInt };
-        auto func = FunctionFactory::Create(FunctionType::SquareRoot);
-        func->AddChild(FunctionFactory::Create(&A));
+        FunctionFactory factory;
+        NormalChromosome root { factory.Create(FunctionType::SquareRoot), RandInt, factory };
+        auto func = factory.Create(FunctionType::SquareRoot);
+        func->AddChild(factory.Create(&A));
         root.GetTree()->AddChild(std::move(func));
 
         while (root.Size() > 1)
@@ -116,12 +121,13 @@ namespace Tests
 
     TEST(OperatorsTest, CreateSingleRandomChromosome)
     {
+        FunctionFactory factory;
         std::vector<FunctionType> allowedFunctions{ FunctionType::Addition };
         std::vector<double*> allowedTerminals{ &A };
         double fitnessCases[] = { 1.0, 2.0, 3.0 };
         TrainingData fc{ fitnessCases, 3 };
         std::vector<double> terminals{ A };
-        NormalChromosome chromosome{1, allowedFunctions, allowedTerminals, fc, terminals, 0.0, RandInt};
+        NormalChromosome chromosome{1, allowedFunctions, allowedTerminals, fc, terminals, 0.0, RandInt, factory};
 
         // std::cout << chromosome->ToString() << std::endl;
         ASSERT_DOUBLE_EQ(A+A, chromosome.GetTree()->Evaluate());

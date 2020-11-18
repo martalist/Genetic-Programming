@@ -4,21 +4,10 @@
 
 namespace Model
 {
-    char Terminal::letter = 'a';
-    std::map<const double*, char> Terminal::s_symbols;
-
-    Terminal::Terminal(const double* variable)
+    Terminal::Terminal(const double* variable, const std::string& symbol)
         : m_variable(variable)
+        , m_symbol(symbol)
     {
-        if (s_symbols.find(variable) != s_symbols.end())
-        {
-            m_symbol = std::string({ s_symbols[variable], '\0' });
-        }
-        else
-        {
-            m_symbol = std::string({letter, '\0'});
-            s_symbols[variable] = letter++;
-        }
     }
 
     Terminal::Terminal(const Terminal& other)

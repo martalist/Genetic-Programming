@@ -17,114 +17,115 @@ namespace Tests
         const double a = 1.0;
         const double b = 2.0;
         const double c = 3.0;
+        FunctionFactory factory;
     };
 
 
     TEST_F(FunctionTest, Addition)
     {
-        auto func = FunctionFactory::Create(FunctionType::Addition);
-        func->AddChild(std::make_unique<Terminal>(&a));
+        auto func = factory.Create(FunctionType::Addition);
+        func->AddChild(factory.Create(&a));
         ASSERT_DOUBLE_EQ(1.0, func->Evaluate());
 
-        func->AddChild(std::make_unique<Terminal>(&b));
+        func->AddChild(factory.Create(&b));
         ASSERT_DOUBLE_EQ(3.0, func->Evaluate());
 
-        func->AddChild(std::make_unique<Terminal>(&c));
+        func->AddChild(factory.Create(&c));
         ASSERT_DOUBLE_EQ(6.0, func->Evaluate());
     }
 
     TEST_F(FunctionTest, Subtraction)
     {
-        auto func = FunctionFactory::Create(FunctionType::Subtraction);
-        func->AddChild(std::make_unique<Terminal>(&a));
+        auto func = factory.Create(FunctionType::Subtraction);
+        func->AddChild(factory.Create(&a));
         ASSERT_DOUBLE_EQ(1.0, func->Evaluate());
 
-        func->AddChild(std::make_unique<Terminal>(&b));
+        func->AddChild(factory.Create(&b));
         ASSERT_DOUBLE_EQ(-1.0, func->Evaluate());
 
-        func->AddChild(std::make_unique<Terminal>(&c));
+        func->AddChild(factory.Create(&c));
         ASSERT_DOUBLE_EQ(-4.0, func->Evaluate());
     }
 
     TEST_F(FunctionTest, Multiplication)
     {
-        auto func = FunctionFactory::Create(FunctionType::Multiplication);
+        auto func = factory.Create(FunctionType::Multiplication);
         ASSERT_EQ(1, func->Size());
-        func->AddChild(std::make_unique<Terminal>(&a));
+        func->AddChild(factory.Create(&a));
         ASSERT_DOUBLE_EQ(1.0, func->Evaluate());
         ASSERT_EQ(2, func->Size());
 
-        func->AddChild(std::make_unique<Terminal>(&b));
+        func->AddChild(factory.Create(&b));
         ASSERT_DOUBLE_EQ(2.0, func->Evaluate());
         ASSERT_EQ(3, func->Size());
 
-        func->AddChild(std::make_unique<Terminal>(&c));
+        func->AddChild(factory.Create(&c));
         ASSERT_DOUBLE_EQ(6.0, func->Evaluate());
         ASSERT_EQ(4, func->Size());
     }
 
     TEST_F(FunctionTest, Division)
     {
-        auto func = FunctionFactory::Create(FunctionType::Division);
-        func->AddChild(std::make_unique<Terminal>(&a));
+        auto func = factory.Create(FunctionType::Division);
+        func->AddChild(factory.Create(&a));
         ASSERT_DOUBLE_EQ(1.0, func->Evaluate());
         // TODO: no denominator .... should this be allowed?
 
-        func->AddChild(std::make_unique<Terminal>(&b));
+        func->AddChild(factory.Create(&b));
         ASSERT_DOUBLE_EQ(0.5, func->Evaluate());
 
-        func = FunctionFactory::Create(FunctionType::Division);
-        func->AddChild(std::make_unique<Terminal>(&c));
-        func->AddChild(std::make_unique<Terminal>(&a));
+        func = factory.Create(FunctionType::Division);
+        func->AddChild(factory.Create(&c));
+        func->AddChild(factory.Create(&a));
         ASSERT_DOUBLE_EQ(3.0, func->Evaluate());
 
-        func = FunctionFactory::Create(FunctionType::Division);
-        ASSERT_TRUE(func->AddChild(std::make_unique<Terminal>(&c)));
-        ASSERT_TRUE(func->AddChild(std::make_unique<Terminal>(&b)));
+        func = factory.Create(FunctionType::Division);
+        ASSERT_TRUE(func->AddChild(factory.Create(&c)));
+        ASSERT_TRUE(func->AddChild(factory.Create(&b)));
         ASSERT_DOUBLE_EQ(1.5, func->Evaluate());
 
         // division can only have 2 children
-        ASSERT_FALSE(func->AddChild(std::make_unique<Terminal>(&b)));
+        ASSERT_FALSE(func->AddChild(factory.Create(&b)));
     }
 
     TEST_F(FunctionTest, SquareRoot)
     {
-        auto func = FunctionFactory::Create(FunctionType::SquareRoot);
-        func->AddChild(std::make_unique<Terminal>(&a));
+        auto func = factory.Create(FunctionType::SquareRoot);
+        func->AddChild(factory.Create(&a));
         ASSERT_DOUBLE_EQ(1.0, func->Evaluate());
 
         const double four = 4.0;
-        func = FunctionFactory::Create(FunctionType::SquareRoot);
-        ASSERT_TRUE(func->AddChild(std::make_unique<Terminal>(&four)));
+        func = factory.Create(FunctionType::SquareRoot);
+        ASSERT_TRUE(func->AddChild(factory.Create(&four)));
         ASSERT_DOUBLE_EQ(2.0, func->Evaluate());
         ASSERT_EQ(2, func->Size());
 
         // sqrt can only have one child
-        ASSERT_FALSE(func->AddChild(std::make_unique<Terminal>(&b)));
+        ASSERT_FALSE(func->AddChild(factory.Create(&b)));
 
         // we're only dealing with real numbers, so sqrt should be of abs value
         const double minus = -1.0;
-        func = FunctionFactory::Create(FunctionType::SquareRoot);
-        ASSERT_TRUE(func->AddChild(std::make_unique<Terminal>(&minus)));
+        func = factory.Create(FunctionType::SquareRoot);
+        ASSERT_TRUE(func->AddChild(factory.Create(&minus)));
         ASSERT_DOUBLE_EQ(1.0, func->Evaluate());
     }
 
     TEST_F(FunctionTest, CompositeFunction)
     {
 
-        auto root = FunctionFactory::Create(FunctionType::SquareRoot);
-        auto div = FunctionFactory::Create(FunctionType::Division);
-        auto mult = FunctionFactory::Create(FunctionType::Multiplication);
-        auto add = FunctionFactory::Create(FunctionType::Addition);
-        auto sub = FunctionFactory::Create(FunctionType::Subtraction);
+        auto root = factory.Create(FunctionType::SquareRoot);
+        auto div = factory.Create(FunctionType::Division);
+        auto mult = factory.Create(FunctionType::Multiplication);
+        auto add = factory.Create(FunctionType::Addition);
+        auto sub = factory.Create(FunctionType::Subtraction);
 
         // (sqrt (/ (* b (+ a b c)) (- c b))) = sqrt(12)
-        add->AddChild(std::make_unique<Terminal>(&a));
-        add->AddChild(std::make_unique<Terminal>(&b));
-        add->AddChild(std::make_unique<Terminal>(&c));
-        sub->AddChild(std::make_unique<Terminal>(&c));
-        sub->AddChild(std::make_unique<Terminal>(&b));
-        mult->AddChild(std::make_unique<Terminal>(&b));
+        add->AddChild(factory.Create(&a));
+        add->AddChild(factory.Create(&b));
+        add->AddChild(factory.Create(&c));
+        sub->AddChild(factory.Create(&c));
+        sub->AddChild(factory.Create(&b));
+        mult->AddChild(factory.Create(&b));
         mult->AddChild(std::move(add));
         div->AddChild(std::move(mult));
         div->AddChild(std::move(sub));
@@ -135,17 +136,17 @@ namespace Tests
 
     TEST_F(FunctionTest, GetNodePointers)
     {
-        auto root = FunctionFactory::Create(FunctionType::SquareRoot);
-        auto div = FunctionFactory::Create(FunctionType::Division);
-        auto mult = FunctionFactory::Create(FunctionType::Multiplication);
-        auto add = FunctionFactory::Create(FunctionType::Addition);
-        auto sub = FunctionFactory::Create(FunctionType::Subtraction);
-        add->AddChild(FunctionFactory::Create(&a));
-        add->AddChild(FunctionFactory::Create(&b));
-        add->AddChild(FunctionFactory::Create(&c));
-        sub->AddChild(FunctionFactory::Create(&c));
-        sub->AddChild(FunctionFactory::Create(&b));
-        mult->AddChild(FunctionFactory::Create(&b));
+        auto root = factory.Create(FunctionType::SquareRoot);
+        auto div = factory.Create(FunctionType::Division);
+        auto mult = factory.Create(FunctionType::Multiplication);
+        auto add = factory.Create(FunctionType::Addition);
+        auto sub = factory.Create(FunctionType::Subtraction);
+        add->AddChild(factory.Create(&a));
+        add->AddChild(factory.Create(&b));
+        add->AddChild(factory.Create(&c));
+        sub->AddChild(factory.Create(&c));
+        sub->AddChild(factory.Create(&b));
+        mult->AddChild(factory.Create(&b));
         mult->AddChild(std::move(add));
         div->AddChild(std::move(mult));
         div->AddChild(std::move(sub));
@@ -179,8 +180,8 @@ namespace Tests
 
     TEST_F(FunctionTest, CloneSingleFunctionAndChild)
     {
-        auto root = FunctionFactory::Create(FunctionType::Addition);
-        root->AddChild(FunctionFactory::Create(&a));
+        auto root = factory.Create(FunctionType::Addition);
+        root->AddChild(factory.Create(&a));
 
         auto clone = root->Clone();
         ASSERT_DOUBLE_EQ(root->Evaluate(), clone->Evaluate());
@@ -189,17 +190,17 @@ namespace Tests
 
     TEST_F(FunctionTest, CloneSExpression)
     {
-        auto root = FunctionFactory::Create(FunctionType::SquareRoot);
-        auto div = FunctionFactory::Create(FunctionType::Division);
-        auto mult = FunctionFactory::Create(FunctionType::Multiplication);
-        auto add = FunctionFactory::Create(FunctionType::Addition);
-        auto sub = FunctionFactory::Create(FunctionType::Subtraction);
-        add->AddChild(FunctionFactory::Create(&a));
-        add->AddChild(FunctionFactory::Create(&b));
-        add->AddChild(FunctionFactory::Create(&c));
-        sub->AddChild(FunctionFactory::Create(&c));
-        sub->AddChild(FunctionFactory::Create(&b));
-        mult->AddChild(FunctionFactory::Create(&b));
+        auto root = factory.Create(FunctionType::SquareRoot);
+        auto div = factory.Create(FunctionType::Division);
+        auto mult = factory.Create(FunctionType::Multiplication);
+        auto add = factory.Create(FunctionType::Addition);
+        auto sub = factory.Create(FunctionType::Subtraction);
+        add->AddChild(factory.Create(&a));
+        add->AddChild(factory.Create(&b));
+        add->AddChild(factory.Create(&c));
+        sub->AddChild(factory.Create(&c));
+        sub->AddChild(factory.Create(&b));
+        mult->AddChild(factory.Create(&b));
         mult->AddChild(std::move(add));
         div->AddChild(std::move(mult));
         div->AddChild(std::move(sub));

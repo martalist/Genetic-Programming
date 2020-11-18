@@ -28,7 +28,8 @@ namespace Model
                     const TrainingData& fitnessCases, 
                     std::vector<double>& terminals, 
                     double parsimonyCoefficient,
-                    Util::UniformRandomGenerator<int, std::uniform_int_distribution<int>>& rand);
+                    Util::UniformRandomGenerator<int, std::uniform_int_distribution<int>>& rand,
+                    FunctionFactory& funcFactory);
 
         /**
          * Copy Constructor
@@ -36,22 +37,12 @@ namespace Model
         TimeSeriesChromosome(const TimeSeriesChromosome& other);
 
         /**
-         * Constructor - Does no fitness calculations upon construction
-         * @param tree The underlying S-expression
-         */
-        // TimeSeriesChromosome(IChromosome::INodePtr tree);
-
-        /**
          * Constructor - Calculates fitness and weighted fitness upon construction.
          */
         TimeSeriesChromosome(IChromosome::INodePtr tree, const TrainingData& fitnessCases, 
                 std::vector<double>& terminals, double parsimonyCoefficient,
-                Util::UniformRandomGenerator<int, std::uniform_int_distribution<int>>& rand);
-
-        /**
-         * Constructor - Calculates only the weighted fitness upon construction.
-         */
-        // TimeSeriesChromosome(IChromosome::INodePtr tree, double fitness, double parsimonyCoefficient);
+                Util::UniformRandomGenerator<int, std::uniform_int_distribution<int>>& rand,
+                FunctionFactory& funcFactory);
 
         /**
          * Less-than operator. Used for sorting collections of Chromosomes.

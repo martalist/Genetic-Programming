@@ -29,12 +29,12 @@ namespace Model
         {
         case ChromosomeType::TimeSeries:
             return std::make_unique<TimeSeriesChromosome>(m_targetSize, m_allowedFunctions, m_variables, 
-                    m_fitnessCases, m_terminals, parsimonyCoefficient, m_randInt);
+                    m_fitnessCases, m_terminals, parsimonyCoefficient, m_randInt, m_funcFactory);
 
         case ChromosomeType::Normal:
         default:
             return std::make_unique<NormalChromosome>(m_targetSize, m_allowedFunctions, m_variables, 
-                    m_fitnessCases, m_terminals, parsimonyCoefficient, m_randInt);
+                    m_fitnessCases, m_terminals, parsimonyCoefficient, m_randInt, m_funcFactory);
         }
     }
 
@@ -43,11 +43,11 @@ namespace Model
         switch (m_type)
         {
         case ChromosomeType::TimeSeries:
-            return std::make_unique<TimeSeriesChromosome>(std::move(tree), m_fitnessCases, m_terminals, parsimonyCoefficient, m_randInt);
+            return std::make_unique<TimeSeriesChromosome>(std::move(tree), m_fitnessCases, m_terminals, parsimonyCoefficient, m_randInt, m_funcFactory);
 
         case ChromosomeType::Normal:
         default:
-            return std::make_unique<NormalChromosome>(std::move(tree), m_fitnessCases, m_terminals, parsimonyCoefficient, m_randInt);
+            return std::make_unique<NormalChromosome>(std::move(tree), m_fitnessCases, m_terminals, parsimonyCoefficient, m_randInt, m_funcFactory);
         }
     }
 

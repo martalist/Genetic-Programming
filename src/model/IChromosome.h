@@ -7,6 +7,7 @@
 
 namespace Model
 {
+    class FunctionFactory;
     enum class FunctionType;
     struct TrainingData;
 
@@ -20,7 +21,7 @@ namespace Model
         using INodePtr = std::unique_ptr<INode>;
 
     public:
-        IChromosome(Util::UniformRandomGenerator<int, std::uniform_int_distribution<int>>& rand);
+        IChromosome(Util::UniformRandomGenerator<int, std::uniform_int_distribution<int>>& rand, FunctionFactory& funcFactory);
         virtual ~IChromosome() = default;
 
         /**
@@ -141,6 +142,8 @@ namespace Model
          * A random integer generator for reuse in genetic operators in a single thread
          */
         Util::UniformRandomGenerator<int, std::uniform_int_distribution<int>>& m_randInt;
+
+        FunctionFactory& m_funcFactory;
     };
 }
 
